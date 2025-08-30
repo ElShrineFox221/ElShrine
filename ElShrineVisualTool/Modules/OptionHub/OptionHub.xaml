@@ -1,0 +1,83 @@
+﻿<ResourceDictionary x:Class="ElShrine.Modules.OptionHub.OptionHubView" 
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:module="clr-namespace:ElShrine.Modules.OptionHub"
+                    xmlns:controls="clr-namespace:ElShrine.Wpf.Controls;assembly=ElShrineLib.Wpf"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <DataTemplate x:Key="OptionHubTemplate" DataType="module:OptionHubVM">
+        <DataTemplate.Resources>
+            <Style x:Key="commonSpaceStyle" TargetType="Control">
+                <Setter Property="Margin" Value="5"/>
+            </Style>
+        </DataTemplate.Resources>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <controls:EListBox x:Name="navigationListBox" 
+                               Width="200" ItemsSource="{Binding OptionGroups}" SelectionMode="Single" Margin="5" SelectionChanged="NavigationListBox_SelectionChanged" Loaded="Navigations_ViewLoaded">
+                <controls:EListBox.ItemTemplate>
+                    <DataTemplate DataType="module:OptionHubVM.OptionGroup">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding GroupName}"/>
+                            <TextBlock Grid.Column="1">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="({0} in {1})">
+                                        <Binding Path="Items.Count"/>
+                                        <Binding Path="ClassesCount"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </Grid>
+                    </DataTemplate>
+                </controls:EListBox.ItemTemplate>
+            </controls:EListBox>
+            <Grid Grid.Column="1" Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <StackPanel Orientation="Horizontal">
+                    <controls:EToggleButton Content="Preview" HorizontalAlignment="Left" IsChecked="{Binding PreviewEnabled}"/>
+                    <controls:EButton Command="{x:Static module:OptionHubVM.UpdateCommand}" Content="Update" Width="80" Margin="5,0,0,0"/>
+                    <controls:EButton Command="{x:Static module:OptionHubVM.SaveCommand}" Content="Save" Width="80"  Margin="5,0,0,0" IsEnabled="{Binding IsOptionsChanged}"/>
+                    <controls:EButton Command="{x:Static module:OptionHubVM.CancelCommand}" Content="Cancel" Width="80" Margin="5,0,0,0" IsEnabled="{Binding IsOptionsChanged}"/>
+                </StackPanel>
+                <controls:EScrollViewer x:Name="contentScrollViewer" Grid.Row="1" Margin="-10,0,0,0"
+                                        ScrollChanged="ContentScrollViewer_ScrollChanged" Loaded="Navigations_ViewLoaded">
+                    <ItemsControl ItemsSource="{Binding OptionGroups}" Grid.IsSharedSizeScope="True">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="module:OptionHubVM.OptionGroups">
+                                <StackPanel>
+                                    <controls:EExpander Header="{Binding GroupName}" Margin="7,5,5,5" Loaded="Navigations_ViewLoaded" Expanded="EExpander_Expanded" DataContext="{Binding}">
+                                        <ItemsControl ItemsSource="{Binding Items}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,5">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" SharedSizeGroup="HeaderGroup"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="0"  Text="{Binding ItemName}" ToolTip="{Binding Description}" VerticalAlignment="Center"/>
+                                                        <ContentControl Grid.Column="1" Content="{Binding}" Loaded="ContentControl_Loaded"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </controls:EExpander>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    
+                </controls:EScrollViewer>
+            </Grid>
+            
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>

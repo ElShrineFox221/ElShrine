@@ -1,0 +1,25 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converters="clr-namespace:ElShrine.Old.Wpf.Converters">
+    <converters:BoolReverse x:Key="BoolReverse"/>
+    <converters:IsNullToBoolConverter x:Key="IsNullToBoolConverter"/>
+    <converters:BoolToVisibleConverter x:Key="BoolToVisibleConverter"/>
+    <converters:DoubleAdder x:Key="DoubleAdder"/>
+    <converters:DoubleFactor x:Key="DoubleFactor"/>
+    <converters:DoubleToByte x:Key="DoubleToByte"/>
+    <converters:DoubleToCornerRadius x:Key="DoubleToCornerRadius"/>
+    <converters:DoubleToString x:Key="DoubleToString"/>
+    <converters:DoubleToThickness x:Key="DoubleToThickness"/>
+    <converters:ToRequiredDouble x:Key="ToRequiredDouble"/>
+    <converters:NameToTitle x:Key="NameToTitle"/>
+    <converters:IntToString x:Key="IntToString"/>
+    <converters:ThicknessFactor x:Key="ThicknessFactor"/>
+    <converters:ThicknessToColor x:Key="ThicknessToColor"/>
+    <converters:ThicknessToDouble x:Key="ThicknessToDouble"/>
+    <converters:BrushToColorHeavy x:Key="BrushToColorHeavy"/>
+    <converters:ColorToARGB x:Key="ColorToARGB"/>
+    <converters:ColorToBrush x:Key="ColorToBrush"/>
+    <converters:ToLightColorBrush x:Key="ToLightColorBrush"/>
+    <converters:ToOppsiteColorBrush x:Key="ToOppsiteColorBrush"/>
+    <converters:ToTargetColorBrush x:Key="ToTargetColorBrush"/>
+</ResourceDictionary>

@@ -1,0 +1,29 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:wpf="clr-namespace:ElShrine.Old.Wpf"
+                    xmlns:converters="clr-namespace:ElShrine.Old.Wpf.Converters"
+                    xmlns:control="clr-namespace:ElShrine.Old.Wpf.Controls">
+    <!--#region ElShrine VectorFieldDrawer Resources-->
+    <ControlTemplate x:Key="ElShrineVectorFieldDrawer_Template" TargetType="{x:Type control:ElShrineVectorFieldDrawer}">
+        <ControlTemplate.Resources>
+            <converters:ThicknessToDouble x:Key="ThicknessToDouble"/>
+        </ControlTemplate.Resources>
+        <Border BorderBrush="Red" BorderThickness="3">
+            <Grid>
+                <Canvas Margin="4" Name="VectorFieldDrawerContainer_Canvas">
+                </Canvas>
+            </Grid>
+        </Border>
+    </ControlTemplate>
+    <Style x:Key="ElShrineVectorFieldDrawer_Style" TargetType="{x:Type control:ElShrineVectorFieldDrawer}">
+        <Style.Resources>
+            <ObjectDataProvider x:Key="OptionProvider" MethodName="GetInstance" ObjectType="{x:Type wpf:Option}"/>
+        </Style.Resources>
+        <Setter Property="BorderThickness" Value="3"/>
+        <Setter Property="Template" Value="{StaticResource ElShrineVectorFieldDrawer_Template}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{Binding Option_ForeColor, Source={StaticResource OptionProvider}}"/>
+    </Style>
+
+    <!--#endregion-->
+</ResourceDictionary>

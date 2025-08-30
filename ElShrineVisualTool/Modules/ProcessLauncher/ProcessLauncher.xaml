@@ -1,0 +1,276 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:Class="ElShrine.Modules.ProcessLauncher.ProcessLauncher"
+                    xmlns:viewmodel ="clr-namespace:ElShrine.Modules.ProcessLauncher.ViewModel"
+                    xmlns:controls="clr-namespace:ElShrine.Wpf.Controls;assembly=ElShrineLib.Wpf"
+                    xmlns:extensions="clr-namespace:ElShrine.Wpf.Controls.Extensions;assembly=ElShrineLib.Wpf">
+    <DataTemplate x:Key="SelectedEditExeInfoTemplate" DataType="{x:Type viewmodel:ExeInfoVM}">
+        <Grid Background="Transparent">
+            <GroupBox Header="Selected Item Edit" Background="Transparent" BorderThickness="2" Margin="-1,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="2*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Image Grid.Row="0" Source="{Binding Icon}" Height="auto" Margin="3"/>
+                    </Grid>
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <controls:ETextBox x:Name="IconPathTextBox" Grid.Row="0" Grid.ColumnSpan="3"
+                                       Margin="5,2" Text="{Binding IconPath}" NoticeInfo="Valid full icon path">
+                            <controls:ETextBox.Header>
+                                <TextBlock Text="Icon Path:" Width="80"/>
+                            </controls:ETextBox.Header>
+                        </controls:ETextBox>
+                        <controls:ETextBox x:Name="IconIndexTextBox" Grid.Row="0" Grid.Column="3"
+                                       Margin="5,2" Text="{Binding IconIndex, Converter={StaticResource NumToStringConverter}}" NoticeInfo="Index of icon file.">
+                            <controls:ETextBox.Header>
+                                <TextBlock Text="Icon Index:" Width="80"/>
+                            </controls:ETextBox.Header>
+                        </controls:ETextBox>
+                        <controls:ETextBox x:Name="TargetPathTextBox" Grid.Row="1" Grid.ColumnSpan="3"
+                                       Margin="5,2" Text="{Binding TargetPath}" NoticeInfo="Valid full target path" IsEnabled="{Binding Activated, Converter={StaticResource BoolReverseConverter}}">
+                            <controls:ETextBox.Header>
+                                <TextBlock Text="Target Path:" Width="80"/>
+                            </controls:ETextBox.Header>
+                        </controls:ETextBox>
+                        <controls:ETextBox x:Name="ArgumentsTextBox" Grid.Row="1" Grid.Column="3"
+                                       Margin="5,2" Text="{Binding Arguments}" IsEnabled="{Binding Activated, Converter={StaticResource BoolReverseConverter}}">
+                            <controls:ETextBox.Header>
+                                <TextBlock Text="Arguments:" Width="80"/>
+                            </controls:ETextBox.Header>
+                        </controls:ETextBox>
+                        <controls:ETextBox x:Name="NameTextBox" Grid.Row="2"
+                                       Margin="5,2" Text="{Binding Name}">
+                            <controls:ETextBox.Header>
+                                <TextBlock Text="Name:" Width="80"/>
+                            </controls:ETextBox.Header>
+                        </controls:ETextBox>
+                        <controls:ETextBox x:Name="DescriptionTextBox" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3"
+                                       Margin="5,2" Text="{Binding Description}">
+                            <controls:ETextBox.Header>
+                                <TextBlock Text="Description:" Width="80"/>
+                            </controls:ETextBox.Header>
+                        </controls:ETextBox>
+                    </Grid>
+                </Grid>
+            </GroupBox>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DataGridTemplate" DataType="{x:Type viewmodel:ProcessLauncherVM}">
+        <DataGrid x:Name="InfosDataGrid" ItemsSource="{Binding ExeInfos}" AutoGenerateColumns="False" SelectionUnit="FullRow" GridLinesVisibility="Vertical" CacheMode="BitmapCache" SnapsToDevicePixels="True" UseLayoutRounding="True" RenderOptions.EdgeMode="Unspecified" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" SelectionMode="Single" SelectionChanged="ProcessLauncher_SelectionChanged">
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Background" Value="{Binding StatusColor, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+                </Style>
+            </DataGrid.RowStyle>
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="DataGridCell">
+                                <Grid Background="{TemplateBinding Background}">
+                                    <ContentPresenter VerticalAlignment="Center" 
+                          HorizontalAlignment="Stretch"
+                          Margin="5,0"/>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </DataGrid.CellStyle>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Icon" MaxWidth="36" MinWidth="36" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="{x:Type viewmodel:ExeInfoVM}">
+                            <Image Source="{Binding Icon}" Margin="0,2"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" MinWidth="50"/>
+                <DataGridTextColumn Header="FileName" Binding="{Binding FileName}" Width="*" MinWidth="90" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*" MinWidth="120"/>
+                <DataGridTextColumn Header="Status" Binding="{Binding Status}" MaxWidth="65" MinWidth="65" IsReadOnly="True"/>
+                <DataGridTemplateColumn Header="Launch Mode" MaxWidth="90" MinWidth="90" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="{x:Type viewmodel:ExeInfoVM}">
+                            <ComboBox SelectedIndex="{Binding LaunchModeIndex}" SelectionChanged="LaunchModeComboBox_SelectionChanged">
+                                <ComboBoxItem>Once</ComboBoxItem>
+                                <ComboBoxItem>Auto</ComboBoxItem>
+                                <ComboBoxItem>Keep</ComboBoxItem>
+                            </ComboBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Retry" Binding="{Binding RetryCount, Converter={StaticResource NumToStringConverter}}" IsReadOnly="True" MaxWidth="45" MinWidth="45"/>
+                <DataGridTextColumn Header="Max" Binding="{Binding MaxRetryCount, Converter={StaticResource NumToStringConverter}}" MaxWidth="35" MinWidth="35"/>
+                <DataGridTemplateColumn Header="Permission" MaxWidth="90" MinWidth="90" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="{x:Type viewmodel:ExeInfoVM}">
+                            <ComboBox SelectedIndex="{Binding PermissionIndex}" SelectionChanged="PermissionComboBox_SelectionChanged" IsEnabled="{Binding Activated,Converter={StaticResource BoolReverseConverter}}">
+                                <ComboBoxItem>Admin</ComboBoxItem>
+                                <ComboBoxItem>Normal</ComboBoxItem>
+                            </ComboBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Actions" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="{x:Type viewmodel:ExeInfoVM}">
+                            <StackPanel Orientation="Horizontal">
+                                <Button Command="{Binding Launch}" IsEnabled="{Binding LaunchButtonEnabled}" Width="60">Launch</Button>
+                                <Button Command="{Binding Exit}" Width="60" IsEnabled="{Binding ExitButtonEnabled}">Exit</Button>
+                                <Button Command="{Binding DataContext.DeleteInfo, ElementName=InfosDataGrid}" CommandParameter="{Binding DataContext, RelativeSource={RelativeSource Self}}" Foreground="Red">
+                                    Del
+                                </Button>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DataTemplate>
+    <DataTemplate x:Key="ListViewTemplate" DataType="{x:Type viewmodel:ProcessLauncherVM}">
+        <ListView ItemsSource="{Binding ExeInfos}" x:Name="InfosListView" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" SelectionChanged="ProcessLauncher_SelectionChanged">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Background" Value="{Binding StatusColor, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListViewItem">
+                                <Border x:Name="RowContainer" Background="{TemplateBinding Background}" BorderBrush="#E0E0E0" BorderThickness="5,0,0,0" Padding="0" SnapsToDevicePixels="True">
+                                    <Border x:Name="SubRowContainer" Background="Transparent">
+                                        <GridViewRowPresenter Content="{TemplateBinding Content}" Columns="{Binding View.Columns, RelativeSource={RelativeSource AncestorType=ListView}}" VerticalAlignment="Center"/>
+                                    </Border>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="SubRowContainer" Property="Background" Value="#4448657C"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="SubRowContainer" Property="Background" Value="#6648657C"/>
+                                        <Setter TargetName="RowContainer" Property="BorderBrush" Value="#48657C"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                    <Setter Property="Margin" Value="0"/>
+                    <Setter Property="Padding" Value="0"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.View>
+                <GridView >
+                    <GridView.Columns>
+                        <GridViewColumn Header="Icon">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type viewmodel:ExeInfoVM}">
+                                    <Image Source="{Binding Icon}" Margin="0,2"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Name" Width="auto" DisplayMemberBinding="{Binding Name}"/>
+                        <GridViewColumn Header="FileName" Width="auto" DisplayMemberBinding="{Binding FileName}"/>
+                        <GridViewColumn Header="Description" Width="auto" DisplayMemberBinding="{Binding Description}"/>
+                        <GridViewColumn Header="Status" DisplayMemberBinding="{Binding Status}"/>
+                        <GridViewColumn Header="Launch Mode">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type viewmodel:ExeInfoVM}">
+                                    <ComboBox SelectedIndex="{Binding LaunchModeIndex}" SelectionChanged="LaunchModeComboBox_SelectionChanged">
+                                        <ComboBoxItem>Once</ComboBoxItem>
+                                        <ComboBoxItem>Auto</ComboBoxItem>
+                                        <ComboBoxItem>Keep</ComboBoxItem>
+                                    </ComboBox>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Retry" DisplayMemberBinding="{Binding RetryCount, Converter={StaticResource NumToStringConverter}}"/>
+                        <GridViewColumn Header="Max" DisplayMemberBinding="{Binding MaxRetryCount, Converter={StaticResource NumToStringConverter}}"/>
+                        <GridViewColumn Header="Permission">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type viewmodel:ExeInfoVM}">
+                                    <ComboBox SelectedIndex="{Binding PermissionIndex}" SelectionChanged="PermissionComboBox_SelectionChanged" IsEnabled="{Binding Activated,Converter={StaticResource BoolReverseConverter}}">
+                                        <ComboBoxItem>Admin</ComboBoxItem>
+                                        <ComboBoxItem>Normal</ComboBoxItem>
+                                    </ComboBox>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Actions" Width="auto">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type viewmodel:ExeInfoVM}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Command="{Binding Launch}" IsEnabled="{Binding LaunchButtonEnabled}" Width="60">Launch</Button>
+                                        <Button Command="{Binding Close}" Width="60" IsEnabled="{Binding ExitButtonEnabled}">Close</Button>
+                                        <Button Command="{Binding Kill}" Width="60" IsEnabled="{Binding ExitButtonEnabled}">Kill</Button>
+                                        <Button Command="{Binding DataContext.DeleteInfo, ElementName=InfosListView}" CommandParameter="{Binding DataContext, RelativeSource={RelativeSource Self}}" Foreground="Red">
+                                            Del
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView.Columns>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </DataTemplate>
+
+    <DataTemplate x:Key="ProcessLauncherTemplate" DataType="{x:Type viewmodel:ProcessLauncherVM}">
+        <Grid x:Name="Root">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <ToolBarTray>
+                    <ToolBar FontSize="13">
+                        <RadioButton GroupName="DrawingActionType" Command="{Binding AddInfo}">
+                            <TextBlock Text="Add" TextDecorations="Underline"/>
+                        </RadioButton>
+                        <RadioButton GroupName="DrawingActionType" Command="{Binding ImportInfo}">
+                            <TextBlock Text="Import" TextDecorations="Underline"/>
+                        </RadioButton>
+                        <RadioButton GroupName="DrawingActionType" Command="{Binding ExportInfo}">
+                            <TextBlock Text="Export" TextDecorations="Underline"/>
+                        </RadioButton>
+                        <RadioButton GroupName="DrawingActionType" Command="{Binding LoadList}">
+                            <TextBlock Text="Load" TextDecorations="Underline"/>
+                        </RadioButton>
+                        <RadioButton GroupName="DrawingActionType" Command="{Binding SaveList}">
+                            <TextBlock Text="Save" TextDecorations="Underline"/>
+                        </RadioButton>
+                    </ToolBar>
+                </ToolBarTray>
+                <ContentControl Grid.Row="1" Content="{Binding SelectedLastExeInfo}" ContentTemplate="{StaticResource SelectedEditExeInfoTemplate}"/>
+                <ContentControl Grid.Row="2" Content="{Binding DataContext, RelativeSource={RelativeSource Self}}" ContentTemplate="{StaticResource ListViewTemplate}"/>
+            </Grid>
+            <Grid Grid.Column="1">
+
+            </Grid>
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>

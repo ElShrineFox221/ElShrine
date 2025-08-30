@@ -1,0 +1,281 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
+                    xmlns:extensions="clr-namespace:ElShrine.Wpf.Controls.Extensions">
+    <Style TargetType="{x:Type controls:EToggleButton}">
+        <Setter Property="IsChecked" Value="True"/>
+        <Setter Property="ToggleSignSize" Value="16"/>
+        <Setter Property="ToggleSignMargin" Value="-3,2"/>
+        <Setter Property="Padding" Value="5,2"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderCornerRadius" Value="{Binding CurrentTheme.CornerRadius, Source={StaticResource ThemeProvider}}"/>
+        <Setter Property="BorderBrush" Value="{Binding CurrentTheme.BorderColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="SelectionBrush" Value="{Binding CurrentTheme.SelectionColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="ClickBrush" Value="{Binding CurrentTheme.ClickColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="Foreground" Value="{Binding CurrentTheme.FontColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="Background" Value="{Binding CurrentTheme.BackColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="FontSize" Value="{Binding CurrentTheme.FontSizeNormal, Source={StaticResource ThemeProvider}}"/>
+        <Setter Property="FontBrush" Value="{Binding CurrentTheme.FontColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type controls:EToggleButton}">
+                    <Border x:Name="controlRoot" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding BorderCornerRadius}" Padding="{TemplateBinding Padding}">
+                        <Border.BorderBrush>
+                            <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                <Binding Path="BorderBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="controlRoot"/>
+                                <Binding Path="SelectionBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                            </MultiBinding>
+                        </Border.BorderBrush>
+                        <Border.Background>
+                            <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                <Binding Path="Background" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.BackColorRate)" ElementName="controlRoot"/>
+                                <Binding Path="SelectionBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                            </MultiBinding>
+                        </Border.Background>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition x:Name="r0" Height="auto"/>
+                                <RowDefinition x:Name="r1" Height="auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition x:Name="c0" Width="auto"/>
+                                <ColumnDefinition x:Name="c1" Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="toggleSignContainer" Grid.Column="1" Margin="{TemplateBinding Padding}">
+                                <Border x:Name="toggleSizeOuterline" 
+                                        Margin="{TemplateBinding ToggleSignMargin}" BorderThickness="{TemplateBinding BorderThickness}" Width="{TemplateBinding ToggleSignSize}" Height="{Binding Width,RelativeSource={RelativeSource Mode=Self}}" CornerRadius="{TemplateBinding BorderCornerRadius}" RenderTransformOrigin="0.5,0.5" UseLayoutRounding="False">
+                                    <Border.BorderBrush>
+                                        <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                            <Binding Path="BorderBrush" ElementName="controlRoot"/>
+                                            <Binding Path="(extensions:AnimationProperitiesExtension.BackColorRate)" ElementName="toggleSizeInnerChunk"/>
+                                            <Binding Path="ClickBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                        </MultiBinding>
+                                    </Border.BorderBrush>
+                                    <Border.CacheMode>
+                                        <BitmapCache EnableClearType="True" RenderAtScale="1" SnapsToDevicePixels="False"/>
+                                    </Border.CacheMode>
+                                    <Border.RenderTransform>
+                                        <ScaleTransform x:Name="outerScaleTransform"/>
+                                    </Border.RenderTransform>
+                                    <Border x:Name="toggleSizeInnerChunk" Width="{TemplateBinding ToggleSignSize, Converter={StaticResource NumToStringConverter},ConverterParameter=0.7}" Height="{Binding Width,RelativeSource={RelativeSource Mode=Self}}" CornerRadius="{TemplateBinding BorderCornerRadius}" BorderThickness="0" BorderBrush="Transparent" RenderTransformOrigin="0.5,0.5" UseLayoutRounding="False">
+                                        <Border.Background>
+                                            <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}" ConverterParameter="alpha.lerp">
+                                                <Binding Path="BorderBrush" ElementName="controlRoot"/>
+                                                <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="toggleSizeInnerChunk"/>
+                                                <Binding Path="BorderBrush" RelativeSource="{RelativeSource Mode=Self}"/>
+                                            </MultiBinding>
+                                        </Border.Background>
+                                        <Border.CacheMode>
+                                            <BitmapCache EnableClearType="True" RenderAtScale="1" SnapsToDevicePixels="False"/>
+                                        </Border.CacheMode>
+                                        <Border.RenderTransform>
+                                            <ScaleTransform x:Name="innerScaleTransform"/>
+                                        </Border.RenderTransform>
+                                    </Border>
+                                </Border>
+                            </Border>
+                            <ContentPresenter x:Name="contentContainer" Margin="{TemplateBinding Padding}" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="controlRoot"
+Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="controlRoot" 
+Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0:0.16">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard HandoffBehavior="Compose">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="controlRoot"
+ Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="controlRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0.15" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard HandoffBehavior="Compose">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="controlRoot" 
+Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="controlRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard Name="pressAnimation">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="outerScaleTransform" Storyboard.TargetProperty="ScaleX" To="1.1" Duration="0:0:0.1">
+                                            <DoubleAnimation.EasingFunction>
+                                                <PowerEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="outerScaleTransform" Storyboard.TargetProperty="ScaleY" To="1.1" Duration="0:0:0.1">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="toggleSizeInnerChunk" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="1" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard BeginTime="0:0:0.1">
+                                        <DoubleAnimation Storyboard.TargetName="outerScaleTransform" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.1">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="outerScaleTransform" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.1">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="toggleSizeInnerChunk" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="innerScaleTransform" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.1">
+                                            <DoubleAnimation.EasingFunction>
+                                                <PowerEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="innerScaleTransform" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.1">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="toggleSizeInnerChunk" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard BeginTime="0:0:0.1">
+                                        <DoubleAnimation Storyboard.TargetName="innerScaleTransform" Storyboard.TargetProperty="ScaleX" To="0.5" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <PowerEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="innerScaleTransform" Storyboard.TargetProperty="ScaleY" To="0.5" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="toggleSizeInnerChunk" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="ContentPlacement" Value="Right">
+                            <Setter TargetName="r0" Property="Height" Value="*"/>
+                            <Setter TargetName="r1" Property="Height" Value="auto"/>
+                            <Setter TargetName="c0" Property="Width" Value="auto"/>
+                            <Setter TargetName="c1" Property="Width" Value="*"/>
+                            <Setter TargetName="contentContainer" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="contentContainer" Property="Grid.Column" Value="1"/>
+                            <Setter TargetName="toggleSignContainer" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="toggleSignContainer" Property="Grid.Column" Value="0"/>
+                        </Trigger>
+                        <Trigger Property="ContentPlacement" Value="Left">
+                            <Setter TargetName="r0" Property="Height" Value="*"/>
+                            <Setter TargetName="r1" Property="Height" Value="auto"/>
+                            <Setter TargetName="c0" Property="Width" Value="*"/>
+                            <Setter TargetName="c1" Property="Width" Value="auto"/>
+                            <Setter TargetName="contentContainer" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="contentContainer" Property="Grid.Column" Value="0"/>
+                            <Setter TargetName="toggleSignContainer" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="toggleSignContainer" Property="Grid.Column" Value="1"/>
+                        </Trigger>
+                        <Trigger Property="ContentPlacement" Value="Down">
+                            <Setter TargetName="r0" Property="Height" Value="auto"/>
+                            <Setter TargetName="r1" Property="Height" Value="*"/>
+                            <Setter TargetName="c0" Property="Width" Value="*"/>
+                            <Setter TargetName="c1" Property="Width" Value="auto"/>
+                            <Setter TargetName="contentContainer" Property="Grid.Row" Value="1"/>
+                            <Setter TargetName="contentContainer" Property="Grid.Column" Value="0"/>
+                            <Setter TargetName="toggleSignContainer" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="toggleSignContainer" Property="Grid.Column" Value="0"/>
+                        </Trigger>
+                        <Trigger Property="ContentPlacement" Value="Up">
+                            <Setter TargetName="r0" Property="Height" Value="*"/>
+                            <Setter TargetName="r1" Property="Height" Value="auto"/>
+                            <Setter TargetName="c0" Property="Width" Value="*"/>
+                            <Setter TargetName="c1" Property="Width" Value="auto"/>
+                            <Setter TargetName="contentContainer" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="contentContainer" Property="Grid.Column" Value="0"/>
+                            <Setter TargetName="toggleSignContainer" Property="Grid.Row" Value="1"/>
+                            <Setter TargetName="toggleSignContainer" Property="Grid.Column" Value="0"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

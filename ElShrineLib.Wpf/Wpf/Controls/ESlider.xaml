@@ -1,0 +1,1177 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
+                    xmlns:extensions="clr-namespace:ElShrine.Wpf.Controls.Extensions"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    <Style TargetType="{x:Type controls:ESlider}">
+        <Style.Resources>
+            <system:Double x:Key="halfDouble">0.7</system:Double>
+            <system:Double x:Key="halfDoubleLight">0.5</system:Double>
+            <system:Double x:Key="halfDoubleSlight">0.3</system:Double>
+            <Style x:Key="esilder_transparent_repeatBtnStyle" TargetType="RepeatButton">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RepeatButton">
+                            <Border BorderThickness="0" Background="Transparent">
+                                <Grid Background="Transparent"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <ControlTemplate x:Key="es_track_clickScale_thumbTemplate" TargetType="Thumb">
+                <Border x:Name="thumbRoot">
+                    <Border.BorderBrush>
+                        <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                            <Binding Path="BorderBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                            <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="thumbRoot"/>
+                            <Binding Path="SelectionBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                            <Binding Source="{StaticResource halfDoubleSlight}"/>
+                            <Binding Path="Background" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                        </MultiBinding>
+                    </Border.BorderBrush>
+                    <ContentControl x:Name="thumbContent" ContentTemplate="{Binding ThumbTemplate, RelativeSource={RelativeSource AncestorType=controls:ESlider}}" Content="{Binding ThumbContent, RelativeSource={RelativeSource AncestorType=controls:ESlider}}" RenderTransformOrigin="0.5,0.5">
+                        <ContentControl.BorderBrush>
+                            <!-- normal-mouseover-mousedown -->
+                            <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                <Binding Path="BorderBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="thumbRoot"/>
+                                <Binding Path="SelectionBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Source="{StaticResource halfDoubleLight}"/>
+                                <Binding Path="Background" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="thumbContent"/>
+                                <Binding Path="BorderBrush" ElementName="thumbRoot"/>
+                            </MultiBinding>
+                        </ContentControl.BorderBrush>
+                        <ContentControl.Background>
+                            <!-- normal-mouseover-mousedown -->
+                            <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                <Binding Path="BorderBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.BackColorRate)" ElementName="thumbRoot"/>
+                                <Binding Path="SelectionBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.BackColorRate)" ElementName="thumbContent"/>
+                                <Binding Path="BorderBrush" ElementName="thumbRoot"/>
+                            </MultiBinding>
+                        </ContentControl.Background>
+                        <ContentControl.RenderTransform>
+                            <ScaleTransform x:Name="scaleTransform"/>
+                        </ContentControl.RenderTransform>
+                    </ContentControl>
+                </Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Trigger.EnterActions>
+                            <BeginStoryboard HandoffBehavior="Compose">
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.EnterActions>
+                        <Trigger.ExitActions>
+                            <BeginStoryboard HandoffBehavior="Compose">
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.ExitActions>
+                    </Trigger>
+                    <Trigger Property="IsDragging" Value="True">
+                        <Trigger.EnterActions>
+                            <BeginStoryboard HandoffBehavior="Compose">
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="thumbContent" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="thumbContent" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="scaleTransform" Storyboard.TargetProperty="ScaleX" To="1.3" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="scaleTransform" Storyboard.TargetProperty="ScaleY" To="1.3" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.EnterActions>
+                        <Trigger.ExitActions>
+                            <BeginStoryboard HandoffBehavior="Compose">
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="thumbContent" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="thumbContent" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="scaleTransform" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="scaleTransform" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.ExitActions>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+            <ControlTemplate x:Key="es_track_fixedScale_thumbTemplate" TargetType="Thumb">
+                <Border x:Name="thumbRoot">
+                    <Border.BorderBrush>
+                        <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                            <Binding Path="BorderBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                            <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="thumbRoot"/>
+                            <Binding Path="SelectionBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                            <Binding Source="{StaticResource halfDoubleSlight}"/>
+                            <Binding Path="Background" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                        </MultiBinding>
+                    </Border.BorderBrush>
+                    <ContentControl x:Name="thumbContent" ContentTemplate="{Binding ThumbTemplate, RelativeSource={RelativeSource AncestorType=controls:ESlider}}" Content="{Binding ThumbContent, RelativeSource={RelativeSource AncestorType=controls:ESlider}}" RenderTransformOrigin="0.5,0.5">
+                        <ContentControl.BorderBrush>
+                            <!-- normal-mouseover-mousedown -->
+                            <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                <Binding Path="BorderBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="thumbRoot"/>
+                                <Binding Path="SelectionBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Source="{StaticResource halfDoubleLight}"/>
+                                <Binding Path="Background" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="thumbContent"/>
+                                <Binding Path="BorderBrush" ElementName="thumbRoot"/>
+                            </MultiBinding>
+                        </ContentControl.BorderBrush>
+                        <ContentControl.Background>
+                            <!-- normal-mouseover-mousedown -->
+                            <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                <Binding Path="BorderBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.BackColorRate)" ElementName="thumbRoot"/>
+                                <Binding Path="SelectionBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.BackColorRate)" ElementName="thumbContent"/>
+                                <Binding Path="BorderBrush" ElementName="thumbRoot"/>
+                            </MultiBinding>
+                        </ContentControl.Background>
+                    </ContentControl>
+                </Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Trigger.EnterActions>
+                            <BeginStoryboard HandoffBehavior="Compose">
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.EnterActions>
+                        <Trigger.ExitActions>
+                            <BeginStoryboard HandoffBehavior="Compose">
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.ExitActions>
+                    </Trigger>
+                    <Trigger Property="IsDragging" Value="True">
+                        <Trigger.EnterActions>
+                            <BeginStoryboard HandoffBehavior="Compose">
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="thumbContent" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="thumbContent" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.EnterActions>
+                        <Trigger.ExitActions>
+                            <BeginStoryboard HandoffBehavior="Compose">
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="thumbContent" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="thumbContent" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.ExitActions>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+        </Style.Resources>
+        <Setter Property="Orientation" Value="Horizontal"/>
+        <Setter Property="SliderFillStyle" Value="LightUpper"/>
+        <Setter Property="BorderThickness" Value="4"/>
+        <Setter Property="BorderBrush" Value="{Binding CurrentTheme.BorderColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="SelectionBrush" Value="{Binding CurrentTheme.SelectionColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="ClickBrush" Value="{Binding CurrentTheme.ClickColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="Foreground" Value="{Binding CurrentTheme.FontColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="Background" Value="{Binding CurrentTheme.BackColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="FontSize" Value="{Binding CurrentTheme.FontSizeNormal, Source={StaticResource ThemeProvider}}"/>
+        <Setter Property="FontBrush" Value="{Binding CurrentTheme.FontColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Height" Value="15"/>
+                <Setter Property="Width" Value="auto"/>
+                <Setter Property="BorderCornerRadius" Value="{Binding ActualHeight, RelativeSource={RelativeSource Mode=Self}, Converter={StaticResource QuadruplesConverter}, ConverterParameter=LRTB_L0.5}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type controls:ESlider}">
+                            <Border x:Name="controlRoot">
+                                <Grid x:Name="renderedPannel" Height="{TemplateBinding Height}">
+                                    <Grid Width="{Binding ActualWidth, ElementName=PART_Track}" 
+                                          Height="{Binding ActualHeight, ElementName=PART_Track}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="{Binding ActualWidth, ElementName=LowerRB}"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="{Binding ActualWidth, ElementName=UpperRB}"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border x:Name="visualCache" Visibility="Collapsed">
+                                            <Border.BorderBrush>
+                                                <MultiBinding x:Name="basicColor" Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                                    <Binding Path="BorderBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                    <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="controlRoot"/>
+                                                    <Binding Path="SelectionBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                </MultiBinding>
+                                            </Border.BorderBrush>
+                                            <Border.Background>
+                                                <MultiBinding x:Name="lightedBasicColor" Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                                    <Binding Path="BorderBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                    <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="controlRoot"/>
+                                                    <Binding Path="SelectionBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                    <Binding Source="{StaticResource halfDouble}"/>
+                                                    <Binding Path="Background" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                </MultiBinding>
+                                            </Border.Background>
+                                        </Border>
+                                        <Line x:Name="lowerLine" Grid.Column="0" 
+      X1="{Binding StrokeThickness, RelativeSource={RelativeSource Mode=Self},Converter={StaticResource NumToStringConverter},ConverterParameter=0.5}" 
+      Y1="{Binding ActualHeight,ElementName=renderedPannel,Converter={StaticResource NumToStringConverter},ConverterParameter=0.5}"
+      X2="{Binding ActualWidth, ElementName=LowerRB}" 
+      Y2="{Binding Y1,RelativeSource={RelativeSource Mode=Self}}"
+      Margin="{Binding ActualWidth, ElementName=trackThumb,Converter={StaticResource QuadruplesConverter},ConverterParameter=L_L0.5}" 
+      StrokeThickness="{Binding BorderThickness.Left, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+      StrokeStartLineCap="Round" HorizontalAlignment="Left" ClipToBounds="False"/>
+                                        <Line x:Name="upperLine" Grid.Column="2" 
+      X1="0" 
+      Y1="{Binding ActualHeight,ElementName=renderedPannel,Converter={StaticResource NumToStringConverter},ConverterParameter=0.5}"
+      X2="{Binding ActualWidth, ElementName=UpperRB}" 
+      Y2="{Binding Y1,RelativeSource={RelativeSource Mode=Self}}"
+      Margin="{Binding ActualWidth, ElementName=trackThumb,Converter={StaticResource QuadruplesConverter},ConverterParameter=R_L0.5}" 
+      StrokeThickness="{Binding BorderThickness.Left, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+      StrokeEndLineCap="Round" HorizontalAlignment="Right" ClipToBounds="False"/>
+                                    </Grid>
+                                    <Track x:Name="PART_Track" VerticalAlignment="Center" Grid.ColumnSpan="3" 
+                                           Orientation="Horizontal">
+                                        <Track.DecreaseRepeatButton>
+                                            <RepeatButton x:Name="LowerRB" Command="{x:Static Slider.DecreaseLarge}" Style="{StaticResource esilder_transparent_repeatBtnStyle}"/>
+                                        </Track.DecreaseRepeatButton>
+                                        <Track.IncreaseRepeatButton>
+                                            <RepeatButton x:Name="UpperRB" Command="{x:Static Slider.IncreaseLarge}" Style="{StaticResource esilder_transparent_repeatBtnStyle}"/>
+                                        </Track.IncreaseRepeatButton>
+                                        <Track.Thumb>
+                                            <Thumb x:Name="trackThumb" Focusable="True" OverridesDefaultStyle="True"
+                                                   VerticalAlignment="Center" Height="{TemplateBinding Height}" Width="{TemplateBinding Height}" IsManipulationEnabled="True"/>
+                                        </Track.Thumb>
+                                    </Track>
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsEnabled" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="controlRoot"
+Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="controlRoot" 
+Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0:0.16">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                </Trigger>
+                                <Trigger Property="IsClickShakable" Value="True">
+                                    <Setter TargetName="trackThumb" Property="Template" Value="{StaticResource es_track_clickScale_thumbTemplate}"/>
+                                </Trigger>
+                                <Trigger Property="IsClickShakable" Value="False">
+                                    <Setter TargetName="trackThumb" Property="Template" Value="{StaticResource es_track_fixedScale_thumbTemplate}"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard HandoffBehavior="Compose">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="controlRoot" 
+                        Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard HandoffBehavior="Compose">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="controlRoot" 
+Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase EasingMode="EaseInOut"/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                                <Trigger Property="SliderFillStyle" Value="LightLower">
+                                    <Setter TargetName="lowerLine" Property="Stroke" Value="{Binding Background, ElementName=visualCache}"/>
+                                    <Setter TargetName="upperLine" Property="Stroke" Value="{Binding BorderBrush, ElementName=visualCache}"/>
+                                </Trigger>
+                                <Trigger Property="SliderFillStyle" Value="LightUpper">
+                                    <Setter TargetName="lowerLine" Property="Stroke" Value="{Binding BorderBrush, ElementName=visualCache}"/>
+                                    <Setter TargetName="upperLine" Property="Stroke" Value="{Binding Background, ElementName=visualCache}"/>
+                                </Trigger>
+                                <Trigger Property="SliderFillStyle" Value="LightAll">
+                                    <Setter TargetName="lowerLine" Property="Stroke" Value="{Binding BorderBrush, ElementName=visualCache}"/>
+                                    <Setter TargetName="upperLine" Property="Stroke" Value="{Binding BorderBrush, ElementName=visualCache}"/>
+                                </Trigger>
+                                <Trigger Property="SliderFillStyle" Value="None">
+                                    <Setter TargetName="lowerLine" Property="Stroke" Value="{Binding Background, ElementName=visualCache}"/>
+                                    <Setter TargetName="upperLine" Property="Stroke" Value="{Binding Background, ElementName=visualCache}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="ThumbTemplate">
+                    <Setter.Value>
+                        <DataTemplate DataType="system:Object">
+                            <Border Width="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=controls:ESlider}}" 
+Height="{Binding Width, RelativeSource={RelativeSource Mode=Self}}" 
+BorderThickness="{Binding BorderThickness,RelativeSource={RelativeSource AncestorType=controls:ESlider}, Converter={StaticResource QuadruplesConverter},ConverterParameter=L_L0.3|T_T0.3|R_R0.3|B_B0.3}" 
+BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=ContentControl}}"
+CornerRadius="{Binding BorderCornerRadius, RelativeSource={RelativeSource AncestorType=controls:ESlider}}"
+Background="{Binding Background, RelativeSource={RelativeSource AncestorType=ContentControl}}">
+                            </Border>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+            <Trigger Property="Orientation" Value="Vertical">
+                <Setter Property="Width" Value="15"/>
+                <Setter Property="Height" Value="auto"/>
+                <Setter Property="VerticalAlignment" Value="Stretch"/>
+                <Setter Property="BorderCornerRadius" Value="{Binding ActualWidth, RelativeSource={RelativeSource Mode=Self}, Converter={StaticResource QuadruplesConverter}, ConverterParameter=LRTB_L0.5}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type controls:ESlider}">
+                            <Border x:Name="controlRoot" RenderTransformOrigin="0.5,0.5">
+                                <Grid x:Name="renderedPannel" Width="{TemplateBinding Width}">
+                                    <Grid Width="{Binding ActualWidth, ElementName=PART_Track}" Height="{Binding ActualHeight, ElementName=PART_Track}">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="{Binding ActualHeight, ElementName=LowerRB}"/>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="{Binding ActualHeight, ElementName=UpperRB}"/>
+                                        </Grid.RowDefinitions>
+                                        <Border x:Name="visualCache" Visibility="Collapsed">
+                                            <Border.BorderBrush>
+                                                <MultiBinding x:Name="basicColor" Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                                    <Binding Path="BorderBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                    <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="controlRoot"/>
+                                                    <Binding Path="SelectionBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                </MultiBinding>
+                                            </Border.BorderBrush>
+                                            <Border.Background>
+                                                <MultiBinding x:Name="lightedBasicColor" Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                                    <Binding Path="BorderBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                    <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="controlRoot"/>
+                                                    <Binding Path="SelectionBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                    <Binding Source="{StaticResource halfDouble}"/>
+                                                    <Binding Path="Background" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                </MultiBinding>
+                                            </Border.Background>
+                                        </Border>
+                                        <Line x:Name="lowerLine" Grid.Row="0" 
+      Y1="{Binding StrokeThickness, RelativeSource={RelativeSource Mode=Self},Converter={StaticResource NumToStringConverter},ConverterParameter=0.5}" 
+      X1="{Binding ActualWidth,ElementName=renderedPannel,Converter={StaticResource NumToStringConverter},ConverterParameter=0.5}"
+      Y2="{Binding ActualHeight, ElementName=LowerRB}" 
+      X2="{Binding X1,RelativeSource={RelativeSource Mode=Self}}"
+      Margin="{Binding ActualHeight, ElementName=trackThumb,Converter={StaticResource QuadruplesConverter},ConverterParameter=T_L0.5}" 
+      StrokeThickness="{Binding BorderThickness.Left, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+      StrokeStartLineCap="Round" HorizontalAlignment="Left" VerticalAlignment="Top" ClipToBounds="False"/>
+                                        <Line x:Name="upperLine" Grid.Row="2" 
+      Y1="0" 
+      X1="{Binding ActualWidth,ElementName=renderedPannel,Converter={StaticResource NumToStringConverter},ConverterParameter=0.5}"
+      Y2="{Binding ActualHeight, ElementName=UpperRB}" 
+      X2="{Binding X1,RelativeSource={RelativeSource Mode=Self}}"
+      Margin="{Binding ActualHeight, ElementName=trackThumb,Converter={StaticResource QuadruplesConverter},ConverterParameter=B_L0.5}" 
+      StrokeThickness="{Binding BorderThickness.Left, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+      StrokeEndLineCap="Round" HorizontalAlignment="Left" VerticalAlignment="Bottom" ClipToBounds="False"/>
+                                    </Grid>
+                                    <Track x:Name="PART_Track" HorizontalAlignment="Center" VerticalAlignment="Stretch" Orientation="Vertical" IsDirectionReversed="True" Grid.RowSpan="3">
+                                        <Track.DecreaseRepeatButton>
+                                            <RepeatButton x:Name="LowerRB" Command="{x:Static Slider.DecreaseLarge}" Style="{StaticResource esilder_transparent_repeatBtnStyle}"/>
+                                        </Track.DecreaseRepeatButton>
+                                        <Track.IncreaseRepeatButton>
+                                            <RepeatButton x:Name="UpperRB" Command="{x:Static Slider.IncreaseLarge}" Style="{StaticResource esilder_transparent_repeatBtnStyle}"/>
+                                        </Track.IncreaseRepeatButton>
+                                        <Track.Thumb>
+                                            <Thumb x:Name="trackThumb" Focusable="True" OverridesDefaultStyle="True"
+                                                   VerticalAlignment="Center" Width="{TemplateBinding Width}" Height="{TemplateBinding Width}" IsManipulationEnabled="True"/>
+                                        </Track.Thumb>
+                                    </Track>
+                                </Grid>
+                                <Border.RenderTransform>
+                                    <RotateTransform Angle="180"/>
+                                </Border.RenderTransform>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsEnabled" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="controlRoot"
+Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="controlRoot" 
+Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0:0.16">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                </Trigger>
+                                <Trigger Property="IsClickShakable" Value="True">
+                                    <Setter TargetName="trackThumb" Property="Template" Value="{StaticResource es_track_clickScale_thumbTemplate}"/>
+                                </Trigger>
+                                <Trigger Property="IsClickShakable" Value="False">
+                                    <Setter TargetName="trackThumb" Property="Template" Value="{StaticResource es_track_fixedScale_thumbTemplate}"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard HandoffBehavior="Compose">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="controlRoot" 
+                        Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard HandoffBehavior="Compose">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="controlRoot" 
+Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase EasingMode="EaseInOut"/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                                <Trigger Property="SliderFillStyle" Value="LightLower">
+                                    <Setter TargetName="lowerLine" Property="Stroke" Value="{Binding Background, ElementName=visualCache}"/>
+                                    <Setter TargetName="upperLine" Property="Stroke" Value="{Binding BorderBrush, ElementName=visualCache}"/>
+                                </Trigger>
+                                <Trigger Property="SliderFillStyle" Value="LightUpper">
+                                    <Setter TargetName="lowerLine" Property="Stroke" Value="{Binding BorderBrush, ElementName=visualCache}"/>
+                                    <Setter TargetName="upperLine" Property="Stroke" Value="{Binding Background, ElementName=visualCache}"/>
+                                </Trigger>
+                                <Trigger Property="SliderFillStyle" Value="LightAll">
+                                    <Setter TargetName="lowerLine" Property="Stroke" Value="{Binding BorderBrush, ElementName=visualCache}"/>
+                                    <Setter TargetName="upperLine" Property="Stroke" Value="{Binding BorderBrush, ElementName=visualCache}"/>
+                                </Trigger>
+                                <Trigger Property="SliderFillStyle" Value="None">
+                                    <Setter TargetName="lowerLine" Property="Stroke" Value="{Binding Background, ElementName=visualCache}"/>
+                                    <Setter TargetName="upperLine" Property="Stroke" Value="{Binding Background, ElementName=visualCache}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="ThumbTemplate">
+                    <Setter.Value>
+                        <DataTemplate DataType="system:Object">
+                            <Border Height="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=controls:ESlider}}" 
+Width="{Binding Height, RelativeSource={RelativeSource Mode=Self}}" 
+BorderThickness="{Binding BorderThickness,RelativeSource={RelativeSource AncestorType=controls:ESlider}, Converter={StaticResource QuadruplesConverter},ConverterParameter=L_L0.3|T_T0.3|R_R0.3|B_B0.3}" 
+BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=ContentControl}}"
+CornerRadius="{Binding BorderCornerRadius, RelativeSource={RelativeSource AncestorType=controls:ESlider}}"
+Background="{Binding Background, RelativeSource={RelativeSource AncestorType=ContentControl}}">
+                            </Border>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="BackBrushed_ESliderStyle" TargetType="{x:Type controls:ESlider}">
+        <Style.Resources>
+            <system:Double x:Key="halfDouble">0.7</system:Double>
+            <system:Double x:Key="halfDoubleLight">0.5</system:Double>
+            <system:Double x:Key="halfDoubleSlight">0.3</system:Double>
+            <Style x:Key="esilder_transparent_repeatBtnStyle" TargetType="RepeatButton">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RepeatButton">
+                            <Border BorderThickness="0" Background="Transparent">
+                                <Grid Background="Transparent"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <ControlTemplate x:Key="es_track_clickScale_thumbTemplate" TargetType="Thumb">
+                <Border x:Name="thumbRoot">
+                    <Border.Resources>
+                        <SolidColorBrush x:Key="transparentBrush" Color="Transparent"/>
+                    </Border.Resources>
+                    <Border.BorderBrush>
+                        <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                            <Binding Path="BorderBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                            <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="thumbRoot"/>
+                            <Binding Path="SelectionBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                            <Binding Source="{StaticResource halfDoubleSlight}"/>
+                            <Binding Path="Background" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                        </MultiBinding>
+                    </Border.BorderBrush>
+                    <ContentControl x:Name="thumbContent" 
+                                    ContentTemplate="{Binding ThumbTemplate, RelativeSource={RelativeSource AncestorType=controls:ESlider}}" Content="{Binding ThumbContent, RelativeSource={RelativeSource AncestorType=controls:ESlider}}" RenderTransformOrigin="0.5,0.5">
+                        <ContentControl.BorderBrush>
+                            <!-- normal-mouseover-mousedown -->
+                            <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                <Binding Path="BorderBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="thumbRoot"/>
+                                <Binding Path="SelectionBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Source="{StaticResource halfDoubleLight}"/>
+                                <Binding Path="Background" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="thumbContent"/>
+                                <Binding Path="BorderBrush" ElementName="thumbRoot"/>
+                            </MultiBinding>
+                        </ContentControl.BorderBrush>
+                        <ContentControl.Background>
+                            <!-- normal-mouseover-mousedown -->
+                            <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}" ConverterParameter="alpha.lerp">
+                                <Binding Path="BorderBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.BackColorRate)" ElementName="thumbRoot"/>
+                                <Binding Path="SelectionBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.BackColorRate)" ElementName="thumbContent"/>
+                                <Binding Source="{StaticResource transparentBrush}"/>
+                            </MultiBinding>
+                        </ContentControl.Background>
+                        <ContentControl.RenderTransform>
+                            <ScaleTransform x:Name="scaleTransform"/>
+                        </ContentControl.RenderTransform>
+                    </ContentControl>
+                </Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Trigger.EnterActions>
+                            <BeginStoryboard HandoffBehavior="Compose">
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.EnterActions>
+                        <Trigger.ExitActions>
+                            <BeginStoryboard HandoffBehavior="Compose">
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.ExitActions>
+                    </Trigger>
+                    <Trigger Property="IsDragging" Value="True">
+                        <Trigger.EnterActions>
+                            <BeginStoryboard HandoffBehavior="Compose">
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="thumbContent" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="thumbContent" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="scaleTransform" Storyboard.TargetProperty="ScaleX" To="1.3" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="scaleTransform" Storyboard.TargetProperty="ScaleY" To="1.3" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.EnterActions>
+                        <Trigger.ExitActions>
+                            <BeginStoryboard HandoffBehavior="Compose">
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="thumbContent" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="thumbContent" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="scaleTransform" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="scaleTransform" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.ExitActions>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+            <ControlTemplate x:Key="es_track_fixedScale_thumbTemplate" TargetType="Thumb">
+                <Border x:Name="thumbRoot">
+                    <Border.BorderBrush>
+                        <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                            <Binding Path="BorderBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                            <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="thumbRoot"/>
+                            <Binding Path="SelectionBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                            <Binding Source="{StaticResource halfDoubleSlight}"/>
+                            <Binding Path="Background" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                        </MultiBinding>
+                    </Border.BorderBrush>
+                    <ContentControl x:Name="thumbContent" ContentTemplate="{Binding ThumbTemplate, RelativeSource={RelativeSource AncestorType=controls:ESlider}}" Content="{Binding ThumbContent, RelativeSource={RelativeSource AncestorType=controls:ESlider}}" RenderTransformOrigin="0.5,0.5">
+                        <ContentControl.BorderBrush>
+                            <!-- normal-mouseover-mousedown -->
+                            <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                <Binding Path="BorderBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="thumbRoot"/>
+                                <Binding Path="SelectionBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Source="{StaticResource halfDoubleLight}"/>
+                                <Binding Path="Background" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="thumbContent"/>
+                                <Binding Path="BorderBrush" ElementName="thumbRoot"/>
+                            </MultiBinding>
+                        </ContentControl.BorderBrush>
+                        <ContentControl.Background>
+                            <!-- normal-mouseover-mousedown -->
+                            <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                <Binding Path="BorderBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.BackColorRate)" ElementName="thumbRoot"/>
+                                <Binding Path="SelectionBrush" RelativeSource="{RelativeSource AncestorType=controls:ESlider}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.BackColorRate)" ElementName="thumbContent"/>
+                                <Binding Path="BorderBrush" ElementName="thumbRoot"/>
+                            </MultiBinding>
+                        </ContentControl.Background>
+                    </ContentControl>
+                </Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Trigger.EnterActions>
+                            <BeginStoryboard HandoffBehavior="Compose">
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.EnterActions>
+                        <Trigger.ExitActions>
+                            <BeginStoryboard HandoffBehavior="Compose">
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.ExitActions>
+                    </Trigger>
+                    <Trigger Property="IsDragging" Value="True">
+                        <Trigger.EnterActions>
+                            <BeginStoryboard HandoffBehavior="Compose">
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="thumbContent" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="thumbContent" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="1" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.EnterActions>
+                        <Trigger.ExitActions>
+                            <BeginStoryboard HandoffBehavior="Compose">
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="thumbContent" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetName="thumbContent" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0" Duration="0:0:0.2">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.ExitActions>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+            
+        </Style.Resources>
+        <Setter Property="Orientation" Value="Horizontal"/>
+        <Setter Property="SliderFillStyle" Value="LightUpper"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="BorderBrush" Value="{Binding CurrentTheme.BorderColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="SelectionBrush" Value="{Binding CurrentTheme.SelectionColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="ClickBrush" Value="{Binding CurrentTheme.ClickColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="Foreground" Value="{Binding CurrentTheme.FontColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="Background" Value="{Binding CurrentTheme.BackColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="FontSize" Value="{Binding CurrentTheme.FontSizeNormal, Source={StaticResource ThemeProvider}}"/>
+        <Setter Property="FontBrush" Value="{Binding CurrentTheme.FontColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Height" Value="15"/>
+                <Setter Property="Width" Value="auto"/>
+                <Setter Property="BorderCornerRadius" Value="{Binding ActualHeight, RelativeSource={RelativeSource Mode=Self}, Converter={StaticResource QuadruplesConverter}, ConverterParameter=LRTB_L0.5}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type controls:ESlider}">
+                            <Border x:Name="controlRoot">
+                                <Grid x:Name="renderedPannel" Height="{TemplateBinding Height}">
+                                    <Grid Width="{Binding ActualWidth, ElementName=PART_Track}" 
+                                          Height="{Binding ActualHeight, ElementName=PART_Track}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="{Binding ActualWidth, ElementName=LowerRB}"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="{Binding ActualWidth, ElementName=UpperRB}"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border BorderThickness="{TemplateBinding BorderThickness, Converter={StaticResource QuadruplesConverter}, ConverterParameter=L_L0.7|T_T0.7|R_R0.7|B_B0.7}" CornerRadius="{TemplateBinding BorderCornerRadius}" BorderBrush="Transparent" Background="{TemplateBinding FillBack}" Grid.ColumnSpan="3"/>
+                                        <Border BorderThickness="{TemplateBinding BorderThickness, Converter={StaticResource QuadruplesConverter}, ConverterParameter=L_L0.7|T_T0.7|R_R0.7|B_B0.7}" CornerRadius="{TemplateBinding BorderCornerRadius}" BorderBrush="Transparent" Background="{TemplateBinding FillFore}" Grid.ColumnSpan="3"/>
+                                        <Border x:Name="visualCache" Visibility="Collapsed">
+                                            <Border.BorderBrush>
+                                                <MultiBinding x:Name="basicColor" Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                                    <Binding Path="BorderBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                    <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="controlRoot"/>
+                                                    <Binding Path="SelectionBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                </MultiBinding>
+                                            </Border.BorderBrush>
+                                            <Border.Background>
+                                                <MultiBinding x:Name="lightedBasicColor" Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                                    <Binding Path="BorderBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                    <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="controlRoot"/>
+                                                    <Binding Path="SelectionBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                    <Binding Source="{StaticResource halfDouble}"/>
+                                                    <Binding Path="Background" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                </MultiBinding>
+                                            </Border.Background>
+                                        </Border>
+                                        <Border Name="lowerBorder" Grid.Column="0"
+BorderThickness="{TemplateBinding BorderThickness, Converter={StaticResource QuadruplesConverter}, ConverterParameter=L_L1|T_T1|B_B1}" CornerRadius="{TemplateBinding BorderCornerRadius, Converter={StaticResource QuadruplesConverter}, ConverterParameter=L_L1|B_B1}"
+Height="{Binding ActualHeight, ElementName=LowerRB}" Margin="{Binding ActualWidth, ElementName=trackThumb,Converter={StaticResource QuadruplesConverter},ConverterParameter=R_L-0.5}"/>
+                                        <Border Name="upperBorder" Grid.Column="2" HorizontalAlignment="Stretch"
+BorderThickness="{TemplateBinding BorderThickness, Converter={StaticResource QuadruplesConverter}, ConverterParameter=R_R1|T_T1|B_B1}" CornerRadius="{TemplateBinding BorderCornerRadius, Converter={StaticResource QuadruplesConverter}, ConverterParameter=R_L1|T_B1}"
+Height="{Binding ActualHeight, ElementName=UpperRB}" Margin="{Binding ActualWidth, ElementName=trackThumb,Converter={StaticResource QuadruplesConverter},ConverterParameter=L_L-0.5}"/>
+                                    </Grid>
+                                    <Track x:Name="PART_Track" 
+                                   VerticalAlignment="Center" Grid.ColumnSpan="3" Orientation="Horizontal">
+                                        <Track.DecreaseRepeatButton>
+                                            <RepeatButton x:Name="LowerRB" Command="{x:Static Slider.DecreaseLarge}" Style="{StaticResource esilder_transparent_repeatBtnStyle}"/>
+                                        </Track.DecreaseRepeatButton>
+                                        <Track.IncreaseRepeatButton>
+                                            <RepeatButton x:Name="UpperRB" Command="{x:Static Slider.IncreaseLarge}" Style="{StaticResource esilder_transparent_repeatBtnStyle}"/>
+                                        </Track.IncreaseRepeatButton>
+                                        <Track.Thumb>
+                                            <Thumb x:Name="trackThumb" Focusable="True" OverridesDefaultStyle="True"
+       VerticalAlignment="Center" Height="{TemplateBinding Height}" Width="{TemplateBinding Height}" IsManipulationEnabled="True"/>
+                                        </Track.Thumb>
+                                    </Track>
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsEnabled" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="controlRoot"
+Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="controlRoot" 
+Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0:0.16">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                </Trigger>
+                                <Trigger Property="IsClickShakable" Value="True">
+                                    <Setter TargetName="trackThumb" Property="Template" Value="{StaticResource es_track_clickScale_thumbTemplate}"/>
+                                </Trigger>
+                                <Trigger Property="IsClickShakable" Value="False">
+                                    <Setter TargetName="trackThumb" Property="Template" Value="{StaticResource es_track_fixedScale_thumbTemplate}"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard HandoffBehavior="Compose">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="controlRoot" 
+                        Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard HandoffBehavior="Compose">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="controlRoot" 
+Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase EasingMode="EaseInOut"/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                                <Trigger Property="SliderFillStyle" Value="LightLower">
+                                    <Setter TargetName="lowerBorder" Property="BorderBrush" Value="{Binding Background, ElementName=visualCache}"/>
+                                    <Setter TargetName="upperBorder" Property="BorderBrush" Value="{Binding BorderBrush, ElementName=visualCache}"/>
+                                </Trigger>
+                                <Trigger Property="SliderFillStyle" Value="LightUpper">
+                                    <Setter TargetName="lowerBorder" Property="BorderBrush" Value="{Binding BorderBrush, ElementName=visualCache}"/>
+                                    <Setter TargetName="upperBorder" Property="BorderBrush" Value="{Binding Background, ElementName=visualCache}"/>
+                                </Trigger>
+                                <Trigger Property="SliderFillStyle" Value="LightAll">
+                                    <Setter TargetName="lowerBorder" Property="BorderBrush" Value="{Binding BorderBrush, ElementName=visualCache}"/>
+                                    <Setter TargetName="upperBorder" Property="BorderBrush" Value="{Binding BorderBrush, ElementName=visualCache}"/>
+                                </Trigger>
+                                <Trigger Property="SliderFillStyle" Value="None">
+                                    <Setter TargetName="lowerBorder" Property="BorderBrush" Value="{Binding Background, ElementName=visualCache}"/>
+                                    <Setter TargetName="upperBorder" Property="BorderBrush" Value="{Binding Background, ElementName=visualCache}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="ThumbTemplate">
+                    <Setter.Value>
+                        <DataTemplate DataType="system:Object">
+                            <Border Width="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=controls:ESlider}}" 
+Height="{Binding Width, RelativeSource={RelativeSource Mode=Self}}" 
+BorderThickness="{Binding BorderThickness,RelativeSource={RelativeSource AncestorType=controls:ESlider}}" 
+BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=ContentControl}}"
+CornerRadius="{Binding BorderCornerRadius, RelativeSource={RelativeSource AncestorType=controls:ESlider}}"
+Background="{Binding Background, RelativeSource={RelativeSource AncestorType=ContentControl}}">
+                            </Border>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+            <Trigger Property="Orientation" Value="Vertical">
+                <Setter Property="Width" Value="15"/>
+                <Setter Property="Height" Value="auto"/>
+                <Setter Property="VerticalAlignment" Value="Stretch"/>
+                <Setter Property="BorderCornerRadius" Value="{Binding ActualWidth, RelativeSource={RelativeSource Mode=Self}, Converter={StaticResource QuadruplesConverter}, ConverterParameter=LRTB_L0.5}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type controls:ESlider}">
+                            <Border x:Name="controlRoot" RenderTransformOrigin="0.5,0.5">
+                                <Grid x:Name="renderedPannel" Width="{TemplateBinding Width}">
+                                    <Grid Width="{Binding ActualWidth, ElementName=PART_Track}" Height="{Binding ActualHeight, ElementName=PART_Track}">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="{Binding ActualHeight, ElementName=LowerRB}"/>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="{Binding ActualHeight, ElementName=UpperRB}"/>
+                                        </Grid.RowDefinitions>
+                                        <Border BorderThickness="{TemplateBinding BorderThickness, Converter={StaticResource QuadruplesConverter}, ConverterParameter=L_L0.7|T_T0.7|R_R0.7|B_B0.7}" CornerRadius="{TemplateBinding BorderCornerRadius}" BorderBrush="Transparent" Background="{TemplateBinding FillBack}" Grid.RowSpan="3"/>
+                                        <Border BorderThickness="{TemplateBinding BorderThickness, Converter={StaticResource QuadruplesConverter}, ConverterParameter=L_L0.7|T_T0.7|R_R0.7|B_B0.7}" CornerRadius="{TemplateBinding BorderCornerRadius}" BorderBrush="Transparent" Background="{TemplateBinding FillFore}" Grid.RowSpan="3"/>
+                                        <Border x:Name="visualCache" Visibility="Collapsed">
+                                            <Border.BorderBrush>
+                                                <MultiBinding x:Name="basicColor" Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                                    <Binding Path="BorderBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                    <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="controlRoot"/>
+                                                    <Binding Path="SelectionBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                </MultiBinding>
+                                            </Border.BorderBrush>
+                                            <Border.Background>
+                                                <MultiBinding x:Name="lightedBasicColor" Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                                    <Binding Path="BorderBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                    <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="controlRoot"/>
+                                                    <Binding Path="SelectionBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                    <Binding Source="{StaticResource halfDouble}"/>
+                                                    <Binding Path="Background" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                </MultiBinding>
+                                            </Border.Background>
+                                        </Border>
+                                        <Border Name="lowerBorder" Grid.Row="0"
+BorderThickness="{TemplateBinding BorderThickness, Converter={StaticResource QuadruplesConverter}, ConverterParameter=L_L1|R_R1|T_T1}" CornerRadius="{TemplateBinding BorderCornerRadius, Converter={StaticResource QuadruplesConverter}, ConverterParameter=L_L1|T_T1}"
+Width="{Binding ActualWidth, ElementName=LowerRB}" Margin="{Binding ActualHeight, ElementName=trackThumb,Converter={StaticResource QuadruplesConverter},ConverterParameter=B_L-0.5}"/>
+                                        <Border Name="upperBorder" Grid.Row="2" HorizontalAlignment="Stretch"
+BorderThickness="{TemplateBinding BorderThickness, Converter={StaticResource QuadruplesConverter}, ConverterParameter=L_L1|R_R1|B_B1}" CornerRadius="{TemplateBinding BorderCornerRadius, Converter={StaticResource QuadruplesConverter}, ConverterParameter=R_L1|B_T1}"
+Width="{Binding ActualWidth, ElementName=UpperRB}" Margin="{Binding ActualHeight, ElementName=trackThumb,Converter={StaticResource QuadruplesConverter},ConverterParameter=T_L-0.5}"/>
+                                    </Grid>
+                                    <Track x:Name="PART_Track" HorizontalAlignment="Center" VerticalAlignment="Stretch" Orientation="Vertical" IsDirectionReversed="True" Grid.RowSpan="3">
+                                        <Track.DecreaseRepeatButton>
+                                            <RepeatButton x:Name="LowerRB" Command="{x:Static Slider.DecreaseLarge}" Style="{StaticResource esilder_transparent_repeatBtnStyle}"/>
+                                        </Track.DecreaseRepeatButton>
+                                        <Track.IncreaseRepeatButton>
+                                            <RepeatButton x:Name="UpperRB" Command="{x:Static Slider.IncreaseLarge}" Style="{StaticResource esilder_transparent_repeatBtnStyle}"/>
+                                        </Track.IncreaseRepeatButton>
+                                        <Track.Thumb>
+                                            <Thumb x:Name="trackThumb" Focusable="True" OverridesDefaultStyle="True"
+                                                   VerticalAlignment="Center" Width="{TemplateBinding Width}" Height="{TemplateBinding Width}" IsManipulationEnabled="True"/>
+                                        </Track.Thumb>
+                                    </Track>
+                                </Grid>
+                                <Border.RenderTransform>
+                                    <RotateTransform Angle="180"/>
+                                </Border.RenderTransform>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsEnabled" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="controlRoot"
+Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="controlRoot" 
+Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0:0.16">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                </Trigger>
+                                <Trigger Property="IsClickShakable" Value="True">
+                                    <Setter TargetName="trackThumb" Property="Template" Value="{StaticResource es_track_clickScale_thumbTemplate}"/>
+                                </Trigger>
+                                <Trigger Property="IsClickShakable" Value="False">
+                                    <Setter TargetName="trackThumb" Property="Template" Value="{StaticResource es_track_fixedScale_thumbTemplate}"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard HandoffBehavior="Compose">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="controlRoot" 
+                        Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard HandoffBehavior="Compose">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="controlRoot" 
+Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase EasingMode="EaseInOut"/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                                <Trigger Property="SliderFillStyle" Value="LightLower">
+                                    <Setter TargetName="lowerBorder" Property="BorderBrush" Value="{Binding Background, ElementName=visualCache}"/>
+                                    <Setter TargetName="upperBorder" Property="BorderBrush" Value="{Binding BorderBrush, ElementName=visualCache}"/>
+                                </Trigger>
+                                <Trigger Property="SliderFillStyle" Value="LightUpper">
+                                    <Setter TargetName="lowerBorder" Property="BorderBrush" Value="{Binding BorderBrush, ElementName=visualCache}"/>
+                                    <Setter TargetName="upperBorder" Property="BorderBrush" Value="{Binding Background, ElementName=visualCache}"/>
+                                </Trigger>
+                                <Trigger Property="SliderFillStyle" Value="LightAll">
+                                    <Setter TargetName="lowerBorder" Property="BorderBrush" Value="{Binding BorderBrush, ElementName=visualCache}"/>
+                                    <Setter TargetName="upperBorder" Property="BorderBrush" Value="{Binding BorderBrush, ElementName=visualCache}"/>
+                                </Trigger>
+                                <Trigger Property="SliderFillStyle" Value="None">
+                                    <Setter TargetName="lowerBorder" Property="BorderBrush" Value="{Binding Background, ElementName=visualCache}"/>
+                                    <Setter TargetName="upperBorder" Property="BorderBrush" Value="{Binding Background, ElementName=visualCache}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="ThumbTemplate">
+                    <Setter.Value>
+                        <DataTemplate DataType="system:Object">
+                            <Border Height="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=controls:ESlider}}" 
+Width="{Binding Height, RelativeSource={RelativeSource Mode=Self}}" 
+BorderThickness="{Binding BorderThickness,RelativeSource={RelativeSource AncestorType=controls:ESlider}}" 
+BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=ContentControl}}"
+CornerRadius="{Binding BorderCornerRadius, RelativeSource={RelativeSource AncestorType=controls:ESlider}}"
+Background="{Binding Background, RelativeSource={RelativeSource AncestorType=ContentControl}}">
+                            </Border>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+</ResourceDictionary>

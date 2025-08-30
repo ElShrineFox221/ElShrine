@@ -1,0 +1,14 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:theme="clr-namespace:ElShrine.Wpf.UITheme"
+                    xmlns:converters="clr-namespace:ElShrine.Wpf.Converters">
+    <ObjectDataProvider x:Key="ThemeProvider" MethodName="GetInstance" ObjectType="{x:Type theme:ThemeManager}"/>
+    
+    <converters:BoolReverseConverter x:Key="BoolReverseConverter"/>
+    <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    <converters:IsNullToVisibilityConverter x:Key="IsNullToVisibilityConverter"/>
+    <converters:ColorToSolidBrushConverter x:Key="ColorToSolidBrushConverter"/>
+    <converters:ColorLerpToSolidBrushConverter x:Key="ColorLerpToSolidBrushConverter"/>
+    <converters:QuadruplesConverter x:Key="QuadruplesConverter"/>
+    <converters:NumToStringConverter x:Key="NumToStringConverter"/>
+</ResourceDictionary>

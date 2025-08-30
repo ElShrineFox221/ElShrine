@@ -1,0 +1,303 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
+                    xmlns:extensions="clr-namespace:ElShrine.Wpf.Controls.Extensions">
+    <Style TargetType="{x:Type controls:EExpander}">
+        <Setter Property="Padding" Value="4"/>
+        <Setter Property="ArrowMargin" Value="5,1"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderCornerRadius" Value="{Binding CurrentTheme.CornerRadius, Source={StaticResource ThemeProvider}}"/>
+        <Setter Property="BorderBrush" Value="{Binding CurrentTheme.BorderColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="SelectionBrush" Value="{Binding CurrentTheme.SelectionColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="ClickBrush" Value="{Binding CurrentTheme.ClickColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="Foreground" Value="{Binding CurrentTheme.ForeColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="Background" Value="{Binding CurrentTheme.BackColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="FontSize" Value="{Binding CurrentTheme.FontSizeNormal, Source={StaticResource ThemeProvider}}"/>
+        <Setter Property="FontBrush" Value="{Binding CurrentTheme.FontColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type controls:EExpander}">
+                    <Border x:Name="controlRoot" 
+                            Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding BorderCornerRadius}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                        <Border.BorderBrush>
+                            <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                <Binding Path="BorderBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="controlRoot"/>
+                                <Binding Path="SelectionBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                            </MultiBinding>
+                        </Border.BorderBrush>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition x:Name="r0" Height="auto"/>
+                                <RowDefinition x:Name="r1" Height="auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition x:Name="c0" Width="auto"/>
+                                <ColumnDefinition x:Name="c1" Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ToggleButton x:Name="headerButton" Grid.Row="0" Grid.Column="0"
+                                          IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                <ToggleButton.Foreground>
+                                    <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                        <Binding Path="FontBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                        <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="controlRoot"/>
+                                        <Binding Path="SelectionBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                        <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="headerButton"/>
+                                        <Binding Path="Background" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                    </MultiBinding>
+                                </ToggleButton.Foreground>
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <ContentPresenter Content="{TemplateBinding Content}"/>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                                <Grid Background="Transparent">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition x:Name="sr0" Height="auto"/>
+                                        <RowDefinition x:Name="sr1" Height="auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition x:Name="sc0"  Width="auto"/>
+                                        <ColumnDefinition x:Name="sc1" Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ContentPresenter x:Name="headerContentPresenter" Grid.Row="0" Grid.Column="0" 
+                                                      Content="{TemplateBinding Header}" Margin="{TemplateBinding Padding}"/>
+                                    <Border x:Name="headerArrowContainer" Grid.Row="0" Grid.Column="1" 
+                                            Margin="{TemplateBinding ArrowMargin}">
+                                        <Viewbox Margin="0,0,0,0" Grid.Column="1">
+                                            <Grid>
+                                                <Border/>
+                                                <Path x:Name="arrow" 
+                                                      Width="11" Height="6" Stretch="Uniform" Data="M0,0 L5,5 L10,0"  StrokeThickness="2">
+                                                    <Path.Stroke>
+                                                        <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
+                                                            <Binding Path="BorderBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                            <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="arrow"/>
+                                                            <Binding Path="SelectionBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
+                                                        </MultiBinding>
+                                                    </Path.Stroke>
+                                                    <Path.RenderTransform>
+                                                        <TransformGroup>
+                                                            <RotateTransform CenterX="5" CenterY="3" Angle="{Binding ArrowAngle, RelativeSource={RelativeSource AncestorType=controls:EExpander}}"/>
+                                                            <RotateTransform x:Name="AnimationArrowRotateTransform" CenterX="5" CenterY="3" Angle="0"/>
+                                                        </TransformGroup>
+                                                    </Path.RenderTransform>
+                                                </Path>
+                                            </Grid>
+                                        </Viewbox>
+                                    </Border>
+                                </Grid>
+                                <ToggleButton.Triggers>
+                                    <EventTrigger RoutedEvent="PreviewMouseDown">
+                                        <BeginStoryboard HandoffBehavior="Compose">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="headerButton" 
+Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0.5" Duration="0:0:0.2">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger>
+                                    <EventTrigger RoutedEvent="PreviewMouseUp">
+                                        <BeginStoryboard HandoffBehavior="Compose">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="headerButton" 
+Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <SineEase/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger>
+                                </ToggleButton.Triggers>
+                            </ToggleButton>
+                            <ContentPresenter x:Name="PART_ContentHost" Grid.Row="1" Grid.Column="0" 
+Margin="{TemplateBinding Padding}" ContentSource="Content" RenderTransformOrigin="0,0" Visibility="Collapsed"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="controlRoot"
+                                 Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="controlRoot" 
+                                 Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0:0.16">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard HandoffBehavior="Compose">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="controlRoot" 
+                                 Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="arrow" 
+Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard HandoffBehavior="Compose">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="controlRoot" 
+                                 Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="arrow" 
+Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsExpanded" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard HandoffBehavior="Compose">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="arrow" 
+         Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard HandoffBehavior="Compose">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="arrow" 
+Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="ExpandDirection" Value="Left">
+                            <Setter TargetName="headerButton" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="headerButton" Property="Grid.Column" Value="1"/>
+                            <Setter TargetName="r0" Property="Height" Value="*"/>
+                            <Setter TargetName="r1" Property="Height" Value="auto"/>
+                            <Setter TargetName="c0" Property="Width" Value="*"/>
+                            <Setter TargetName="c1" Property="Width" Value="auto"/>
+                            <Setter TargetName="PART_ContentHost" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="PART_ContentHost" Property="Grid.Column" Value="0"/>
+                        </Trigger>
+                        <Trigger Property="ExpandDirection" Value="Right">
+                            <Setter TargetName="headerButton" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="headerButton" Property="Grid.Column" Value="0"/>
+                            <Setter TargetName="r0" Property="Height" Value="*"/>
+                            <Setter TargetName="r1" Property="Height" Value="auto"/>
+                            <Setter TargetName="c0" Property="Width" Value="auto"/>
+                            <Setter TargetName="c1" Property="Width" Value="*"/>
+                            <Setter TargetName="PART_ContentHost" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="PART_ContentHost" Property="Grid.Column" Value="1"/>
+                        </Trigger>
+                        <Trigger Property="ExpandDirection" Value="Up">
+                            <Setter TargetName="headerButton" Property="Grid.Row" Value="1"/>
+                            <Setter TargetName="headerButton" Property="Grid.Column" Value="0"/>
+                            <Setter TargetName="r0" Property="Height" Value="*"/>
+                            <Setter TargetName="r1" Property="Height" Value="auto"/>
+                            <Setter TargetName="c0" Property="Width" Value="*"/>
+                            <Setter TargetName="c1" Property="Width" Value="auto"/>
+                            <Setter TargetName="PART_ContentHost" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="PART_ContentHost" Property="Grid.Column" Value="0"/>
+                        </Trigger>
+                        <Trigger Property="ExpandDirection" Value="Down">
+                            <Setter TargetName="headerButton" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="headerButton" Property="Grid.Column" Value="0"/>
+                            <Setter TargetName="r0" Property="Height" Value="auto"/>
+                            <Setter TargetName="r1" Property="Height" Value="*"/>
+                            <Setter TargetName="c0" Property="Width" Value="*"/>
+                            <Setter TargetName="c1" Property="Width" Value="auto"/>
+                            <Setter TargetName="PART_ContentHost" Property="Grid.Row" Value="1"/>
+                            <Setter TargetName="PART_ContentHost" Property="Grid.Column" Value="0"/>
+                        </Trigger>
+                        <Trigger Property="HeaderPlacement" Value="Left">
+                            <Setter TargetName="sr0" Property="Height" Value="*"/>
+                            <Setter TargetName="sr1" Property="Height" Value="auto"/>
+                            <Setter TargetName="sc0" Property="Width" Value="*"/>
+                            <Setter TargetName="sc1" Property="Width" Value="auto"/>
+                            <Setter TargetName="headerArrowContainer" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="headerArrowContainer" Property="Grid.Column" Value="1"/>
+                            <Setter TargetName="headerContentPresenter" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="headerContentPresenter" Property="Grid.Column" Value="0"/>
+                            <Setter Property="ArrowAngle" Value="90"/>
+                        </Trigger>
+                        <Trigger Property="HeaderPlacement" Value="Right">
+                            <Setter TargetName="sr0" Property="Height" Value="*"/>
+                            <Setter TargetName="sr1" Property="Height" Value="auto"/>
+                            <Setter TargetName="sc0" Property="Width" Value="auto"/>
+                            <Setter TargetName="sc1" Property="Width" Value="*"/>
+                            <Setter TargetName="headerArrowContainer" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="headerArrowContainer" Property="Grid.Column" Value="0"/>
+                            <Setter TargetName="headerContentPresenter" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="headerContentPresenter" Property="Grid.Column" Value="1"/>
+                            <Setter Property="ArrowAngle" Value="270"/>
+                        </Trigger>
+                        <Trigger Property="HeaderPlacement" Value="Up">
+                            <Setter TargetName="sr0" Property="Height" Value="*"/>
+                            <Setter TargetName="sr1" Property="Height" Value="auto"/>
+                            <Setter TargetName="sc0" Property="Width" Value="*"/>
+                            <Setter TargetName="sc1" Property="Width" Value="auto"/>
+                            <Setter TargetName="headerArrowContainer" Property="Grid.Row" Value="1"/>
+                            <Setter TargetName="headerArrowContainer" Property="Grid.Column" Value="0"/>
+                            <Setter TargetName="headerContentPresenter" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="headerContentPresenter" Property="Grid.Column" Value="0"/>
+                            <Setter Property="ArrowAngle" Value="180"/>
+                        </Trigger>
+                        <Trigger Property="HeaderPlacement" Value="Down">
+                            <Setter TargetName="sr0" Property="Height" Value="auto"/>
+                            <Setter TargetName="sr1" Property="Height" Value="*"/>
+                            <Setter TargetName="sc0" Property="Width" Value="*"/>
+                            <Setter TargetName="sc1" Property="Width" Value="auto"/>
+                            <Setter TargetName="headerArrowContainer" Property="Grid.Row" Value="0"/>
+                            <Setter TargetName="headerArrowContainer" Property="Grid.Column" Value="0"/>
+                            <Setter TargetName="headerContentPresenter" Property="Grid.Row" Value="1"/>
+                            <Setter TargetName="headerContentPresenter" Property="Grid.Column" Value="0"/>
+                            <Setter Property="ArrowAngle" Value="0"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>
