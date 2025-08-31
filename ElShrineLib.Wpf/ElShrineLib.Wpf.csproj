@@ -16,7 +16,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ElShrineLib.Graphics\ElShrineLib.Graphics.csproj" />
-    <ProjectReference Include="..\ElShrineLib\ElShrineLib.csproj" />
   </ItemGroup>
 
   <ItemGroup>

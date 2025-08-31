@@ -1,0 +1,14 @@
+﻿<Application x:Class="ElShrine.VisualTool.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:ElShrine.VisualTool"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/ConverterResources.xaml"/>
+                <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/ControlResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

@@ -95,7 +95,10 @@ namespace ElShrine.EOption
                             ValueType = valueType
                         };
                         //validate: check same identity option item
-                        if (OptionItemsCache.FindIndex(i => i.SomeEqual(item)) != -1) throw new("Duplicated option items. ");
+                        if (OptionItemsCache.FindIndex(i => i.SomeEqual(item)) != -1)
+                        {
+                            throw new("Duplicated option items. ");
+                        }
                         else OptionItemsCache.Add(item);
                     }
                 }

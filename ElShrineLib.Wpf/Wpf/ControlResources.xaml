@@ -2,17 +2,17 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:theme="clr-namespace:ElShrine.Wpf.UITheme">
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="/ElShrineWpfLib;component/Wpf/Controls/EButton.xaml"/>
-        <ResourceDictionary Source="/ElShrineWpfLib;component/Wpf/Controls/EToggleButton.xaml"/>
-        <ResourceDictionary Source="/ElShrineWpfLib;component/Wpf/Controls/EExpander.xaml"/>
-        <ResourceDictionary Source="/ElShrineWpfLib;component/Wpf/Controls/EScrollBar.xaml"/>
-        <ResourceDictionary Source="/ElShrineWpfLib;component/Wpf/Controls/EScrollViewer.xaml"/>
-        <ResourceDictionary Source="/ElShrineWpfLib;component/Wpf/Controls/EListBox.xaml"/>
-        <ResourceDictionary Source="/ElShrineWpfLib;component/Wpf/Controls/EListView.xaml"/>
-        <ResourceDictionary Source="/ElShrineWpfLib;component/Wpf/Controls/EComboBox.xaml"/>
-        <ResourceDictionary Source="/ElShrineWpfLib;component/Wpf/Controls/ETextBox.xaml"/>
-        <ResourceDictionary Source="/ElShrineWpfLib;component/Wpf/Controls/ETabControl.xaml"/>
-        <ResourceDictionary Source="/ElShrineWpfLib;component/Wpf/Controls/ESlider.xaml"/>
-        <ResourceDictionary Source="/ElShrineWpfLib;component/Wpf/Controls/EInWindowDialog.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EButton.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EToggleButton.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EExpander.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EScrollBar.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EScrollViewer.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EListBox.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EListView.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EComboBox.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/ETextBox.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/ETabControl.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/ESlider.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EInWindowDialog.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

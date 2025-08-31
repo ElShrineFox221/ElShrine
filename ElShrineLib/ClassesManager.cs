@@ -85,13 +85,40 @@ namespace ElShrine
         #endregion
 
         #region Classes manage in current domain
+        public static bool EqualAssembly(this Assembly a, Assembly b)
+        {
+            var result = a.FullName == b.FullName;
+            if (result)
+            {
+                if (a.IsDynamic || b.IsDynamic) result &= a.ManifestModule.ModuleVersionId == b.ManifestModule.ModuleVersionId;
+                else return result &= a.Location == b.Location;
+            }
+            return result;
+        }
+
+        public static List<Assembly> MergeDistinctAssemblies(this IEnumerable<Assembly> assemblies, params IEnumerable<Assembly>[] assembliesCollections)
+        {
+            var list = new List<Assembly>();
+            foreach(var asb in assemblies)
+            {
+                if (list.FindIndex(asb0 => asb0.EqualAssembly(asb)) == -1) list.Add(asb); 
+            }
+            foreach (var assemblies0 in assembliesCollections)
+            {
+                foreach (var asb in assemblies0)
+                {
+                    if (list.FindIndex(asb0 => asb0.EqualAssembly(asb)) == -1) list.Add(asb);
+                }
+            }
+            return list;
+        }
         public static List<Assembly> GetCurrentAllAssemblies(int depth = 1, List<Assembly>? extraSources = null)
         {
-            List<Assembly> assemblies = [.. AppDomain.CurrentDomain.GetAssemblies()];
-            if (extraSources is not null) assemblies.AddRange(extraSources);
-            List<Assembly> resultAssemblies = [.. assemblies];
+            List<Assembly> assemblies = MergeDistinctAssemblies(AppDomain.CurrentDomain.GetAssemblies(), extraSources ?? []);
+            List<Assembly> resultAssemblies = [];
             foreach (Assembly assembly in assemblies)
             {
+                if (resultAssemblies.FindIndex(asb => asb.EqualAssembly(assembly)) == -1) resultAssemblies.Add(assembly);
                 assembly.GetAllReferenceAssemblies(depth, ref resultAssemblies);
             }
             return resultAssemblies;
@@ -99,10 +126,10 @@ namespace ElShrine
         public static void GetAllReferenceAssemblies(this Assembly source, int searchDepth, ref List<Assembly> assemblies)
         {
             if (searchDepth < 1) return;
-            var asbNames = source.GetReferencedAssemblies();
+            var asbNames = source.GetReferencedAssemblies().ToList();
             foreach (var asbName in asbNames)
             {
-                if (assemblies.FindIndex(asb => asb.FullName == asbName.FullName) == -1) 
+                if (asbNames.FindIndex(an => an == asbName) == -1) 
                 {
                     try
                     {
@@ -117,7 +144,7 @@ namespace ElShrine
 
         public static IEnumerable<(Type type, List<Attribute> attr)> GetClassesByAttribute(this Type attribute, bool inherit = false, Assembly[]? range = null)
         {
-            range ??= [.. assemblies];
+            range ??= [..MergeDistinctAssemblies(assemblies)];
             foreach (Assembly assembly in range)
             {
                 var preTypes = assembly.GetTypes().Where((t) => t.GetCustomAttributes(attribute, inherit).Length != 0);
@@ -131,22 +158,23 @@ namespace ElShrine
         }
         public static IEnumerable<(Type type, List<A> attrs)> GetClassesByAttribute<A>(bool inherit = false, Assembly[]? range = null) where A : Attribute
         {
-            range ??= [.. assemblies];
+            List<(Type type, List<A> attrs)> result = [];
+            range ??= [.. MergeDistinctAssemblies(assemblies)];
             foreach (Assembly assembly in range)
             {
-                var preTypes = assembly.GetTypes().Where((t) => t.GetCustomAttributes<A>(inherit).Any());
-                foreach (var type in preTypes)
+                var types = assembly.GetTypes();
+                foreach (var type in types)
                 {
                     var attrs = type.GetCustomAttributes<A>(inherit).ToList();
-                    if (attrs.Count > 0) yield return (type, attrs);
+                    if (attrs.Count > 0) result.Add((type, attrs));
                 }
             }
-            yield break;
+            return result;
         }
         public static List<Type> GetImplements(this Type parentType, List<Assembly>? range = null)
         {
             List<Type> result = [];
-            range ??= [.. assemblies];
+            range ??= [.. MergeDistinctAssemblies(assemblies)];
             foreach (Assembly assembly in range)
             {
                 foreach (Type type in assembly.GetTypes())
@@ -161,7 +189,7 @@ namespace ElShrine
         public static Type GetClassesByName(string typeName, bool ignoreCase = false, Assembly[]? range = null)
         {
             Type? result = null;
-            range ??= [.. assemblies];
+            range ??= [.. MergeDistinctAssemblies(assemblies)];
             foreach (Assembly assembly in range)
             {
                 if (result is not null) break;

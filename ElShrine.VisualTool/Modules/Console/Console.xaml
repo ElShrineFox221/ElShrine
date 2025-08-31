@@ -1,0 +1,104 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:viewmodel ="clr-namespace:ElShrine.VisualTool.Modules.Console.ViewModel">
+    <DataTemplate x:Key="SubConsoleTemplate" DataType="{x:Type viewmodel:ConsoleVM}">
+        <ItemsControl x:Name="ConsoleRoot" ItemsSource="{Binding SubConsole.RecentInfoLines}" Background="Black" >
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type viewmodel:InformationLineVM}">
+                    <Grid>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding RecordTime}" Visibility="{Binding DataContext.RecordTimeVisible, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=null, ElementName=ConsoleRoot}" Foreground="White" Opacity="0.7"/>
+                            <ItemsControl x:Name="LineContainer" Opacity="0" Margin ="5,-1"  ItemsSource="{Binding InLineInformations}" ItemTemplate="{DynamicResource ConsoleInfoTemplate}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.Triggers>
+                                    <EventTrigger RoutedEvent="Rectangle.Loaded">
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="LineContainer" Storyboard.TargetProperty="Opacity" From="0" To="1.0" Duration="0:0:0.2" AutoReverse="False" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger>
+                                </ItemsControl.Triggers>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </DataTemplate>
+    <DataTemplate x:Key="ConsoleTemplate" DataType="{x:Type viewmodel:ConsoleVM}">
+        <Grid x:Name="ConsoleRoot" Background="#FFE5E5E5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <StackPanel x:Name="DebugInfoPanel" Visibility="Collapsed">
+
+            </StackPanel>
+            <ContentControl Grid.Column="1" FontFamily="SimHei" FontWeight="Normal" FontSize="15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Margin="10,1.5">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Show Log Time" FontSize="14" VerticalAlignment="Center"/>
+                            <CheckBox IsChecked="{Binding RecordTimeVisible}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <ListBox x:Name="InfoLinesContainer" Grid.Row="1" ItemsSource="{Binding InfoLines}" Background="Black">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Grid Visibility="{Binding NotIgnoreRecordTime, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=null}">
+                                            <TextBlock Text="{Binding RecordTime}" Visibility="{Binding DataContext.RecordTimeVisible, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=collapsed, ElementName=InfoLinesContainer}" Foreground="White" Opacity="0.7"/>
+                                        </Grid>
+                                        <ItemsControl x:Name="LineContainer" Opacity="0" Margin ="5,-1"  ItemsSource="{Binding InLineInformations}" ItemTemplate="{DynamicResource ConsoleInfoTemplate}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <VirtualizingStackPanel Orientation="Horizontal"/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.Triggers>
+                                                <EventTrigger RoutedEvent="Rectangle.Loaded">
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetName="LineContainer" Storyboard.TargetProperty="Opacity" From="0" To="1.0" Duration="0:0:0.2" AutoReverse="False" />
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </EventTrigger>
+                                            </ItemsControl.Triggers>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <ContentControl x:Name="ConsoleTextBox" Grid.Row="2" Content="{Binding CommandInputBarData, Mode=TwoWay}" ContentTemplate="{DynamicResource CommandInputBarTemplate}" />
+                </Grid>
+            </ContentControl>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="CommandInputBarTemplate" DataType="{x:Type viewmodel:CommandInputBarDataVM}">
+        <TextBox x:Name="TextBox" Text="{Binding CurrentInput, Mode=TwoWay}">
+            <TextBox.InputBindings>
+                <KeyBinding Command="{Binding ConfrimInput}" CommandParameter="{Binding ElementName=TextBox}" Key="Enter"/>
+                <KeyBinding Command="{Binding GetNextInput}" CommandParameter="{Binding ElementName=TextBox}" Key="Down"/>
+                <KeyBinding Command="{Binding GetLastInput}" CommandParameter="{Binding ElementName=TextBox}" Key="Up"/>
+            </TextBox.InputBindings>
+        </TextBox>
+    </DataTemplate>
+    <DataTemplate x:Key="ConsoleInfoTemplate" DataType="{x:Type viewmodel:InformationItemVM}">
+        <Grid>
+            <TextBlock Text="{Binding Text}" Foreground="{Binding ForeColor,Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>
