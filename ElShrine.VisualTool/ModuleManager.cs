@@ -1,8 +1,6 @@
 ﻿using ElShrine.ECommand;
 using ElShrine.EFile;
 using ElShrine.EOption;
-using System.IO;
-using System.Reflection;
 using static ElShrine.EConsole.ConsoleManager;
 
 namespace ElShrine.VisualTool
@@ -44,31 +42,12 @@ namespace ElShrine.VisualTool
         public delegate void ModuleListChangedHandler(bool itemsChanged);
         public event ModuleListChangedHandler? ModuleListChanged;
         public readonly static string ModulesDiectory = Environment.CurrentDirectory;
-        private const string dllExtension = ".dll";
         private void RefreshModulesList()
         {
             //load asb;
-            var files = Directory.GetFiles(ModulesDiectory);
-            var dllFiles = files.Where(f => Path.GetExtension(f).EqualIgnoreCase(dllExtension));
-            var assembies = AppDomain.CurrentDomain.GetAssemblies().MergeDistinctAssemblies().ToList();
-            assembies.AddRange(dllFiles.Select(df =>
-            {
-                Assembly? assembly = null;
-                try
-                {
-                    if (assembies.FindIndex(asb => asb.Location == df) == -1) assembly = Assembly.LoadFile(df);
-                }
-                catch (Exception e)
-                {
-                    ListErrorInfo(e);
-                }
-                return assembly;
-            })
-                .Where(asb => asb is not null)
-                .Select(static asb => asb ?? throw new NullReferenceException()));
-           
+            ClassesManager.LoadExtraAssemblies(ModulesDiectory);
             //get modules list
-            var moduleAttrs = ClassesManager.GetClassesByAttribute<ModuleRootAttribute>(true, [..assembies]).ToList();
+            var moduleAttrs = ClassesManager.GetClassesByAttribute<ModuleRootAttribute>(true).ToList();
             var modules = moduleAttrs.Select(ma => ma.attrs[0].ToModuleInfo(ma.type)).ToList();
             //get saved modules list data
             var r = DataHandler.Read<ModuleList>();

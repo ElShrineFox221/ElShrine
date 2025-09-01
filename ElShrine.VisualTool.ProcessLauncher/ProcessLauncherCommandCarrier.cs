@@ -37,7 +37,7 @@ namespace ElShrine.VisualTool.ProcessLauncher
         public static void Import()
         {
             var lnkInfos = GetExeFiles();
-            if (lnkInfos.Count == 0) ListWarnInfo([GetWarningItem(), new("Selected no files.", InformationPaintStyle.Normal)]);
+            if (lnkInfos.Count == 0) ListWarnInfo([GetWarningItem(), new(" Selected no files.")]);
             else ListContentInfo($"Selected {lnkInfos.Count} {"files".GetPural(lnkInfos.Count)}.");
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -123,8 +123,8 @@ namespace ElShrine.VisualTool.ProcessLauncher
                 }
                 else canceled = true;
             }
-            else ListWarnInfo([GetWarningItem(), new("Selected no infos to export.", InformationPaintStyle.Normal)]);
-            if (canceled) ListWarnInfo([GetWarningItem(), new("Canceled export.", InformationPaintStyle.Normal)]);
+            else ListWarnInfo([GetWarningItem(), new(" Selected no infos to export.")]);
+            if (canceled) ListWarnInfo([GetWarningItem(), new("Canceled export.")]);
         }
     }
 }

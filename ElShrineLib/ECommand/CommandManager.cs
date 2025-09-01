@@ -55,7 +55,7 @@ namespace ElShrine.ECommand
                     }
                     catch
                     {
-                        ListWarnInfo([GetWarningItem(), new($"Fount no parser with parse type <{parameterInfo.ParameterType}>, use type <{typeof(object).Name}> instead.")]);
+                        ListWarnInfo([GetWarningItem(), new($"Found no parser with parse type <{parameterInfo.ParameterType}>, use type <{typeof(object).Name}> instead.")]);
                         parsers.Add(ParamParserManager.GetParameterParser(typeof(object)));
                     }
                 }
@@ -133,14 +133,12 @@ namespace ElShrine.ECommand
         public static ICommandCarrierInfo[] CommandCarrierInfos => [.. AllCommandCarrierInfo];
 
         public readonly static List<Task<ICommandResult>> RunningCommands = [];
-        static CommandManager()
+        static CommandManager() => ClassesManager.AssembliesLoaded += LoadCammandInfo;
+        private static void LoadCammandInfo(Assembly[] assemblies)
         {
-            LoadAllCammandInfo();
-            ListContentInfo($"Loaded {AllCommandInfo.Count} {"command".GetPural(AllCommandInfo.Count)} in {AllCommandCarrierInfo.Count} {"carrier".GetPural(AllCommandCarrierInfo.Count)}.", true);
-        }
-        private static void LoadAllCammandInfo()
-        {
-            var attrClasses = ClassesManager.GetClassesByAttribute<CommandCarrierAttribute>(true);
+            var attrClasses = ClassesManager.GetClassesByAttribute<CommandCarrierAttribute>(true, assemblies);
+            var ciCount = AllCommandInfo.Count;
+            var cciCount = AllCommandCarrierInfo.Count;
             foreach (var attrClass in attrClasses)
             {
                 Type type = attrClass.type;
@@ -166,11 +164,15 @@ namespace ElShrine.ECommand
                             new CommandInfo(methodInfo, commandAttr, carrierInfo));
                     }
                 }
-                
-                foreach (var tempCommandInfo in tempList) tempCommandInfo.Initialize();
                 carrierInfo.OwnCommandInfos.AddRange(tempList);
                 AllCommandInfo.AddRange(tempList);
                 AllCommandCarrierInfo.Add(carrierInfo);
+            }
+            ciCount = AllCommandInfo.Count - ciCount;
+            cciCount = AllCommandCarrierInfo.Count - cciCount;
+            if(cciCount > 0)
+            {
+                ListContentInfo($"Loaded {ciCount} {"command".GetPural(ciCount)} in {cciCount} {"carrier".GetPural(cciCount)}.");
             }
         }
 
@@ -184,7 +186,9 @@ namespace ElShrine.ECommand
                 bool commandMatched =
                     commandName.EqualIgnoreCase(ci.Name) ||
                     carrierName.EqualIgnoreCase(ci.MethodInfo.Name);
-                return carrierMatched && commandMatched;
+                var r = carrierMatched && commandMatched;
+                if(r)ci.Initialize();
+                return r;
             })];
         public static List<ICommandCarrierInfo> FindCommandCarrierInfo(string carrierName)
             => [..AllCommandCarrierInfo.FindAll(cci =>

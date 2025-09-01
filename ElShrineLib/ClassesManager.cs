@@ -1,8 +1,7 @@
-﻿using ElShrine.EConsole;
-using ElShrine.ECommand;
+﻿using ElShrine.ECommand;
+using ElShrine.EConsole;
 using ElShrine.EException;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using static ElShrine.EConsole.ConsoleManager;
 
 namespace ElShrine
@@ -11,65 +10,186 @@ namespace ElShrine
     public static class ClassesManager
     {
         #region Vars
-        private readonly static List<Assembly> assemblies = [];
-        private static int assembliesSearchDepth = 1;
-        public static int AssembliesSearchDepth
-        {
-            get => assembliesSearchDepth;
-            set
-            {
-                assembliesSearchDepth = value;
-                assemblies.ReplaceAll(GetCurrentAllAssemblies());
-            }
-        }
+        public static Assembly[] Assemblies => [.. assemblies];
+        private static readonly List<Assembly> assemblies = [];
+        private static readonly string DllFileExtension = ".dll";
         #endregion
 
+        #region Initialization
         static ClassesManager()
         {
-            ListBeginInfo([new("Try Initializing...")], true);
+            DefaultSub = true;
+            ListBeginInfo([new("Initializing...")], true);
             try
             {
-                assemblies = GetCurrentAllAssemblies();
-                ValidateAttributedClasses();
+                assemblies = LoadAllAssemblies();
+                var extraFiles = GetDllFilesFrom(Environment.CurrentDirectory);
+                if (extraFiles.Length != 0) LoadAssembliesFromFiles(extraFiles, false);
+                int count = assemblies.Count;
+                ListContentInfo($"Loaded {count} {"assembly".GetPural(count)}.", true);
+                DoLoad(assemblies);
             }
             catch(Exception e)
             {
                 ListErrorInfo(e, true);
             }
             var result = GetListInfoListener();
-            ListEndInfo([GetCompleteItem(result.Errors.Count == 0, true)], true);
+            ListEndInfo([GetCompleteItem(result.Errors.Count == 0)]);
+            DefaultSub = false;
             Paused = false;
             if (result.Errors.Count > 0) GlobalCommandCarrier.Exit();
         }
-
-        #region Initializing methods
-        [Obsolete]
-        private static void ClassesStaticStartup()
+        private static List<Assembly> LoadAllAssemblies()
         {
-            var attributedTypes = typeof(StartupClassAttribute).GetClassesByAttribute(true);
-            foreach (var attributedType in attributedTypes)
+            var assemblies = MergeDistinctAssemblies(AppDomain.CurrentDomain.GetAssemblies());
+            List<Assembly> resultAssemblies = [];
+            foreach (Assembly assembly in assemblies) resultAssemblies.Add(assembly);
+            foreach (Assembly assembly in assemblies) assembly.LoadAllReferenceAssemblies(ref resultAssemblies);
+            return resultAssemblies;
+        }
+        #endregion
+
+        #region Utills - independent
+        public static bool IsDistinct(this Assembly assembly, string filePath)
+            => assembly.Location != filePath;
+        public static bool IsDistinct(this Assembly assembly, AssemblyName assemblyName)
+            => assembly.GetName().FullName == assemblyName.FullName;
+        public static bool IsDistinct(this Assembly a, Assembly b)
+        {
+            var result = a.FullName == b.FullName;
+            if (result)
             {
-                var type = attributedType.type;
-                if (type.IsClass && type.IsAbstract && type.IsSealed)
+                if (a.IsDynamic || b.IsDynamic) result &= a.ManifestModule.ModuleVersionId == b.ManifestModule.ModuleVersionId;
+                else result &= a.Location == b.Location;
+            }
+            return !result;
+        }
+
+        public static Assembly? LoadDistinctAssembly(List<Assembly> assemblies, string filePath)
+        {
+            Assembly? assembly = null;
+            if (File.Exists(filePath) && Path.GetExtension(filePath).EqualIgnoreCase(DllFileExtension) && assemblies.FindIndex(asb => !asb.IsDistinct(filePath)) == -1) 
+            {
+                assembly = Assembly.LoadFile(filePath);
+                assemblies.Add(assembly);
+            }
+            return assembly;
+        }
+        public static Assembly? LoadDistinctAssembly(List<Assembly> assemblies, AssemblyName assemblyName)
+        {
+            Assembly? assembly = null;
+            if (assemblies.FindIndex(asb => !asb.IsDistinct(assemblyName)) == -1)
+            {
+                assembly = Assembly.Load(assemblyName);
+                assemblies.Add(assembly);
+            }
+            return assembly;
+        }
+        public static void LoadAllReferenceAssemblies(this Assembly source, ref List<Assembly> assemblies, int searchDepth = -1)
+        {
+            if (searchDepth == 0) return;
+            var asbNames = source.GetReferencedAssemblies().ToList();
+            foreach (var asbName in asbNames)
+            {
+                if (assemblies.FindIndex(asb => !asb.IsDistinct(asbName)) == -1)
                 {
-                    RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+                    try
+                    {
+                        var asb = Assembly.Load(asbName);
+                        assemblies.Add(asb);
+                        LoadAllReferenceAssemblies(asb, ref assemblies, searchDepth - 1);
+                    }
+                    catch (Exception e)
+                    {
+                        ListErrorInfo(e);
+                    }
                 }
-                else throw new($"The attribute cannot be applied on class {type.FullName}");
             }
         }
-        private static void ValidateAttributedClasses()
+        #endregion
+
+        public delegate void AssembliesLoadedHandler(Assembly[] assemblies);
+        public static event AssembliesLoadedHandler? AssembliesLoaded = null;
+
+        private static string[] GetDllFilesFrom(string directory)
         {
-            var attributedTypes = GetClassesByAttribute<ValidatableAttribute>(true);
-
-            var initializingClasses = attributedTypes.Where(at => at.attrs.ToList().FindIndex(a => a is StartupClassAttribute) != -1);
-            List<InformationItem> items = [..initializingClasses.Select(ic => new InformationItem(ic.type.Name, InformationPaintStyle.SubParameterMethod))];
-            InformationItem splitItem = new(", ");
-            for (int i = items.Count - 1; i > 0; i--) 
+            string[] dllFiles = [];
+            if (Directory.Exists(directory))
             {
-                items.Insert(i, splitItem);
+                var files = Directory.GetFiles(directory);
+                dllFiles = [.. files.Where(f => Path.GetExtension(f).EqualIgnoreCase(DllFileExtension))];
             }
-            ListContentInfo([new($"Initializing "), ..items, new("...")], true);
-
+            return dllFiles;
+        }
+        private static List<Assembly> LoadAssembliesFromFiles(IEnumerable<string> files, bool showFailed)
+        {
+            List<Assembly> fileAssemblies = [.. assemblies];
+            foreach (var path in files)
+            {
+                var fileAsb = LoadDistinctAssembly(fileAssemblies, path);
+                if(showFailed || fileAsb is not null)
+                {
+                    ListContentInfo([GetCompleteItem(fileAsb is not null), new($" Load file from: {path}")]);
+                }
+            }
+            var suc = fileAssemblies.Count != assemblies.Count;
+            List<Assembly> distinctAssemblies = [];
+            if (suc)
+            {
+                distinctAssemblies = [.. fileAssemblies];
+                foreach (var fileAsb in fileAssemblies)
+                {
+                    if (!assemblies.Exists(asb => !asb.IsDistinct(fileAsb)))
+                    {
+                        fileAsb.LoadAllReferenceAssemblies(ref distinctAssemblies);
+                    }
+                }
+                distinctAssemblies = [.. distinctAssemblies.Where(asb => !assemblies.Exists(asb1 => !asb1.IsDistinct(asb)))];
+                assemblies.AddRange(distinctAssemblies);
+            }
+            return distinctAssemblies;
+        }
+        public static bool LoadExtraAssemblies(string directory)
+        {
+            var files = GetDllFilesFrom(directory);
+            var suc = files.Length != 0;
+            if (suc) suc = LoadExtraAssemblies(files);
+            return suc;
+        }
+        public static bool LoadExtraAssemblies(IEnumerable<string> modulePaths)
+        {
+            ListBeginInfo([new($"Loading Modules...")]);
+            var count = assemblies.Count;
+            var asbs = LoadAssembliesFromFiles(modulePaths, true);
+            count = assemblies.Count - count;
+            var suc = count != 0;
+            ListContentInfo($"Loaded {count} {"assembly".GetPural(count)}.");
+            DoLoad(asbs);
+            ListEndInfo([GetCompleteItem(suc)]);
+            return suc;
+        }
+        private static void DoLoad(List<Assembly> assemblies)
+        {
+            DoValidate(assemblies);
+            AssembliesLoaded?.Invoke([..assemblies]);
+        }
+        private static void DoValidate(List<Assembly> assemblies)
+        {
+            ListBeginInfo([new("Validating...")]);
+            var attributedTypes = GetClassesByAttribute<ValidatableAttribute>(true, [..assemblies]);
+            int atts = attributedTypes.Sum(at => at.attrs.Count), ats = attributedTypes.Count();
+            ListContentInfo([new($"There are {atts} {"attr".GetPural(atts)} in {ats} attributed {"type".GetPural(ats)}.")]);
+            var initializingClasses = attributedTypes.Where(at => at.attrs.ToList().FindIndex(a => a is StartupClassAttribute) != -1);
+            if (initializingClasses.Any())
+            {
+                List<InformationItem> items = [.. initializingClasses.Select(ic => new InformationItem(ic.type.Name, InformationPaintStyle.SubParameterMethod))];
+                InformationItem splitItem = new(", ");
+                for (int i = items.Count - 1; i > 0; i--)
+                {
+                    items.Insert(i, splitItem);
+                }
+                ListContentInfo([new($"Startup {"class".GetPural(items.Count)}: "), .. items, new("...")]);
+            }
             foreach (var (type, attrs) in attributedTypes)
             {
                 foreach (var attr in attrs)
@@ -81,70 +201,30 @@ namespace ElShrine
                     }
                 }
             }
-        }
-        #endregion
-
-        #region Classes manage in current domain
-        public static bool EqualAssembly(this Assembly a, Assembly b)
-        {
-            var result = a.FullName == b.FullName;
-            if (result)
-            {
-                if (a.IsDynamic || b.IsDynamic) result &= a.ManifestModule.ModuleVersionId == b.ManifestModule.ModuleVersionId;
-                else return result &= a.Location == b.Location;
-            }
-            return result;
+            var result = GetListInfoListener();
+            ListEndInfo([GetCompleteItem(result.Errors.Count == 0)]);
         }
 
+        #region Classes manage in current assemblies
         public static List<Assembly> MergeDistinctAssemblies(this IEnumerable<Assembly> assemblies, params IEnumerable<Assembly>[] assembliesCollections)
         {
             var list = new List<Assembly>();
             foreach(var asb in assemblies)
             {
-                if (list.FindIndex(asb0 => asb0.EqualAssembly(asb)) == -1) list.Add(asb); 
+                if (list.FindIndex(asb0 => !asb0.IsDistinct(asb)) == -1) list.Add(asb); 
             }
             foreach (var assemblies0 in assembliesCollections)
             {
                 foreach (var asb in assemblies0)
                 {
-                    if (list.FindIndex(asb0 => asb0.EqualAssembly(asb)) == -1) list.Add(asb);
+                    if (list.FindIndex(asb0 => !asb0.IsDistinct(asb)) == -1) list.Add(asb);
                 }
             }
             return list;
         }
-        public static List<Assembly> GetCurrentAllAssemblies(int depth = 1, List<Assembly>? extraSources = null)
+        public static IEnumerable<(Type type, List<Attribute> attr)> GetClassesByAttribute(this Type attribute, bool inherit = false, IEnumerable<Assembly>? range = null)
         {
-            List<Assembly> assemblies = MergeDistinctAssemblies(AppDomain.CurrentDomain.GetAssemblies(), extraSources ?? []);
-            List<Assembly> resultAssemblies = [];
-            foreach (Assembly assembly in assemblies)
-            {
-                if (resultAssemblies.FindIndex(asb => asb.EqualAssembly(assembly)) == -1) resultAssemblies.Add(assembly);
-                assembly.GetAllReferenceAssemblies(depth, ref resultAssemblies);
-            }
-            return resultAssemblies;
-        }
-        public static void GetAllReferenceAssemblies(this Assembly source, int searchDepth, ref List<Assembly> assemblies)
-        {
-            if (searchDepth < 1) return;
-            var asbNames = source.GetReferencedAssemblies().ToList();
-            foreach (var asbName in asbNames)
-            {
-                if (asbNames.FindIndex(an => an == asbName) == -1) 
-                {
-                    try
-                    {
-                        var asb = Assembly.Load(asbName);
-                        assemblies.Add(asb);
-                        GetAllReferenceAssemblies(asb, searchDepth - 1, ref assemblies);
-                    }
-                    catch { }
-                }
-            }
-        }
-
-        public static IEnumerable<(Type type, List<Attribute> attr)> GetClassesByAttribute(this Type attribute, bool inherit = false, Assembly[]? range = null)
-        {
-            range ??= [..MergeDistinctAssemblies(assemblies)];
+            range ??= [..assemblies];
             foreach (Assembly assembly in range)
             {
                 var preTypes = assembly.GetTypes().Where((t) => t.GetCustomAttributes(attribute, inherit).Length != 0);
@@ -156,10 +236,10 @@ namespace ElShrine
             }
             yield break;
         }
-        public static IEnumerable<(Type type, List<A> attrs)> GetClassesByAttribute<A>(bool inherit = false, Assembly[]? range = null) where A : Attribute
+        public static IEnumerable<(Type type, List<A> attrs)> GetClassesByAttribute<A>(bool inherit = false, IEnumerable<Assembly>? range = null) where A : Attribute
         {
             List<(Type type, List<A> attrs)> result = [];
-            range ??= [.. MergeDistinctAssemblies(assemblies)];
+            range ??= [..assemblies];
             foreach (Assembly assembly in range)
             {
                 var types = assembly.GetTypes();
@@ -171,10 +251,10 @@ namespace ElShrine
             }
             return result;
         }
-        public static List<Type> GetImplements(this Type parentType, List<Assembly>? range = null)
+        public static List<Type> GetImplements(this Type parentType, IEnumerable<Assembly>? range = null)
         {
             List<Type> result = [];
-            range ??= [.. MergeDistinctAssemblies(assemblies)];
+            range ??= [.. assemblies];
             foreach (Assembly assembly in range)
             {
                 foreach (Type type in assembly.GetTypes())
@@ -186,10 +266,10 @@ namespace ElShrine
             result.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
             return [.. result];
         }
-        public static Type GetClassesByName(string typeName, bool ignoreCase = false, Assembly[]? range = null)
+        public static Type GetClassesByName(string typeName, bool ignoreCase = false, IEnumerable<Assembly>? range = null)
         {
             Type? result = null;
-            range ??= [.. MergeDistinctAssemblies(assemblies)];
+            range ??= [.. assemblies];
             foreach (Assembly assembly in range)
             {
                 if (result is not null) break;

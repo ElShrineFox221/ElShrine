@@ -68,7 +68,7 @@ namespace ElShrine.ECommand
                 ListContentInfo("Directory located.");
                 suc = true;
             }
-            if (!suc) ListWarnInfo([GetWarningItem(),new("Matched no directory or file.",InformationPaintStyle.Normal)]);
+            if (!suc) ListWarnInfo([GetWarningItem(),new(" Matched no directory or file.")]);
         }
         public static void Del(string path)
         {
@@ -82,7 +82,7 @@ namespace ElShrine.ECommand
                 else FileSystem.DeleteFile(path, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
             }
             if (suc) ListContentInfo("Completed delete.");
-            else ListWarnInfo([GetWarningItem(), new("Found no directory or file with the path.", InformationPaintStyle.Normal)]);
+            else ListWarnInfo([GetWarningItem(), new(" Found no directory or file with the path.")]);
         }
         public static void ClearDir(string dir) => ClearDir(dir, []);
         public static void ClearDir(string dir, string[] ignoreFiles)
@@ -116,7 +116,7 @@ namespace ElShrine.ECommand
                 if (deleteCount == 0) failedReason = "No files to delete.";
             }
             if (failedReason is null) ListContentInfo("Completed delete.");
-            else ListWarnInfo([GetWarningItem(), new("Failed delete. ", InformationPaintStyle.Normal), new(failedReason, InformationPaintStyle.Normal)]);
+            else ListWarnInfo([GetWarningItem(), new(" Failed delete. "), new(failedReason, InformationPaintStyle.Normal)]);
         }
     }
 }

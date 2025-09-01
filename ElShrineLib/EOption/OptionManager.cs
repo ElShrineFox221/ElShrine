@@ -22,20 +22,34 @@ namespace ElShrine.EOption
 
         [DataMember] public readonly List<OptionItem> OptionItemsCache = [];
         [IgnoreDataMember] public List<Type> OptionClasses = [];
-        public void Initialize()
+        public void Initialize() => ClassesManager.AssembliesLoaded += LoadOptionsAndOptionItems;
+
+        private void LoadOptionsAndOptionItems(Assembly[] assemblies)
         {
-            OptionClasses.ReplaceAll(typeof(OptionAttribute).GetClassesByAttribute(true).Select(i => i.type));
-            RefreshOptionItemsCache();
-            ListContentInfo([new($"Concluded {OptionClasses.Count} option classes and {OptionItemsCache.Count} option items.")], true);
+            var result = GetListInfoListener();
+            var totalSev = result.Errors.Count + result.Warnings.Count;
+            var newOptionClasses = typeof(OptionAttribute).GetClassesByAttribute(true, assemblies).Select(i => i.type);
+            newOptionClasses = newOptionClasses.Where(noc => !OptionClasses.Contains(noc));
+            int ocCount = OptionClasses.Count, oicCount = OptionItemsCache.Count;
+            if (newOptionClasses.Any())
+            {
+                OptionClasses.AddRange(newOptionClasses.Where(noc => !OptionClasses.Contains(noc)));
+                RefreshOptionItemsCache();
+                ocCount = OptionClasses.Count - ocCount; oicCount = OptionItemsCache.Count - oicCount;
+                ListContentInfo([new($"Loaded {ocCount} option {"class".GetPural(ocCount)} and {oicCount} option {"item".GetPural(oicCount)}.")]);
+            }
+            
             try
             {
                 LoadOptions();
-                ListContentInfo("Loaded option files.");
+                totalSev = result.Errors.Count + result.Warnings.Count - totalSev;
             }
             catch
             {
-                ListWarnInfo([GetWarningItem(true), new("Failed to load option files.", InformationPaintStyle.Sub)]);
+                ListWarnInfo([GetWarningItem(true), new( "Failed to load option files.")]);
+                totalSev = -1;
             }
+            if (totalSev == 0) ListContentInfo("Loaded option files.");
         }
 
         public void RefreshOptionItemsCache()
@@ -140,7 +154,7 @@ namespace ElShrine.EOption
                 }
                 RefreshOptionItemsCache();
             }
-            else ListWarnInfo([GetWarningItem(), new("Found errors in reading option files, files may be broken.", InformationPaintStyle.Normal)]);
+            else ListWarnInfo([GetWarningItem(), new(" Found errors in reading option files, files may be broken.")]);
         }
 
         public void Revise(string className, string itemName, string valueStr)

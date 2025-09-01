@@ -183,10 +183,10 @@ namespace ElShrine.EConsole
             else stackItem = InfoPrintQueue.BaseListener;
             return stackItem;
         }
-        public static InformationItem GetWarningItem(bool isSub = false) => new("[Warning]", InformationPaintStyle.Warning.Subside(isSub));
-        public static InformationItem GetErrorItem(bool isSub = false) => new("[Error]", InformationPaintStyle.Error.Subside(isSub));
-        public static InformationItem GetCompleteItem(bool suc, bool isSub = false)
-            => suc ? new("[Completed]", InformationPaintStyle.Complete.Subside(isSub)) : new("[Failed]", InformationPaintStyle.Faild.Subside(isSub));
+        public static InformationItem GetWarningItem(bool? isSub = null) => new("[Warning]", InformationPaintStyle.Warning.Subside((isSub ?? DefaultSub)));
+        public static InformationItem GetErrorItem(bool? isSub = null) => new("[Error]", InformationPaintStyle.Error.Subside((isSub ?? DefaultSub)));
+        public static InformationItem GetCompleteItem(bool suc, bool? isSub = null)
+            => suc ? new("[Completed]", InformationPaintStyle.Complete.Subside((isSub ?? DefaultSub))) : new("[Failed]", InformationPaintStyle.Faild.Subside((isSub ?? DefaultSub)));
         #endregion
 
         private static void ListInfo(InformationLine line, LineReportType reportType)
@@ -197,10 +197,10 @@ namespace ElShrine.EConsole
         }
         public static void ListInfo(InformationLine line)
             => ListInfo(line, LineReportType.Normal);
-        public static void ListContentInfo(InformationItem[] items, bool isSub = false)
-            => ListInfo(new(items, InformationLineType.Normal, InformationPaintStyle.Normal.Subside(isSub)), LineReportType.Normal);
-        public static void ListContentInfo(string lineText, bool isSub = false)
-            => ListInfo(new(lineText, InformationLineType.Normal, InformationPaintStyle.Normal.Subside(isSub)), LineReportType.Normal);
+        public static void ListContentInfo(InformationItem[] items, bool? isSub = null)
+            => ListInfo(new(items, InformationLineType.Normal, InformationPaintStyle.Normal.Subside(isSub ?? DefaultSub)), LineReportType.Normal);
+        public static void ListContentInfo(string lineText, bool? isSub = null)
+            => ListInfo(new(lineText, InformationLineType.Normal, InformationPaintStyle.Normal.Subside(isSub ?? DefaultSub)), LineReportType.Normal);
         public static void ListCommandNoticeInfo(string commandFormation, string actionDescription)
         {
             InformationItem item0 = new("Use command formation: ");
@@ -231,20 +231,22 @@ namespace ElShrine.EConsole
                 ListInfo(line);
             }
         }
-        public static void ListBeginInfo(InformationItem[] items, bool isSub = false, InformationPaintStyle basePaint = InformationPaintStyle.Normal)
-            => ListInfo(new(items, InformationLineType.ChunkBegin, basePaint.Subside(isSub)), LineReportType.Normal);
-        public static void ListWarnInfo(InformationItem[] items, bool isSub = false)
-            => ListInfo(new(items, InformationLineType.Normal, InformationPaintStyle.Warning.Subside(isSub)), LineReportType.Warning);
-        public static void ListErrorInfo(InformationItem[] items, bool isSub = false)
-            => ListInfo(new(items, InformationLineType.Normal, InformationPaintStyle.Error.Subside(isSub)), LineReportType.Error);
-        public static void ListErrorInfo(Exception exception, bool isSub = false)
+
+        public static bool DefaultSub { get; set; } = false;
+        public static void ListBeginInfo(InformationItem[] items, bool? isSub = null, InformationPaintStyle basePaint = InformationPaintStyle.Normal)
+            => ListInfo(new(items, InformationLineType.ChunkBegin, basePaint.Subside(isSub ?? DefaultSub)), LineReportType.Normal);
+        public static void ListWarnInfo(InformationItem[] items, bool? isSub = null)
+            => ListInfo(new(items, InformationLineType.Normal, InformationPaintStyle.Normal.Subside(isSub ?? DefaultSub)), LineReportType.Warning);
+        public static void ListErrorInfo(InformationItem[] items, bool? isSub = null)
+            => ListInfo(new(items, InformationLineType.Normal, InformationPaintStyle.Normal.Subside(isSub ?? DefaultSub)), LineReportType.Error);
+        public static void ListErrorInfo(Exception exception, bool? isSub = null)
         {
             while(exception.InnerException is not null) exception = exception.InnerException;
-            InformationLine line = new(exception.Message, InformationLineType.Normal, isSub ? InformationPaintStyle.SubError : InformationPaintStyle.Error);
+            InformationLine line = new(exception.Message, InformationLineType.Normal, (isSub ?? DefaultSub) ? InformationPaintStyle.SubError : InformationPaintStyle.Error);
             ListInfo(line, LineReportType.Error);
         }
-        public static void ListEndInfo(InformationItem[] items, bool isSub = false, InformationPaintStyle basePaint = InformationPaintStyle.Normal)
-            => ListInfo(new(items, InformationLineType.ChunkEnd, basePaint.Subside(isSub)), LineReportType.Normal);
+        public static void ListEndInfo(InformationItem[] items, bool? isSub = null, InformationPaintStyle basePaint = InformationPaintStyle.Normal)
+            => ListInfo(new(items, InformationLineType.ChunkEnd, basePaint.Subside(isSub ?? DefaultSub)), LineReportType.Normal);
         #endregion
     }
 }

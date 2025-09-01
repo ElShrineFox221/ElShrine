@@ -104,7 +104,7 @@ namespace ElShrine.VisualTool
                 NoticePropertyChanged();
                 ListContentInfo($"Rebuild {EnabledModules.Count} tab {"item".GetPural(EnabledModules.Count)} with realoaded {"module".GetPural(EnabledModules.Count)}");
             }
-            else ListWarnInfo([GetWarningItem(), new("Target tab controller is invalid.", InformationPaintStyle.Normal)]);
+            else ListWarnInfo([GetWarningItem(), new(" Target tab controller is invalid.")]);
         }
         #endregion
 

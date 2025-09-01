@@ -2,6 +2,7 @@
 
 namespace ElShrine
 {
+    [Flags]
     public enum LoadMode
     {
         None = 0,

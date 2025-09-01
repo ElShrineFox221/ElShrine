@@ -2,6 +2,7 @@
 using static ElShrine.CommonHelper;
 using static ElShrine.EConsole.ConsoleManager;
 using ElShrine.EConsole;
+using System.Reflection;
 
 namespace ElShrine.ECommand
 {
@@ -9,12 +10,14 @@ namespace ElShrine.ECommand
     public static class ParamParserManager
     {
         private readonly static Dictionary<Type, ParamParserBase> ParserDictionary = [];
-        static ParamParserManager()
+        private readonly static List<Type> cachedTypes = [];
+        private readonly static List<Type> cachedParserTypes = [];
+        private readonly static List<char> cachedChars = [];
+        static ParamParserManager() => ClassesManager.AssembliesLoaded += LoadParamParsers;
+
+        private static void LoadParamParsers(Assembly[] assemblies)
         {
-            var parserClasses = typeof(ParamParserBase).GetImplements();
-            List<Type> cachedTypes = [];
-            List<Type> cachedParserTypes = [];
-            List<char> cachedChars = [];
+            var parserClasses = typeof(ParamParserBase).GetImplements(assemblies);
             foreach (var parserClass in parserClasses)
             {
                 var parserInstance = Activator.CreateInstance(parserClass) as ParamParserBase;
@@ -30,7 +33,7 @@ namespace ElShrine.ECommand
                         if (bracketSet.HasValue)
                         {
                             var (left, right) = bracketSet.Value;
-                            if (cachedChars.Contains(left) || cachedChars.Contains(right)) ListWarnInfo([GetWarningItem(true), new($"There are repeat chars in bracksets <\'{left}\',\'{right}\'>, it may causes error when parsing command.", InformationPaintStyle.Sub)], true);
+                            if (cachedChars.Contains(left) || cachedChars.Contains(right)) ListWarnInfo([GetWarningItem(true), new($" There are repeat chars in bracksets <\'{left}\',\'{right}\'>, it may causes error when parsing command.")], true);
                             else if (left == right) cachedChars.Add(left);
                             else cachedChars.AddRange([left, right]);
                         }
@@ -46,12 +49,12 @@ namespace ElShrine.ECommand
                             ParserDictionary[cachedTypes[cachedTypeIndex]] = parserInstance;
                             extraItem = new($"the parser <{cachedParser}> would be replaced to <{parserInstance}>.", InformationPaintStyle.Sub);
                         }
-                        
+
                         ListWarnInfo([GetWarningItem(true), containedItem, extraItem], true);
                     }
                 }
             }
-            ListContentInfo($"Loaded {cachedTypes.Count} parsers: {cachedTypes.BuildString(t => $"<{t.Name}>")}", true);
+            ListContentInfo($"Loaded {cachedTypes.Count} parsers: {cachedTypes.BuildString(t => $"<{t.Name}>")}");
         }
 
         public static ParamParserBase GetParameterParser(Type type)

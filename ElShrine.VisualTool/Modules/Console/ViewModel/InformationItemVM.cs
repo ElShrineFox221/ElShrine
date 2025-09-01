@@ -1,12 +1,12 @@
-﻿using ElShrine.VisualTool.Modules.Console;
-using ElShrine.EConsole;
+﻿using ElShrine.EConsole;
 using ElShrine.Wpf.ViewModel;
 using System.Windows.Media;
 
 namespace ElShrine.VisualTool.Modules.Console.ViewModel
 {
-    public class InformationItemVM(InformationItem model) : ViewModelBase<InformationItem>(model)
+    public class InformationItemVM(InformationItem model, InformationLine modelParent) : ViewModelBase<InformationItem>(model)
     {
+        private readonly InformationLine modelParent = modelParent;
         private bool ignoreWarp = false;
         public bool IgnoreWarp
         {
@@ -17,7 +17,7 @@ namespace ElShrine.VisualTool.Modules.Console.ViewModel
                 NoticePropertyChanged(nameof(Text));
             }
         }
-        public Color ForeColor => Model.PaintStyle.ToConsoleColor().ToMediaColor();
+        public Color ForeColor => ((Model.PaintStyle == InformationPaintStyle.Empty) ? modelParent.BasePaintStyle : Model.PaintStyle).ToConsoleColor().ToMediaColor();
         public string Text
         {
             get

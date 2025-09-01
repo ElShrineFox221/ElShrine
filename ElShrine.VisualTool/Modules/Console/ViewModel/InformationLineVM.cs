@@ -25,9 +25,9 @@ namespace ElShrine.VisualTool.Modules.Console.ViewModel
             get
             {
                 InformationItem intentItem = new(new(' ', 3 * Model.Intent));
-                ObservableCollection<InformationItemVM> items = [.. Model.LineTextSources.Select(infos => new InformationItemVM(infos) { IgnoreWarp = IgnoreWarp})];
-                var result = items.Count > 0 ? items : [new(new(Model.LineText ?? string.Empty, Model.BasePaintStyle))];
-                result.Insert(0, new(intentItem));
+                ObservableCollection<InformationItemVM> items = [.. Model.LineTextSources.Select(infos => new InformationItemVM(infos, Model) { IgnoreWarp = IgnoreWarp})];
+                var result = items.Count > 0 ? items : [new(new(Model.LineText ?? string.Empty, Model.BasePaintStyle), Model)];
+                result.Insert(0, new(intentItem, Model));
                 return result;
             }
         }
