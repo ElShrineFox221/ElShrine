@@ -5,7 +5,7 @@ using static ElShrine.EConsole.ConsoleManager;
 namespace ElShrine.EFile
 {
     [CommandCarrier(Name = "Process")]
-    public static class ProcessCommandCarrier
+    public static class ProcessCommands
     {
         public static void Launch(string exePath, string arguments, string workingDir, bool adminMode = false)
         {

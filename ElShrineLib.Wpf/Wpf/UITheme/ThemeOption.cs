@@ -8,6 +8,7 @@ namespace ElShrine.Wpf.UITheme
         private static ThemeOption? Instance = null;
         public static ThemeOption GetInstance() => Instance ??= new();
 
-        [OptionItem] public Theme SelectedTheme { get; set; } = Theme.Default;
+        [OptionItem(Ignored = true)] public Theme SelectedTheme { get; set; } = Theme.Default;
+        [OptionItem] public int SelectedThemeIndex { get; set; } = -1; 
     }
 }

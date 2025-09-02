@@ -10,19 +10,20 @@ namespace ElShrine.EOption
     [DataContract]
     [KnownType(nameof(GetKnownTypes))]
     [StartupClass]
+    [CommandCarrier(ItemMode = LoadMode.None, Name = OptionCommandCarrierName)]
     public sealed class OptionManager : IEName, ISingleton<OptionManager>
     {
         private static List<Type> GetKnownTypes() => KnownTypes;
         private static readonly List<Type> KnownTypes = [];
 
-        [IgnoreDataMember] public string Name => OptionCommandCarrier.OptionCommandCarrierName;
+        [IgnoreDataMember] public string Name => OptionCommandCarrierName;
         private static OptionManager? Instance = null;
         public static OptionManager GetInstance() => Instance ??= new();
         private OptionManager() => Initialize();
 
         [DataMember] public readonly List<OptionItem> OptionItemsCache = [];
         [IgnoreDataMember] public List<Type> OptionClasses = [];
-        public void Initialize() => ClassesManager.AssembliesLoaded += LoadOptionsAndOptionItems;
+        private void Initialize() => ClassesManager.AssembliesLoaded += LoadOptionsAndOptionItems;
 
         private void LoadOptionsAndOptionItems(Assembly[] assemblies)
         {
@@ -72,23 +73,17 @@ namespace ElShrine.EOption
                         foreach (PropertyInfo pio in optionClass.GetProperties(itemLoadFlags))
                         {
                             var itemAttr = pio.GetCustomAttribute<OptionItemAttribute>();
-                            if (itemAttr is null || !itemAttr.Ignored)
-                            {
-                                attributedMemberInfos.Remove(pio); 
-                                add(pio);
-                            } 
+                            if (itemAttr is null) add(pio);
+                            else if (itemAttr.Ignored) attributedMemberInfos.Remove(pio);
                         }
                     }
-                    else if ((itemLoadMode & LoadMode.Field) != 0)
+                    if ((itemLoadMode & LoadMode.Field) != 0)
                     {
                         foreach (FieldInfo fio in optionClass.GetFields(itemLoadFlags))
                         {
                             var itemAttr = fio.GetCustomAttribute<OptionItemAttribute>();
-                            if (itemAttr is null || !itemAttr.Ignored)
-                            {
-                                attributedMemberInfos.Remove(fio);
-                                add(fio);
-                            }
+                            if (itemAttr is null) add(fio);
+                            else if (itemAttr.Ignored) attributedMemberInfos.Remove(fio);
                         }
                     }
                     foreach (var memberInfo in attributedMemberInfos)
@@ -118,25 +113,35 @@ namespace ElShrine.EOption
                 }
             }
         }
-        public void SaveOptions()
+        private void SaveOptions()
         {
+            ListBeginInfo([new("Saving Options...")]);
             RefreshOptionItemsCache();
+            ListContentInfo($"Regenerated {OptionItemsCache.Count} cached option {"item".GetPural(OptionItemsCache.Count)} from {OptionClasses.Count} option {"class".GetPural(OptionClasses.Count)}.");
             var result = DataHandler.Write(this);
+            var suc = result.Success || result.FailedSource is null;
+            if (suc) ListContentInfo("Options saved.");
+            ListEndInfo([GetCompleteItem(result.Success || result.FailedSource is null)]);
             if (!result.Success && result.FailedSource is not null) throw result.FailedSource;
         }
-        public void ResetOptions()
+        private void ResetOptions()
         {
+            var flags = (LoadMode.AllAccessible | LoadMode.AllInstiateble).ToSearchFlags();
             foreach (var oc in OptionClasses)
             {
                 var defaultIns = Activator.CreateInstance(oc, []);
-                oc.GetProperty(nameof(Instance))?.SetValue(null, defaultIns);
+                oc.GetField(nameof(Instance), flags)?.SetValue(null, defaultIns);
+                oc.GetProperty(nameof(Instance), flags)?.SetValue(null, defaultIns);
             }
             RefreshOptionItemsCache();
+            ListContentInfo("Options reset.");
         }
-        public void LoadOptions()
+        private void LoadOptions()
         {
+            ListBeginInfo([new("Loading Option Files...")]);
             RefreshOptionItemsCache();
             var result = DataHandler.Read(this);
+            int count = 0;
             if (result.Success && result.Data is not null)
             {
                 var groupedResults = result.Data.OptionItemsCache.GroupBy(item => item.ClassName).ToList();
@@ -145,16 +150,39 @@ namespace ElShrine.EOption
                     if (groupedResult != null && groupedResult.Any())
                     {
                         Type optionClass = ClassesManager.GetClassesByName(groupedResult.First().ClassName, true);
-                        var optionInstance = ISingleton.GetInstance(optionClass);
-                        foreach (var optionItem in groupedResult)
+                        try
                         {
-                            optionClass.SetMemberValue(optionInstance, optionItem.Value, optionItem.ItemName);
+                            var optionInstance = ISingleton.GetInstance(optionClass);
+                            foreach (var optionItem in groupedResult)
+                            {
+                                try
+                                {
+                                    optionClass.SetMemberValue(optionInstance, optionItem.Value, optionItem.ItemName);
+                                    count++;
+                                }
+                                catch
+                                {
+                                    ListWarnInfo([GetWarningItem(), new($" Failed to set option item value to {optionItem.Value}. Item: {optionItem.ItemName} in {optionClass.FullName}.")]);
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            ListWarnInfo([GetWarningItem(), new($" Failed to get option class instance of {optionClass.FullName}")]);
                         }
                     }
                 }
                 RefreshOptionItemsCache();
             }
-            else ListWarnInfo([GetWarningItem(), new(" Found errors in reading option files, files may be broken.")]);
+            else ListWarnInfo([GetWarningItem(), new(" Found errors in loading option files, files may be broken.")]);
+            if (count == OptionItemsCache.Count) ListContentInfo($"Loaded {count} option {"item".GetPural(count)} from files.");
+            else ListWarnInfo([GetWarningItem(), new($" Loaded {count} option {"item".GetPural(count)} for files, but there are {OptionItemsCache.Count} {"item".GetPural(OptionItemsCache.Count)} in total.")]);
+            var listener = GetListInfoListener();
+            if (listener.Warnings.Count > 0)
+            {
+                ListCommandNoticeInfo($"[{OptionCommandCarrierName}.{nameof(Save)}]", "create, save or override option files");
+            }
+            ListEndInfo([listener.Warnings.Count > 0 ? GetWarningItem() : GetCompleteItem(true)]);
         }
 
         public void Revise(string className, string itemName, string valueStr)
@@ -187,5 +215,61 @@ namespace ElShrine.EOption
             else throw new($"Found no option item named <{itemName}> with option class <{className}>.");
             RefreshOptionItemsCache();
         }
+
+        #region Commands
+        public const string OptionCommandCarrierName = "Option";
+        [Command] public static void Save() => GetInstance().SaveOptions();
+        [Command] public static void Load() => GetInstance().LoadOptions();
+        [Command] public static void Reset() => GetInstance().ResetOptions();
+        [Command] public static void Set(string optionClassName, string memberName, string valueStr)
+        {
+            GetInstance().Revise(optionClassName, memberName, valueStr);
+            ListInfo(new($"Option changed."));
+
+            bool autoSave = FileOption.GetInstance().AutoSave;
+            if (autoSave) Save();
+            else ListCommandNoticeInfo($"[{OptionCommandCarrierName}.{nameof(Save)}]", "save changes");
+            bool autoView = FileOption.GetInstance().ViewChanges;
+            if (autoView) Get(optionClassName);
+            else ListCommandNoticeInfo($"[{OptionCommandCarrierName}.{nameof(Get)} <OptionName>]", "view changes");
+        }
+        [Command] public static void Get()
+        {
+            var omcs = GetInstance().OptionClasses.OrderBy(cl => cl.Name).ToList();
+            var NameCol = omcs.Select(c => new InformationItem(c.Name, InformationPaintStyle.ParameterMethod));
+            var ShortNameCol = omcs.Select(c => new InformationItem(c.GetCustomAttribute<OptionAttribute>()?.Name ?? string.Empty, InformationPaintStyle.SubComplete));
+            var fullNameCol = omcs.Select(c => new InformationItem($"<{c.FullName}>", InformationPaintStyle.Normal));
+
+            ListContentInfo($"{omcs.Count} options as follows:");
+            ListTableInfo(
+                (3, [new("Name", InformationPaintStyle.Warning), .. NameCol]),
+                (3, [new("Short Name", InformationPaintStyle.Warning), .. ShortNameCol]),
+                (3, [new("Full Name", InformationPaintStyle.Warning), .. fullNameCol])
+            );
+        }
+        [Command] public static void Get(string optionClassName)
+        {
+            var optionsIns = GetInstance();
+            Type[] types = [.. optionsIns.OptionClasses.Where((t) => t.GetCustomAttribute<OptionAttribute>()?.Name.EqualIgnoreCase(optionClassName) ?? false)];
+            if (types.Length == 0) types = [.. optionsIns.OptionClasses.Where((t) => t.NameEqual(optionClassName, true))];
+            string[] classNames = [.. types.Select(t => t.FullName ?? string.Empty)];
+            if (types.Length == 0) throw new($"Found no option named {optionClassName}.");
+            //ClassName is fullname, overrideName is attrName or classShortName.
+            var groupedResults = optionsIns.OptionItemsCache.GroupBy(t => t.ClassName).Where(g => classNames.Contains(g.Key));
+            foreach (var group in groupedResults)
+            {
+                var nameCol = group.Select(c => new InformationItem(c.ItemName, InformationPaintStyle.ParameterMethod));
+                var valueCol = group.Select(c => new InformationItem(c.Value?.ToString() ?? string.Empty, InformationPaintStyle.SubComplete));
+                var descCol = group.Select(c => new InformationItem(c.Description, InformationPaintStyle.Normal));
+
+                ListContentInfo($"{group.Key} option items as follows:");
+                ListTableInfo(
+                    (3, [new("Name", InformationPaintStyle.Warning), .. nameCol]),
+                    (3, [new("Current Value", InformationPaintStyle.Warning), .. valueCol]),
+                    (3, [new("Description", InformationPaintStyle.Warning), .. descCol])
+                );
+            }
+        }
+        #endregion
     }
 }

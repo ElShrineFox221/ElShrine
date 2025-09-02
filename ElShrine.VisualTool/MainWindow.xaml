@@ -9,9 +9,9 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="720" Width="1100" MinWidth="300" MinHeight="600" FontSize="12">
     <Window.Resources>
-        <DataTemplate x:Key="ModuleInfoDataTemplate" DataType="{x:Type viewmodel:ModuleInfoVM}">
+        <DataTemplate x:Key="ModuleInfoDataTemplate" DataType="{x:Type viewmodel:WpfPageInfoVM}">
             <Grid>
-                <Border x:Name="rootBorder" CornerRadius="10" Padding="9,3">
+                <Border x:Name="rootBorder" CornerRadius="10" Padding="9,3" Width="150">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="auto"/>
@@ -98,9 +98,9 @@
                                     <ColumnDefinition/>
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
-                                <Button Grid.Column="0" Content="Refresh" Command="{Binding Source={x:Static viewmodel:ModuleManagerVM.Refresh}}"/>
-                                <Button Grid.Column="1" Content="Confrim" IsEnabled="{Binding ModuleManager.IsDirty}" Command="{Binding ModuleManager.Confrim}" CommandParameter="{Binding ElementName=ModulesTabControl}"/>
-                                <Button Grid.Column="2" Content="Cancel" IsEnabled="{Binding ModuleManager.IsDirty}" Command="{Binding Source={x:Static viewmodel:ModuleManagerVM.Discard}}"/>
+                                <Button Grid.Column="0" Content="Refresh" Command="{Binding Source={x:Static viewmodel:WpfPageManagerVM.Refresh}}"/>
+                                <Button Grid.Column="1" Content="Confrim" IsEnabled="{Binding Source={x:Static viewmodel:WpfPageManagerVM.IsDirty}}" Command="{Binding ModuleManager.Confrim}" CommandParameter="{Binding ElementName=ModulesTabControl}"/>
+                                <Button Grid.Column="2" Content="Cancel" IsEnabled="{Binding Source={x:Static viewmodel:WpfPageManagerVM.IsDirty}}" Command="{Binding Source={x:Static viewmodel:WpfPageManagerVM.Discard}}"/>
                             </Grid>
                             <TextBlock Grid.Row="1" Text="Disabled Modules" FontSize="{Binding CurrentTheme.FontSizeMedium, Source={StaticResource ThemeProvider}}" HorizontalAlignment="Center"/>
                             <TextBlock Grid.Row="1" Grid.Column="1" Text="Enabled Modules" FontSize="{Binding CurrentTheme.FontSizeMedium, Source={StaticResource ThemeProvider}}" HorizontalAlignment="Center"/>

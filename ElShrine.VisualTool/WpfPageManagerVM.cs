@@ -8,38 +8,29 @@ using VMC = ElShrine.Wpf.VMCommand;
 
 namespace ElShrine.VisualTool
 {
-    public sealed class ModuleManagerVM : ViewModelBase
+    public sealed class WpfPageManagerVM : ViewModelBase
     {
-        public ObservableCollection<ModuleInfoVM> EnabledModules { get; } = [];
-        public ObservableCollection<ModuleInfoVM> DisabledModules { get; } = [];
-        public ModuleManagerVM() : base()
+        public ObservableCollection<WpfPageInfoVM> EnabledModules { get; } = [];
+        public ObservableCollection<WpfPageInfoVM> DisabledModules { get; } = [];
+        public WpfPageManagerVM() : base()
         {
-            var manager = ModuleManager.GetInstance();
-            manager.ModuleListChanged += RefreshModulesList;
+            var manager = WpfPageManager.GetInstance();
+            manager.PageListChanged += RefreshPagesList;
         }
         public TabControl? TabsController { get; set; } = null;
-        public bool IsDirty => ModuleManager.GetInstance().IsDirty;
+        public static bool IsDirty => WpfPageManager.GetInstance().IsDirty;
 
-        private void RefreshModulesList(bool itemsChanged)
-        {
-            RefreshEnabilityList();
-            if (itemsChanged) ReloadModules();
-            NoticeDirtyChanged();
-        }
-        public static VMC Refresh => new(parameter => ModuleManager.Refresh());
+        
+        public static VMC Refresh => new(parameter => WpfPageManager.Refresh());
         public VMC Confrim => new(parameter =>
         {
             if (parameter is TabControl tabControl) TabsController = tabControl;
-            ModuleManager.Confrim();
+            WpfPageManager.Confrim();
         });
-        public static VMC Discard => new(parameter => ModuleManager.Discard());
+        public static VMC Discard => new(parameter => WpfPageManager.Discard());
 
         #region VM props & methods
-        
-        
-
         private void NoticeDirtyChanged() => NoticePropertyChanged(nameof(IsDirty));
-        
         
         public void RefreshIndexes()
         {
@@ -47,20 +38,25 @@ namespace ElShrine.VisualTool
             for (int i = 0; i < DisabledModules.Count; i++) DisabledModules[i].Model.Index = i;
             NoticeDirtyChanged();
         }
-
+        private void RefreshPagesList(bool needToReload)
+        {
+            RefreshEnabilityList();
+            if (needToReload) ReloadPages();
+            NoticeDirtyChanged();
+        }
         private void RefreshEnabilityList()
         {
-            var modules = ModuleManager.GetInstance().Modules;
+            var modules = WpfPageManager.GetInstance().Pages;
             EnabledModules.Clear();
             DisabledModules.Clear();
             foreach (var module in modules)
             {
-                ObservableCollection<ModuleInfoVM> list = module.Enabled ? EnabledModules : DisabledModules;
+                ObservableCollection<WpfPageInfoVM> list = module.Enabled ? EnabledModules : DisabledModules;
                 module.Index = list.Count;
                 list.Add(new(module));
             }
         }
-        private void ReloadModules()
+        private void ReloadPages()
         {
             var tabControl = TabsController;
             if (tabControl is not null)

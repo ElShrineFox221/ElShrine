@@ -128,7 +128,7 @@ namespace ElShrine.ECommand
                     tokenBuilder ??= new();
                     if (currentChar == currentRight) braketDegree--;
                     else if (currentChar == currentLeft) braketDegree++;
-                    if (!removeOuterBracket || currentChar != currentLeft && currentChar != currentRight) appendChar(currentChar);
+                    if ((!removeOuterBracket || braketDegree != 0) || (currentChar != currentLeft && currentChar != currentRight)) appendChar(currentChar);
                     lastInToken = true;
                 }
             }

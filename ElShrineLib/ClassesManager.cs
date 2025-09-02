@@ -37,7 +37,7 @@ namespace ElShrine
             ListEndInfo([GetCompleteItem(result.Errors.Count == 0)]);
             DefaultSub = false;
             Paused = false;
-            if (result.Errors.Count > 0) GlobalCommandCarrier.Exit();
+            if (result.Errors.Count > 0) GlobalCommands.Exit();
         }
         private static List<Assembly> LoadAllAssemblies()
         {
@@ -123,15 +123,21 @@ namespace ElShrine
         }
         private static List<Assembly> LoadAssembliesFromFiles(IEnumerable<string> files, bool showFailed)
         {
+            var sortedfiles = files.ToList();
+            ListBeginInfo([new($"Loading Extra {"Assembly".GetPural(sortedfiles.Count)}...")]);
             List<Assembly> fileAssemblies = [.. assemblies];
-            foreach (var path in files)
+            sortedfiles.Sort();
+            List<InformationItem> col0 = [], col1 = [];
+            foreach (var path in sortedfiles)
             {
                 var fileAsb = LoadDistinctAssembly(fileAssemblies, path);
                 if(showFailed || fileAsb is not null)
                 {
-                    ListContentInfo([GetCompleteItem(fileAsb is not null), new($" Load file from: {path}")]);
+                    col0.Add(new(path, InformationPaintStyle.ParameterMethod));
+                    col1.Add(GetCompleteItem(fileAsb is not null));
                 }
             }
+            ListTableInfo((3, [.. col0]), (0, [.. col1]));
             var suc = fileAssemblies.Count != assemblies.Count;
             List<Assembly> distinctAssemblies = [];
             if (suc)
@@ -147,6 +153,7 @@ namespace ElShrine
                 distinctAssemblies = [.. distinctAssemblies.Where(asb => !assemblies.Exists(asb1 => !asb1.IsDistinct(asb)))];
                 assemblies.AddRange(distinctAssemblies);
             }
+            ListEndInfo([GetCompleteItem(suc)]);
             return distinctAssemblies;
         }
         public static bool LoadExtraAssemblies(string directory)
@@ -158,14 +165,15 @@ namespace ElShrine
         }
         public static bool LoadExtraAssemblies(IEnumerable<string> modulePaths)
         {
-            ListBeginInfo([new($"Loading Modules...")]);
+            ListBeginInfo([new($"Loading Assemblies...")]);
             var count = assemblies.Count;
             var asbs = LoadAssembliesFromFiles(modulePaths, true);
             count = assemblies.Count - count;
             var suc = count != 0;
             ListContentInfo($"Loaded {count} {"assembly".GetPural(count)}.");
             DoLoad(asbs);
-            ListEndInfo([GetCompleteItem(suc)]);
+            var r = GetListInfoListener();
+            ListEndInfo([GetCompleteItem(r.Errors.Count == 0)]);
             return suc;
         }
         private static void DoLoad(List<Assembly> assemblies)

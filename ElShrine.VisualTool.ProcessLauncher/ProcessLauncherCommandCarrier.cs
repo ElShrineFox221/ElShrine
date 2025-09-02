@@ -1,5 +1,4 @@
 ﻿using ElShrine.ECommand;
-using ElShrine.EConsole;
 using ElShrine.VisualTool.ProcessLauncher.EFile;
 using ElShrine.VisualTool.ProcessLauncher.Model;
 using ElShrine.VisualTool.ProcessLauncher.ViewModel;

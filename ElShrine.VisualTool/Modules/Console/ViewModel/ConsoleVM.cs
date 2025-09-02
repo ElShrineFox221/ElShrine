@@ -7,7 +7,7 @@ using System.Windows.Controls;
 
 namespace ElShrine.VisualTool.Modules.Console.ViewModel
 {
-    [ModuleRoot(Name = "Console", Version = "2.0", Tags = ["Common", "Console", "Command"], Description = "The advanced console, as implement of the IConsoleListener instead of System.Console.", DataTemplateUri = "/ElShrine.VisualTool;component/Modules/Console/Console.xaml", DataTemplateName = "ConsoleTemplate", DefaultEnabled = true)]
+    [WpfPageRootVM(Name = "Console", Version = "2.0", Tags = ["Common", "Console", "Command"], Description = "The advanced console, as implement of the IConsoleListener instead of System.Console.", DataTemplateUri = "/ElShrine.VisualTool;component/Modules/Console/Console.xaml", DataTemplateName = "ConsoleTemplate", DefaultEnabled = true)]
     public sealed class ConsoleVM : ViewModelBase, IConsoleListener, ISingleton<ConsoleVM>
     {
         private ConsoleVM()

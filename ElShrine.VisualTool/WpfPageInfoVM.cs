@@ -3,7 +3,7 @@ using ElShrine.Wpf.ViewModel;
 
 namespace ElShrine.VisualTool
 {
-    public class ModuleInfoVM(ModuleInfo model) : ViewModelBase<ModuleInfo>(model)
+    public class WpfPageInfoVM(WpfPageInfo model) : ViewModelBase<WpfPageInfo>(model)
     {
         public string Name => Model.Name;
         public string Description => Model.Description;

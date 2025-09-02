@@ -3,14 +3,8 @@ using System.Windows;
 
 namespace ElShrine.VisualTool
 {
-    public sealed class MainWindowViewModel : EWindowViewModelBase
+    public sealed class MainWindowViewModel(Window ownerWindow) : EWindowViewModelBase(ownerWindow)
     {
-        public MainWindowViewModel(Window ownerWindow) : base(ownerWindow)
-        {
-            VisualTool.ModuleManager.Refresh();
-            VisualTool.ModuleManager.Confrim();
-        }
-
-        public ModuleManagerVM ModuleManager { get; } = new ModuleManagerVM();
+        public WpfPageManagerVM ModuleManager { get; } = new WpfPageManagerVM();
     }
 }

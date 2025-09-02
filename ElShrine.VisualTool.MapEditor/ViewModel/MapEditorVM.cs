@@ -13,7 +13,7 @@ using VMCommand = ElShrine.Wpf.VMCommand;
 
 namespace ElShrine.VisualTool.MapEditor.ViewModel
 {
-    [ModuleRoot(Name = "Map Editor", Version = "1.0", Tags = ["Common", "Graph", "Map"], Description = "Map editor with 2d perlin noises and drawing pannel.", DataTemplateUri = "/ElShrine.VisualTool.MapEditor;component/MapEditor.xaml", DataTemplateName = "MapEditorTemplate")]
+    [WpfPageRootVM(Name = "Map Editor", Version = "1.0", Tags = ["Common", "Graph", "Map"], Description = "Map editor with 2d perlin noises and drawing pannel.", DataTemplateUri = "/ElShrine.VisualTool.MapEditor;component/MapEditor.xaml", DataTemplateName = "MapEditorTemplate")]
     [StartupClass]
     public class MapEditorVM : ViewModelBase, ISingleton<MapEditorVM>
     {
@@ -157,7 +157,7 @@ namespace ElShrine.VisualTool.MapEditor.ViewModel
 
         public VMCommand OpenDirectory => new(o =>
         {
-            if (o is string path) Command.ParseAndExcute($"{nameof(GlobalCommandCarrier.Open)} \"{path}\"");
+            if (o is string path) Command.ParseAndExcute($"{nameof(GlobalCommands.Open)} \"{path}\"");
         });
         public VMCommand RefreshMapDrited => new(o =>
         {

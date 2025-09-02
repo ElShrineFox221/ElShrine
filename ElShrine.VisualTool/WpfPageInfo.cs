@@ -3,7 +3,7 @@
 namespace ElShrine.VisualTool
 {
     [DataContract]
-    public class ModuleInfo
+    public class WpfPageInfo
     {
         [DataMember] public string Name { get; set; } = "New Module";
         [DataMember] public string Version { get; set; } = "1.0";
@@ -15,12 +15,12 @@ namespace ElShrine.VisualTool
         [DataMember] public bool Enabled { get; set; } = false;
 
         public Type RootViewModelClass = typeof(object);
-        public ModuleInfo Clone()
+        public WpfPageInfo Clone()
         {
             var module = this;
             var copyTags = new string[module.Tags.Length];
             module.Tags.CopyTo(copyTags, 0);
-            var moduleCopy = new ModuleInfo()
+            var moduleCopy = new WpfPageInfo()
             {
                 Name = module.Name,
                 Version = module.Version,
@@ -33,7 +33,7 @@ namespace ElShrine.VisualTool
             };
             return moduleCopy;
         }
-        public bool MemberValueEqual(ModuleInfo other)
+        public bool MemberValueEqual(WpfPageInfo other)
             => Name == other.Name 
             && Version == other.Version 
             && Tags.SequenceEqual(other.Tags) 

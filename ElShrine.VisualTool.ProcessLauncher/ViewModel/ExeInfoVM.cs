@@ -131,7 +131,7 @@ namespace ElShrine.VisualTool.ProcessLauncher.ViewModel
         {
             if (Valid)
             {
-                Command.ParseAndExcute($"{nameof(ProcessCommandCarrier)}.{nameof(ProcessCommandCarrier.Launch)} \"{TargetPath}\" \"{Arguments}\" \"{Model.WorkingDirectory}\" {Model.RunAsAdmin}");
+                Command.ParseAndExcute($"{nameof(ProcessCommands)}.{nameof(ProcessCommands.Launch)} \"{TargetPath}\" \"{Arguments}\" \"{Model.WorkingDirectory}\" {Model.RunAsAdmin}");
             }
         });
         public bool ExitButtonEnabled
@@ -140,11 +140,11 @@ namespace ElShrine.VisualTool.ProcessLauncher.ViewModel
         }
         public VMC Close => new(parameter =>
         {
-            if (Valid) Command.ParseAndExcute($"{nameof(ProcessCommandCarrier)}.{nameof(ProcessCommandCarrier.Close)} \"{TargetPath}\" true");
+            if (Valid) Command.ParseAndExcute($"{nameof(ProcessCommands)}.{nameof(ProcessCommands.Close)} \"{TargetPath}\" true");
         });
         public VMC Kill => new(parameter =>
         {
-            if (Valid) Command.ParseAndExcute($"{nameof(ProcessCommandCarrier)}.{nameof(ProcessCommandCarrier.Kill)} \"{TargetPath}\" true");
+            if (Valid) Command.ParseAndExcute($"{nameof(ProcessCommands)}.{nameof(ProcessCommands.Kill)} \"{TargetPath}\" true");
         });
         #endregion
 

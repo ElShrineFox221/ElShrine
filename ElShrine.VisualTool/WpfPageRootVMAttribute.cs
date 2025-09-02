@@ -3,7 +3,7 @@
 namespace ElShrine.VisualTool
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class ModuleRootAttribute() : ValidatableAttribute
+    public class WpfPageRootVMAttribute() : ValidatableAttribute
     {
         public string? Name;
         public string? Version;
@@ -14,9 +14,9 @@ namespace ElShrine.VisualTool
         public bool DefaultEnabled = false;
         public override bool Validate(object obj)
             => obj is Type t && t.IsImplementOf(typeof(ViewModelBase));
-        public ModuleInfo ToModuleInfo(Type implement)
+        public WpfPageInfo ToModuleInfo(Type implement)
         {
-            ModuleInfo moduleInfo = new()
+            WpfPageInfo moduleInfo = new()
             {
                 Name = Name ?? implement.Name,
                 Tags = Tags,

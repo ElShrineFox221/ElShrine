@@ -10,7 +10,7 @@ using VMC = ElShrine.Wpf.VMCommand;
 
 namespace ElShrine.VisualTool.ProcessLauncher.ViewModel
 {
-    [ModuleRoot(Name = "Process Launcher", Version = "1.0", Tags = ["Common", "Process"], Description = "Manager of softwares, Import .lnk and .exe files to create software info.", DataTemplateUri = "/ElShrine.VisualTool.ProcessLauncher;component/ProcessLauncher.xaml", DataTemplateName = "ProcessLauncherTemplate")]
+    [WpfPageRootVM(Name = "Process Launcher", Version = "1.0", Tags = ["Common", "Process"], Description = "Manager of softwares, Import .lnk and .exe files to create software info.", DataTemplateUri = "/ElShrine.VisualTool.ProcessLauncher;component/ProcessLauncher.xaml", DataTemplateName = "ProcessLauncherTemplate")]
     [StartupClass]
     public sealed class ProcessLauncherVM : ViewModelBase, ISingleton<ProcessLauncherVM>
     {

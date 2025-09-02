@@ -10,7 +10,7 @@ using ElShrine.EFile;
 namespace ElShrine.ECommand
 {
     [CommandCarrier(Name = Const.EmptyStr)]
-    public static class GlobalCommandCarrier
+    public static class GlobalCommands
     {
         public static void Help()
         {
@@ -32,7 +32,7 @@ namespace ElShrine.ECommand
                 (3, [new("Command", InformationPaintStyle.Warning), .. nameCol]),
                 (3, [new("Carrier", InformationPaintStyle.Warning), .. carrierCol]),
                 (3, [new("Type", InformationPaintStyle.Warning), .. carrierClassCol]),
-                (3, [new("Usage", InformationPaintStyle.Warning), .. usageCol]),
+                (3, [new("Usage(Ignore Case)", InformationPaintStyle.Warning), .. usageCol]),
                 (3, [new("Description", InformationPaintStyle.Warning), .. descriptionCol])
             );
         }
@@ -54,7 +54,7 @@ namespace ElShrine.ECommand
                 var extension = Path.GetExtension(path);
                 if (extension.EqualIgnoreCase(".Lnk") || extension.EqualIgnoreCase(".Exe"))
                 {
-                    Command.ParseAndExcute($"{nameof(ProcessCommandCarrier)}.{nameof(ProcessCommandCarrier.Launch)} \"{path}\" \"\" \"\" false", true);
+                    Command.ParseAndExcute($"{nameof(ProcessCommands)}.{nameof(ProcessCommands.Launch)} \"{path}\" \"\" \"\" false", true);
                     suc = true;
                 }
                 else
@@ -90,33 +90,42 @@ namespace ElShrine.ECommand
             string? failedReason = null;
             if (dir is not null)
             {
-                var files = Directory.GetFiles(dir);
+                var files = Directory.GetFiles(dir).Select(Path.GetFullPath).ToArray();
+                ignoreFiles = [.. ignoreFiles.Select(Path.GetFullPath)];
                 ListContentInfo($"{files.Length} {"file".GetPural(files.Length)} found.");
                 //
                 var deleteCount = 0;
                 //Directly delete files or move to recycle bin.
                 var sign = FileOption.GetInstance().DirectlyDel;
                 //Delete action
+                //
+                var ignoredCount = 0;
                 try
                 {
                     foreach (var file in files)
                     {
-                        if (!ignoreFiles.Contains(file))
+                        if (!ignoreFiles.Contains(file)) 
                         {
                             deleteCount++;
                             if (sign) File.Delete(file);
                             else FileSystem.DeleteFile(file, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                         }
+                        else ignoredCount++;
                     }
                 }
                 catch (Exception ex)
                 {
                     failedReason = $"Delete failed: {ex.Message}";
                 }
-                if (deleteCount == 0) failedReason = "No files to delete.";
+                if (deleteCount == 0 && ignoredCount == 0) failedReason = "No files to delete.";
+                else
+                {
+                    InformationItem[] items = [new($"Deleted {deleteCount} {"file".GetPural(deleteCount)}")];
+                    if (ignoredCount > 0) items = [.. items, new($", ignored {ignoredCount} {"file".GetPural(ignoredCount)}")];
+                    ListContentInfo([..items, new(".")]);
+                }
             }
-            if (failedReason is null) ListContentInfo("Completed delete.");
-            else ListWarnInfo([GetWarningItem(), new(" Failed delete. "), new(failedReason, InformationPaintStyle.Normal)]);
+            if (failedReason is not null) ListWarnInfo([GetWarningItem(), new(" Failed delete. "), new(failedReason, InformationPaintStyle.Normal)]);
         }
     }
 }

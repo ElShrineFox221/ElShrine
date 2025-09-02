@@ -7,7 +7,7 @@ using System.Windows;
 
 namespace ElShrine.VisualTool.OptionHub
 {
-    [ModuleRoot(Name = "Option Hub", Version = "1.0", Tags = ["Common", "Option"], Description = "UI for options, created a visual page for user viewing and changing settings.", DataTemplateUri = "/ElShrine.VisualTool.OptionHub;component/OptionHub.xaml", DataTemplateName = "OptionHubTemplate")]
+    [WpfPageRootVM(Name = "Option Hub", Version = "1.0", Tags = ["Common", "Option"], Description = "UI for options, created a visual page for user viewing and changing settings.", DataTemplateUri = "/ElShrine.VisualTool.OptionHub;component/OptionHub.xaml", DataTemplateName = "OptionHubTemplate")]
     public sealed class OptionHubVM : ViewModelBase, ISingleton<OptionHubVM>
     {
         private static OptionHubVM? Instance = null;
