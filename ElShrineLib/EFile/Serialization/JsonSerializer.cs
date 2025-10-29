@@ -21,8 +21,8 @@ namespace ElShrine.EFile.Serialization
             data = System.Text.Json.JsonSerializer.Deserialize(stream, dataType, Options) ?? throw new Exception("Failed to deserialize.");
             //using JsonTextReader reader = new(new StreamReader(stream, Encoding.UTF8));
             //JsonSerializer serializer = JsonSerializer.Create(new() { Formatting = Newtonsoft.Json.Formatting.Indented });
-            //object? o = serializer.Deserialize(reader, typeof(D));
-            //if (o != null) data = (D)o;
+            //object? o = serializer.Deserialize(reader, typeof(TData));
+            //if (o != null) data = (TData)o;
             //else throw new("Failed to deserialize");
         }
     }

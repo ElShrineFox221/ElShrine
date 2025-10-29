@@ -99,6 +99,8 @@ namespace ElShrine
             str.EndsWith("sh") || str.EndsWith("ch") ? str + "es" :
             str.EndsWith('y') && str.Length > 1 && !"aeiou".Contains(str[^2]) ?
             str[..^1] + "ies" : str + "s";
+        public static string GetPuralWithNum(this string str, int num)
+            => $"{num} {str.GetPural(num)}";
 
         public static int GetDeletionDistance(this string target, string pattern)
         {

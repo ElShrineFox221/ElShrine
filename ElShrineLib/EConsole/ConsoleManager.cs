@@ -77,11 +77,19 @@ namespace ElShrine.EConsole
         {
             ConsoleInfosTimer.Elapsed += ControllerInvoker;
         }
-        private static void ControllerInvoker(object? sender, ElapsedEventArgs e)
+        private static void ControllerInvoker(object? sender, ElapsedEventArgs? e)
         {
-            if (Paused) return;
-            if (timerFinishedInvoke) timerFinishedInvoke = false;
-            else return;
+            if (InstantPrint)
+            {
+                if (sender is not null) return;
+            }
+            else
+            {
+                if (Paused) return;
+                if (timerFinishedInvoke) timerFinishedInvoke = false;
+                else return;
+            }
+            
 
             ConsoleInfosTimer.Interval = 100 + 300 / (1 + InfoPrintQueue.Count);
             bool queueable = false;
@@ -165,7 +173,7 @@ namespace ElShrine.EConsole
 
 
         #region Directly Insert Line
-
+        public static bool InstantPrint { get; set; } = false;
         #region Line or LineItem Builder
         public static InformationPaintStyle Subside(this InformationPaintStyle paintStyle, bool isSub)
             => isSub ? paintStyle switch
@@ -192,7 +200,12 @@ namespace ElShrine.EConsole
         private static void ListInfo(InformationLine line, LineReportType reportType)
         {
             InfoPrintQueue.Enqueue(line, reportType);
-            if (!ConsoleInfosTimer.Ticking) ConsoleInfosTimer.Start();
+            if (InstantPrint)
+            {
+                if(ConsoleInfosTimer.Ticking) ConsoleInfosTimer.Stop();
+                ControllerInvoker(null, null);
+            }
+            else if (!ConsoleInfosTimer.Ticking) ConsoleInfosTimer.Start();
             if (Paused) Paused = false;
         }
         public static void ListInfo(InformationLine line)

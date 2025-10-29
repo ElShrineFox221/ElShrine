@@ -20,11 +20,19 @@ namespace ElShrine.EConsole
         public static void Close() => FreeConsole();
         public bool PrintInfoLine(InformationLine line, int listenerIndex)
         {
-            Task.Run(() =>
+            if (ConsoleManager.InstantPrint)
             {
                 Open();
                 ConsoleWrite(line);
-            });
+            }
+            else
+            {
+                Task.Run(() =>
+                {
+                    Open();
+                    ConsoleWrite(line);
+                });
+            }
             return true;
         }
         public const string IntentSpace = "   ";

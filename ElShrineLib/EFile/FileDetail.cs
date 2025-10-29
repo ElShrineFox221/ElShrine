@@ -1,102 +1,121 @@
-﻿namespace ElShrine.EFile
+﻿using ElShrine.Common;
+using P = System.IO.Path;
+
+namespace ElShrine.EFile
 {
-    public class FileDetail
+    public sealed class FileDetails() : IDisposable
     {
-        public FileDetail() { }
-        public FileDetail(string path)
-        {
-            var temp = new FileInfo(path);
-            FileInfo = temp;
-        }
-        public FileStream Open(FileMode mode)
-        {
-            if (!IsValid) throw new("Invalid file infos.");
-            bool createDirectory = !(mode == FileMode.Truncate || mode == FileMode.Truncate);
-            if (createDirectory)
-            {
-                string directory = FileInfo.DirectoryName ?? Environment.CurrentDirectory;
-                if (directory.IsNotEmpty() && !System.IO.Directory.Exists(directory)) System.IO.Directory.CreateDirectory(directory);
-            }
-            return FileInfo.Open(mode);
-        }
-
-
-        private string? name = null;
-        private string? extensionName = null;
-        private string? directory = null;
-        private string? fullPath = null;
+        private string path = string.Empty;
+        private bool fileOpened = false;
+        private FileStream? stream = null;
         private FileInfo? fileInfo = null;
-
-        public string Name
+        private FileInfo? FileInfo
         {
-            get => name ?? string.Empty;
-            set
+            get
             {
-                name = value;
-                Update();
+                if (fileInfo is null && IsValid)
+                {
+                    try
+                    {
+                        fileInfo = new(path);
+                    }
+                    catch (Exception)
+                    {
+                        fileInfo = null;
+                    }
+                }
+                return fileInfo;
             }
         }
-        public string ExtensionName
+        public string Path
         {
-            get => extensionName ?? string.Empty;
+            get => path;
             set
             {
-                extensionName = value;
-                Update();
+                if (fileOpened) throw new InvalidOperationException("Cannot modify path while the file stream is open.");
+                if (path == value) return;
+                string oldPath = path;
+                path = value;
+                fileInfo = null;
+                PathChanged?.Invoke(this, new(oldValue: oldPath, newValue: value));
+            }
+        }
+        
+
+
+        public event ValueChangedHandler<string>? PathChanged;
+
+        public FileDetails(string path) : this() => Path = path;
+        public FileDetails(FileInfo fileInfo) : this() => Path = (this.fileInfo = fileInfo).FullName;
+
+        public string Extension
+        {
+            get => P.GetExtension(path) ?? string.Empty;
+            set
+            {
+                if (fileOpened) throw new InvalidOperationException("Cannot modify path components while the file stream is open.");
+                if (!IsValid) return;
+                Path = P.Combine(Directory, FileNameWithoutExtension + value);
+            }
+        }
+        public string FileName
+        {
+            get => P.GetFileName(path) ?? string.Empty;
+            set
+            {
+                if (fileOpened) throw new InvalidOperationException("Cannot modify path components while the file stream is open.");
+                if (!IsValid) return;
+                Path = P.Combine(Directory, value);
+            }
+        }
+        public string FileNameWithoutExtension
+        {
+            get => P.GetFileNameWithoutExtension(path) ?? string.Empty;
+            set
+            {
+                if (fileOpened) throw new InvalidOperationException("Cannot modify path components while the file stream is open.");
+                if (!IsValid) return;
+                Path = P.Combine(Directory, value + Extension);
             }
         }
         public string Directory
         {
-            get => directory ?? string.Empty;
+            get => P.GetDirectoryName(path) ?? string.Empty;
             set
             {
-                value = value.TrimEnd('\\');
-                directory = value;
-                Update();
+                if (fileOpened) throw new InvalidOperationException("Cannot modify path components while the file stream is open.");
+                if (!IsValid) return;
+                Path = P.Combine(value, FileName);
             }
         }
-        public string FullPath
+
+        public bool IsValid => !string.IsNullOrEmpty(path) && path.IndexOfAny(System.IO.Path.GetInvalidPathChars()) == -1;
+        public bool IsExisted => IsValid && File.Exists(path);
+        public string FullPath => IsValid ? P.GetFullPath(path) : string.Empty;
+        public DateTime UpdatedDateTime => FileInfo?.LastWriteTime ?? DateTime.MinValue;
+        public DateTime CreatedDateTime => FileInfo?.CreationTime ?? DateTime.MinValue;
+
+        public FileStream Open(FileMode mode, FileAccess access)
         {
-            get => fullPath ?? string.Empty;
-            protected set => fullPath = value;
+            if (!IsValid) throw new InvalidOperationException("Cannot open file stream. The path is invalid.");
+            if (fileOpened) throw new InvalidOperationException("File stream is already open. Call EnsureClose() first.");
+            stream = new FileStream(path, mode, access);
+            fileOpened = true;
+            return stream;
         }
-        public FileInfo FileInfo
+        public bool EnsureClose()
         {
-            get => fileInfo ?? new(string.Empty);
-            set
-            {
-                try
-                {
-                    FullPath = Path.GetFullPath(value.FullName);
-                    fileInfo = value;
-                    name = fileInfo.Name;
-                    extensionName = fileInfo.Extension.Replace(".", string.Empty);
-                    directory = fileInfo.DirectoryName;
-                    IsValid = true;
-                }
-                catch
-                {
-                    IsValid = false;
-                }
-            }
+            bool wasOpened = fileOpened;
+            stream?.Dispose();
+            stream = null;
+            fileOpened = false;
+            return wasOpened;
         }
-        protected virtual void Update()
+
+        public void Dispose()
         {
-            if(name is not null && directory is not null)
-            {
-                var fp = string.IsNullOrEmpty(extensionName) ? $"{directory}\\{name}" : $"{directory}\\{name}.{extensionName}";
-                try
-                {
-                    FullPath = Path.GetFullPath(fp);
-                    fileInfo = new(FullPath);
-                    IsValid = true;
-                }
-                catch
-                {
-                    IsValid = false;
-                }
-            }
+            EnsureClose();
+            GC.SuppressFinalize(this);
         }
-        public bool IsValid { get; protected set; }
     }
 }
