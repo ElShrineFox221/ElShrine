@@ -11,4 +11,9 @@
     <converters:ColorLerpToSolidBrushConverter x:Key="ColorLerpToSolidBrushConverter"/>
     <converters:QuadruplesConverter x:Key="QuadruplesConverter"/>
     <converters:NumToStringConverter x:Key="NumToStringConverter"/>
+    <converters:EnumTextLocalizeConverter x:Key="EnumTextLocalizeConverter"/>
+    <converters:LocalizeConverter x:Key="LocalizeConverter"/>
+    <DataTemplate x:Key="EnumComboBoxDataTemplate">
+        <TextBlock Text="{Binding Converter={StaticResource EnumTextLocalizeConverter}}"/>
+    </DataTemplate>
 </ResourceDictionary>

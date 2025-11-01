@@ -1,4 +1,5 @@
-﻿using ElShrine.EFile;
+﻿using ElShrine.ECommand;
+using ElShrine.EFile;
 using ElShrine.EFile.Serialization;
 using ElShrine.EOption;
 using System.Collections.Concurrent;
@@ -42,6 +43,8 @@ namespace ElShrine.Common
         Malay = 31,
         Max = 32
     }
+    [StartupClass]
+    [CommandCarrier(ItemMode = LoadMode.None, Name = "Localization")]
     public sealed class LocalizationManager : ISingleton<LocalizationManager>
     {
         private static LocalizationManager? instance;
@@ -59,9 +62,17 @@ namespace ElShrine.Common
                 LanguageChanged?.Invoke(this, new(oldValue, value));
             }
         }
-        private readonly ConcurrentDictionary<Language, Dictionary<string, string>> localizationKVByLanguages = [];
-        private readonly ConcurrentDictionary<Language, List<string>> untranslatedKeysByLanguages = [];
-        private Dictionary<string, string> CurrentKV => localizationKVByLanguages.GetOrAdd(Language, []);
+        private readonly Dictionary<Language, Dictionary<string, string>> localizationKVByLanguages = [];
+        private readonly Dictionary<Language, List<string>> untranslatedKeysByLanguages = [];
+        private Dictionary<string, string> CurrentKV
+        {
+            get
+            {
+                var got = localizationKVByLanguages.TryGetValue(language, out var keysDic);
+                if (!got || keysDic is null) localizationKVByLanguages.Add(language, keysDic = []);
+                return keysDic;
+            }
+        }
         public event ValueChangedHandler<Language>? LanguageChanged;
         
         private LocalizationManager() => ReloadLocalization();
@@ -79,11 +90,11 @@ namespace ElShrine.Common
                         var r = DataHandler.Read<Dictionary<string, string>>(null, details, serializer);
                         if(r.Success && r.Data is not null)
                         {
-                            localizationKVByLanguages.AddOrUpdate(enumKey, r.Data, (_, _) => r.Data);
+                            localizationKVByLanguages[enumKey] = r.Data;
                             languageChanged |= true;
                         }
                     }
-                    else using (_ = details.Open(FileMode.Create, FileAccess.Read)) { }
+                    else using (_ = details.Open(FileMode.Create, FileAccess.ReadWrite)) { }
                     details.EnsureClose();
                 }
                 catch (Exception e)
@@ -95,14 +106,23 @@ namespace ElShrine.Common
         }
         public void SaveUntranslatedKeys()
         {
+            var serializer = new DictionaryXmlSerializer();
             foreach (var enumKey in Enum.GetValues<Language>())
             {
-                var data = untranslatedKeysByLanguages.GetOrAdd(enumKey, []);
-                if (data.Count == 0) continue;
+                var got = untranslatedKeysByLanguages.TryGetValue(enumKey, out var list);
+                if (!got || list is null) untranslatedKeysByLanguages.Add(enumKey, list = []);
+                if (list.Count == 0) continue;
+                var data = new Dictionary<string, string>();
+                foreach (var key in list)
+                {
+                    localizationKVByLanguages.TryGetValue(Language.None, out var noneDic);
+                    var value = (noneDic?.TryGetValue(key, out var v) ?? false) ? v : string.Empty;
+                    data.Add(key, value);
+                }
                 try
                 {
                     var details = new FileDetails($"Localization\\UntranslatedKeys_{enumKey}");
-                    if (details.IsValid) DataHandler.Write(data, details);
+                    if (details.IsValid) DataHandler.Write(data, details, serializer);
                     else using (_ = details.Open(FileMode.Create, FileAccess.Write)) { }
                     details.EnsureClose();
                 }
@@ -119,16 +139,29 @@ namespace ElShrine.Common
             if (!got || value is null)
             {
                 value = defaultS ?? key;
-                var list = untranslatedKeysByLanguages.GetOrAdd(Language, []);
-                if (!list.Contains(key))
+                var got1 = untranslatedKeysByLanguages.TryGetValue(Language, out var list);
+                if (!got1 || list is null) untranslatedKeysByLanguages.Add(Language, list = []);
+                if ( !list.Contains(key))
                 {
                     list.Add(key);
+                    var got2 = localizationKVByLanguages.TryGetValue(Language.None, out var noneDic);
+                    if(!got2 || noneDic is null) localizationKVByLanguages.Add(Language.None, noneDic = []);
+                    noneDic[key] = value;
                     ListWarnInfo([GetWarningItem(), new($"Untranslated key: \'{key}\', default as: \'{value}\'")]);
                 }
             }
             value = string.Format(value, args);
             return value;
         }
+
+        #region Commands
+        [Command] public static void Reload() => GetInstance().ReloadLocalization();
+        [Command] public static void SaveUntranslated() => GetInstance().SaveUntranslatedKeys();
+        #endregion
     }
-    
+    public static class LocalizationExtensions
+    {
+        public static string Translate(this string key, string? defaultS = null, params object?[] args)
+            => LocalizationManager.GetInstance().Translate(key, defaultS, args);
+    }
 }

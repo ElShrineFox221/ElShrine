@@ -1,4 +1,5 @@
-﻿using ElShrine.Wpf.UITheme;
+﻿using ElShrine.Common;
+using ElShrine.Wpf.UITheme;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -61,14 +62,16 @@ namespace ElShrine.Wpf.Controls
         public static readonly DependencyProperty HeaderPlacementProperty = DependencyProperty.Register(nameof(HeaderPlacement),  typeof(ExpandDirection), typeof(ETextBox), new(ExpandDirection.Left));
         public static readonly DependencyProperty NoticeInfoProperty = DependencyProperty.Register(nameof(NoticeInfo),  typeof(string), typeof(ETextBox), new(string.Empty));
         public static readonly DependencyProperty SuggestionsSourceProperty = DependencyProperty.Register(nameof(SuggestionsSource),  typeof(IEnumerable<object>), typeof(ETextBox), new(null, OnSuggestionsSourceChanged));
+
+        public event ValueChangedHandler<string>? AppliedSuggestion;
         #endregion
 
         #region Private Properties
-        private Popup? _autoCompletePopup;
-        private ListBox? _suggestionListBox;
-        private ScrollViewer? _contentHostScrollViewer;
-        private bool _isUpdatingFromSuggestion;
-        private INotifyCollectionChanged? _currentCollection;
+        private Popup? autoCompletePopup;
+        private ListBox? suggestionListBox;
+        private ScrollViewer? contentHostScrollViewer;
+        private bool isUpdatingFromSuggestion;
+        private INotifyCollectionChanged? currentCollection;
         #endregion
 
         static ETextBox() => DefaultStyleKeyProperty.OverrideMetadata(typeof(ETextBox), new FrameworkPropertyMetadata(typeof(ETextBox)));
@@ -77,23 +80,23 @@ namespace ElShrine.Wpf.Controls
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
-            _autoCompletePopup = GetTemplateChild("PART_SuggestionPopup") as Popup;
-            _suggestionListBox = GetTemplateChild("PART_SuggestionListBox") as ListBox;
-            _contentHostScrollViewer = GetTemplateChild("PART_ContentHost") as ScrollViewer;
-            if (_suggestionListBox != null)
+            autoCompletePopup = GetTemplateChild("PART_SuggestionPopup") as Popup;
+            suggestionListBox = GetTemplateChild("PART_SuggestionListBox") as ListBox;
+            contentHostScrollViewer = GetTemplateChild("PART_ContentHost") as ScrollViewer;
+            if (suggestionListBox != null)
             {
-                _suggestionListBox.PreviewKeyDown += OnSuggestionListKeyDown;
-                _suggestionListBox.MouseUp += OnSuggestionListMouseUp;
+                suggestionListBox.PreviewKeyDown += OnSuggestionListKeyDown;
+                suggestionListBox.MouseUp += OnSuggestionListMouseUp;
             }
             UpdateSuggestionsSourceListener();
         }
         private void UpdateSuggestionsSourceListener()
         {
-            if (_currentCollection != null) _currentCollection.CollectionChanged -= OnSuggestionCollectionChanged;
+            if (currentCollection != null) currentCollection.CollectionChanged -= OnSuggestionCollectionChanged;
             if (SuggestionsSource is INotifyCollectionChanged newCollection)
             {
                 newCollection.CollectionChanged += OnSuggestionCollectionChanged;
-                _currentCollection = newCollection;
+                currentCollection = newCollection;
             }
         }
         private void OnSuggestionCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => UpdateSuggestions();
@@ -111,14 +114,14 @@ namespace ElShrine.Wpf.Controls
         protected override void OnTextChanged(TextChangedEventArgs e)
         {
             base.OnTextChanged(e);
-            if (!_isUpdatingFromSuggestion) UpdateSuggestions();
+            if (!isUpdatingFromSuggestion) UpdateSuggestions();
         }
         private void UpdateSuggestions()
         {
-            if (_autoCompletePopup is null || _suggestionListBox is null) return;
+            if (autoCompletePopup is null || suggestionListBox is null) return;
             if (SuggestionsSource is null || !SuggestionsSource.Any())
             {
-                _autoCompletePopup.IsOpen = false;
+                autoCompletePopup.IsOpen = false;
                 return;
             }
             var suggestions = new List<string>();
@@ -130,23 +133,23 @@ namespace ElShrine.Wpf.Controls
             }
 
             suggestions = [.. suggestions.OrderBy(s => s.GetDeletionDistance(pattern)).ThenBy(s => s)];
-            _suggestionListBox.ItemsSource = suggestions;
-            _suggestionListBox.SelectedIndex = suggestions.Count != 0 ? 0 : -1;
+            suggestionListBox.ItemsSource = suggestions;
+            suggestionListBox.SelectedIndex = suggestions.Count != 0 ? 0 : -1;
 
             if (suggestions.Count != 0)
             {
-                _autoCompletePopup.PlacementTarget = _contentHostScrollViewer;
-                _autoCompletePopup.Placement = PlacementMode.Bottom;
-                _autoCompletePopup.IsOpen = true;
+                autoCompletePopup.PlacementTarget = contentHostScrollViewer;
+                autoCompletePopup.Placement = PlacementMode.Bottom;
+                autoCompletePopup.IsOpen = true;
             }
-            else _autoCompletePopup.IsOpen = false;
+            else autoCompletePopup.IsOpen = false;
         }
         #endregion
 
         #region Key handling
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
-            if (_autoCompletePopup?.IsOpen == true)
+            if (autoCompletePopup?.IsOpen == true)
             {
                 switch (e.Key)
                 {
@@ -163,7 +166,7 @@ namespace ElShrine.Wpf.Controls
                         e.Handled = true;
                         return;
                     case Key.Escape:
-                        _autoCompletePopup.IsOpen = false;
+                        autoCompletePopup.IsOpen = false;
                         e.Handled = true;
                         return;
                 }
@@ -177,27 +180,30 @@ namespace ElShrine.Wpf.Controls
             base.OnPreviewKeyDown(e);
             void moveSuggestionListSelection(int mount)
             {
-                if (_suggestionListBox?.Items.Count > 0)
+                if (suggestionListBox?.Items.Count > 0)
                 {
-                    int newIndex = _suggestionListBox.SelectedIndex + mount;
-                    if (newIndex >= 0 && newIndex < _suggestionListBox.Items.Count)
+                    int newIndex = suggestionListBox.SelectedIndex + mount;
+                    if (newIndex >= 0 && newIndex < suggestionListBox.Items.Count)
                     {
-                        _suggestionListBox.SelectedIndex = newIndex;
-                        _suggestionListBox.ScrollIntoView(_suggestionListBox.SelectedItem);
+                        suggestionListBox.SelectedIndex = newIndex;
+                        suggestionListBox.ScrollIntoView(suggestionListBox.SelectedItem);
                     }
                 }
             }
         }
         private void ApplySelectedSuggestion()
         {
-            if (_suggestionListBox?.SelectedItem != null)
+            if (suggestionListBox?.SelectedItem != null)
             {
-                _isUpdatingFromSuggestion = true;
-                Text = _suggestionListBox.SelectedItem.ToString();
+                isUpdatingFromSuggestion = true;
+                var newText = suggestionListBox.SelectedItem.ToString() ?? string.Empty;
+                AppliedSuggestion?.Invoke(this, new(Text, newText));
+                Text = newText;
                 CaretIndex = Text?.Length ?? 0;
-                _isUpdatingFromSuggestion = false;
+                isUpdatingFromSuggestion = false;
+                
             }
-            if (_autoCompletePopup is not null) _autoCompletePopup.IsOpen = false;
+            if (autoCompletePopup is not null) autoCompletePopup.IsOpen = false;
         }
         private void OnSuggestionListKeyDown(object sender, KeyEventArgs e)
         {

@@ -131,7 +131,11 @@
                     <TextBlock Text="test header" Margin="10,2"/>
                 </controls:ETextBox.Header>
             </controls:ETextBox>
-            <controls:EButton Grid.Row="5" Grid.Column="0" Content="Test Button - 0" Margin="5"/>
+            <UniformGrid Grid.Row="5" Grid.Column="0" Rows="1">
+                <controls:EButton Content="Test Button - 0" Margin="5"/>
+                <controls:EButton Style="{DynamicResource EButton_BackColorStyle}" Content="Test Button - 0" Margin="5"/>
+            </UniformGrid>
+            
             <controls:EButton Grid.Row="5" Grid.Column="1" Style="{StaticResource EButton_CircleStyle}" Height="30">
                 <Viewbox Margin="3" VerticalAlignment="Center" HorizontalAlignment="Center">
                     <Path Data="M0,0 L9,9 M9,0 L0,9" Stroke="#FFEEEEEE" StrokeThickness="1.5">

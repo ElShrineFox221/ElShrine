@@ -143,10 +143,10 @@ namespace ElShrine.EConsole
             CurrentInitializeDirectory ??= FileOption.GetInstance().LogDir;
             var path = CurrentInitializePath??= $"{FileOption.GetInstance().LogDir}\\Log[{InitializeTime}].txt";
             var text = line.ToString();
-            var fd = new FileDetail(path);
+            var fd = new FileDetails(path);
             if(fd.IsValid)
             {
-                using FileStream fs = fd.Open(FileMode.OpenOrCreate);
+                using FileStream fs = fd.Open(FileMode.OpenOrCreate, FileAccess.Write);
                 {
                     fs.Position = fs.Length;
                     fs.Write(Encoding.UTF8.GetBytes($"{text}\n"));

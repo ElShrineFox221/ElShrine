@@ -88,20 +88,6 @@
                         </Grid>
                     </Grid>
                     <ControlTemplate.Triggers>
-                        <Trigger Property="IsEnabled" Value="True">
-                            <Trigger.EnterActions>
-                                <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="controlRoot"
-                                                         Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
-                                            <DoubleAnimation.EasingFunction>
-                                                <SineEase/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                        </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Trigger.EnterActions>
                                 <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
@@ -115,6 +101,18 @@
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="controlRoot"
+                             Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Trigger.EnterActions>

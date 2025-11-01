@@ -9,7 +9,7 @@ namespace ElShrine.EFile.Serialization
     {
         public const string RootElementDefaultName = "Root";
         private readonly string rootName = rootName;
-        public override string GetFileExtendName() => "xml";
+        public override string GetFileExtendName() => string.Empty;
         public override void Serialize(object data, Type dataType, Stream stream)
         {
             if (!IsDictionary(dataType)) throw new NotSupportedException($"Type '{dataType.FullName}' is not supported by this custom serializer. It only supports Dictionary<TKey, TValue>.");

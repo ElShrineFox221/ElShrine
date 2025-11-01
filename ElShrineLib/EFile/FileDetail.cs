@@ -1,5 +1,6 @@
 ﻿using ElShrine.Common;
 using P = System.IO.Path;
+using D = System.IO.Directory;
 
 namespace ElShrine.EFile
 {
@@ -99,6 +100,7 @@ namespace ElShrine.EFile
         {
             if (!IsValid) throw new InvalidOperationException("Cannot open file stream. The path is invalid.");
             if (fileOpened) throw new InvalidOperationException("File stream is already open. Call EnsureClose() first.");
+            if (!D.Exists(Directory)) D.CreateDirectory(Directory);
             stream = new FileStream(path, mode, access);
             fileOpened = true;
             return stream;
