@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ElShrine.Common
+﻿namespace ElShrine.Common
 {
     public class ValueChangedEventArgs<TValue>(TValue oldValue, TValue newValue) : EventArgs
     {

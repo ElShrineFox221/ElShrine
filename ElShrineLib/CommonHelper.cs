@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 
 namespace ElShrine
 {
@@ -132,6 +133,17 @@ namespace ElShrine
                 parentIndex++;
             }
             return subIndex == subLower.Length;
+        }
+
+        public static string ToTitle(this string str, bool capitalizeAllWords = false)
+        {
+            if (string.IsNullOrWhiteSpace(str)) return str;
+            if (capitalizeAllWords)
+            {
+                TextInfo textInfo = CultureInfo.CurrentCulture.TextInfo;
+                return textInfo.ToTitleCase(str.ToLower());
+            }
+            else return char.ToUpper(str[0]) + str.Substring(1);
         }
         #endregion
 

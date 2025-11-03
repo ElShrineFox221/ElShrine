@@ -132,9 +132,7 @@ Margin="{TemplateBinding Padding}" ContentSource="Content" RenderTransformOrigin
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.EnterActions>
-                        </Trigger>
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Trigger.EnterActions>
+                            <Trigger.ExitActions>
                                 <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
                                     <Storyboard>
                                         <DoubleAnimation Storyboard.TargetName="controlRoot" 
@@ -145,7 +143,7 @@ Margin="{TemplateBinding Padding}" ContentSource="Content" RenderTransformOrigin
                                         </DoubleAnimation>
                                     </Storyboard>
                                 </BeginStoryboard>
-                            </Trigger.EnterActions>
+                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Trigger.EnterActions>
