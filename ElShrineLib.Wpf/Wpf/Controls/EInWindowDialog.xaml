@@ -4,15 +4,16 @@
                     xmlns:extensions="clr-namespace:ElShrine.Wpf.Controls.Extensions"
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
     <Style TargetType="controls:EInWindowDialog">
+        <Setter Property="Background" Value="#80202020"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="controls:EInWindowDialog">
                     <Canvas>
                         <Grid x:Name="overlayRoot" Panel.ZIndex="10000" Visibility="Collapsed" Background="Transparent">
-                            <Border x:Name="overlayMask"  Background="#80000000"  Opacity="0" BorderThickness="5" BorderBrush="Red">
-                                <ContentPresenter x:Name="DialogContentHost" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5" Content="{TemplateBinding Content}">
+                            <Border x:Name="overlayMask"  Background="{TemplateBinding Background}"  Opacity="0" BorderThickness="0">
+                                <ContentPresenter x:Name="DialogContentHost" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}">
                                     <ContentPresenter.RenderTransform>
-                                        <ScaleTransform x:Name="contentScaleTransform" ScaleX="0.8" ScaleY="0.8"/>
+                                        <ScaleTransform x:Name="contentScaleTransform" ScaleX="1" ScaleY="1"/>
                                     </ContentPresenter.RenderTransform>
                                 </ContentPresenter>
                             </Border>

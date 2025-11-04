@@ -10,6 +10,7 @@ namespace ElShrine.Wpf.ViewModel
 {
     public partial class EWindowViewModelBase : ViewModelBase<Window>
     {
+        protected static WpfOption WpfOption => WpfOption.GetInstance();
         protected static readonly List<Window> ownerWindows = [];
         public static T SetWindowViewModel<T>(Window ownerWindow) where T : EWindowViewModelBase
         {
@@ -49,7 +50,7 @@ namespace ElShrine.Wpf.ViewModel
 
         protected Window? ownerWindow;
 
-        private static Duration FadeDuration => TimeSpan.FromMilliseconds(GetInstance().LayTimeSpanMS);
+        private static Duration FadeDuration => TimeSpan.FromMilliseconds(WpfOption.FadeInOutms);
         protected virtual void WindowFadeOut(Action? action, double factor)
         {
             if (ownerWindow == null) return;

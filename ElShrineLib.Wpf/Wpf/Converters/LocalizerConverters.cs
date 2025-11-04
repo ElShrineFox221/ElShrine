@@ -9,11 +9,12 @@ namespace ElShrine.Wpf.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            string text = string.Empty;
+            var text = string.Empty;
+            var paramStr = parameter?.ToString(); 
             if (value is Enum enumValue)
             {
                 string key = enumValue.ToString();
-                text = key.Translate();
+                text = string.IsNullOrWhiteSpace(paramStr) ? key.Translate() : key.Translate(paramStr);
             }
             return text;
         }
@@ -32,7 +33,11 @@ namespace ElShrine.Wpf.Converters
     public sealed class LocalizeConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-            => value?.ToString()?.Translate() ?? string.Empty;
+        {
+            var paramStr = parameter?.ToString();
+            var key = value?.ToString() ?? string.Empty;
+            return string.IsNullOrWhiteSpace(paramStr) ? key.Translate() : key.Translate(paramStr);
+        }
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;
     }
 }

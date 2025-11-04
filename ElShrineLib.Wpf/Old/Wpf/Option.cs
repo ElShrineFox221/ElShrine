@@ -1,6 +1,4 @@
-﻿using ElShrine.Common.Interface;
-using ElShrine.Wpf;
-using ElShrine.Wpf.Model;
+﻿using ElShrine.Wpf;
 using ElShrine.Wpf.ViewModel;
 using System;
 using System.Runtime.Serialization;

@@ -1,11 +1,11 @@
-﻿using ElShrine.Common.Interface;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace ElShrine.Wpf.Model
+namespace ElShrine.Old.Wpf.Model
 {
+    [Obsolete(ObsoleteMsg.OldNamespaceMsg)]
     [DataContract]
     public abstract class ElShrineResourceBase : IEName, IEInformationChanged, IECloneable<ElShrineResourceBase>, IEOrderlyComparable<ElShrineResourceBase>
     {
@@ -37,6 +37,7 @@ namespace ElShrine.Wpf.Model
 
         public virtual int CompareTo(ElShrineResourceBase? other) => 0;
     }
+    [Obsolete(ObsoleteMsg.OldNamespaceMsg)]
     [DataContract]
     public class EBasicList<T> : ElShrineResourceBase, IEList<T>, IECloneable<EBasicList<T>>
         where T : class
@@ -70,6 +71,7 @@ namespace ElShrine.Wpf.Model
 
         public IEnumerator GetEnumerator() => this.GetEnumerator<EBasicList<T>, T>();
     }
+    [Obsolete(ObsoleteMsg.OldNamespaceMsg)]
     [DataContract]
     public class EList<T> : EBasicList<T>, IEOrderlySortable<T>, IECloneable<EList<T>>
         where T : class, IEName, IEOrderlyComparable<T>, IECloneable<T>

@@ -149,9 +149,10 @@ namespace ElShrine.EOption
                 {
                     if (groupedResult != null && groupedResult.Any())
                     {
-                        Type optionClass = ClassesManager.GetClassesByName(groupedResult.First().ClassName, true);
+                        Type? optionClass = null;
                         try
                         {
+                            optionClass = ClassesManager.GetClassesByName(groupedResult.First().ClassName, true);
                             var optionInstance = ISingleton.GetInstance(optionClass);
                             foreach (var optionItem in groupedResult)
                             {
@@ -166,9 +167,10 @@ namespace ElShrine.EOption
                                 }
                             }
                         }
-                        catch
+                        catch(Exception e)
                         {
-                            ListWarnInfo([GetWarningItem(), new($" Failed to get option class instance of {optionClass.FullName}")]);
+                            if (optionClass is null) ListErrorInfo(e);
+                            else ListWarnInfo([GetWarningItem(), new($" Failed to get option class instance of {optionClass.FullName}")]);
                         }
                     }
                 }

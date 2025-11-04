@@ -7,10 +7,6 @@ using System.Windows.Media;
 
 namespace ElShrine.Wpf.ViewModel.LoadingWindow
 {
-    public class ConsoleOptions
-    {
-
-    }
     public sealed class LoadingWindowViewModel : EWindowViewModelBase
     {
         public static class LoadingWindowStyle
@@ -31,9 +27,7 @@ namespace ElShrine.Wpf.ViewModel.LoadingWindow
         public static LoadingWindowViewModel CreateInstanceIsolated()
             => new(new());
 
-        public static void Loading(TimeSpan? Span = null, Brush? Background = null, 
-            ConsoleOptions? ConsoleOption = null, string StyleName = LoadingWindowStyle.Base,
-            Action? Act = null)
+        public static void Loading(TimeSpan? Span = null, Brush? Background = null, string StyleName = LoadingWindowStyle.Base, Action? Act = null)
         {
             Window window = Instance.ownerWindow ?? new();
 

@@ -271,5 +271,29 @@ namespace ElShrine.Wpf
         }
         public static T? FindVisualParent<T>(this FrameworkElement element, string? name = null, bool selfInconcluded = true) where T : FrameworkElement
             => (T?)element.FindVisualParent(typeof(T), name, selfInconcluded);
+        public static FrameworkElement? FindVisualChildRecursive(this DependencyObject parent, Predicate<DependencyObject> predicate)
+        {
+            if (parent == null) return null;
+            int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childrenCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (predicate(child)) return child as FrameworkElement;
+                var found = child.FindVisualChildRecursive(predicate);
+                if (found != null) return found; 
+            }
+            return null; 
+        }
+        public static DependencyObject GetRootDependencyObject(this DependencyObject element)
+        {
+            DependencyObject? parent = element;
+            while (parent != null)
+            {
+                element = parent;
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+            return element;
+        }
+
     }
 }

@@ -119,16 +119,16 @@ namespace ElShrine.EConsole
             static void _optionApplier(InformationLine line)
             {
                 var opt = ConsoleOption.GetInstance();
-                if (line.LineType == InformationLineType.ChunkEnd && opt.UseSpaceLine && ConsoleOption.GetInstance().SpaceLineLevel >= line.AutoIntent)
-                {
-                    if (line.LineText is not null) line.LineText += '\n';
-                    else line.LineTextSources = [.. line.LineTextSources, new("\n")];
-                }
                 if (line.LineType == InformationLineType.ChunkEnd && opt.ShowSpendTime && line.ChunkMiliseconds != -1)
                 {
                     var notice = $" {line.ChunkMiliseconds} ms consumed.";
                     if (line.LineText is not null) line.LineText += notice;
                     else line.LineTextSources = [.. line.LineTextSources, new(notice, InformationPaintStyle.Sub)];
+                }
+                if (line.LineType == InformationLineType.ChunkEnd && opt.UseSpaceLine && ConsoleOption.GetInstance().SpaceLineLevel >= line.AutoIntent)
+                {
+                    if (line.LineText is not null) line.LineText += '\n';
+                    else line.LineTextSources = [.. line.LineTextSources, new("\n")];
                 }
             }
         }

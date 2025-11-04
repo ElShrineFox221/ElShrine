@@ -2,17 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace ElShrine.Wpf.Model
+namespace ElShrine.Old.Wpf.Model
 {
     #region Inform Changes
-
+    [Obsolete(ObsoleteMsg.OldNamespaceMsg)]
     public interface IEInformationChanged
     {
         public delegate void InformationChangedHandler(object sender, string valueName);
         public event InformationChangedHandler? InformationChanged;
         public void OnInformationChanged(object sender, string valueName);
     }
-
+    [Obsolete(ObsoleteMsg.OldNamespaceMsg)]
     public static class IEInformationChangedExtension
     {
         public static void OnInformationChanged<T>(this T TInstance, object sender, params string[] valueNames) where T : IEInformationChanged
@@ -24,12 +24,12 @@ namespace ElShrine.Wpf.Model
     #endregion
 
     #region Clone Instance
-
+    [Obsolete(ObsoleteMsg.OldNamespaceMsg)]
     public interface IECloneable<T>
     {
         public Func<T, string?, T>? CloneMethod { get; init; }
     }
-
+    [Obsolete(ObsoleteMsg.OldNamespaceMsg)]
     public static class IECloneableExtension
     {
         public static T Clone<T>(this T tInstance, string? newName = null) where T : IECloneable<T>
@@ -52,9 +52,9 @@ namespace ElShrine.Wpf.Model
 
     //IEOrderlyComparable & IEOrderlyComparableExtension
     #region Element Comparer Achieve
-
+    [Obsolete(ObsoleteMsg.OldNamespaceMsg)]
     public interface IEOrderlyComparable<T> : IComparable<T> where T : IEName { };
-
+    [Obsolete(ObsoleteMsg.OldNamespaceMsg)]
     public static class IEOrderlyComparableExtension
     {
         public static int CompareByName<T>(T ins0, T ins1) where T : IEName => ins0.Name.CompareTo(ins1.Name);
@@ -76,8 +76,9 @@ namespace ElShrine.Wpf.Model
     }
 
     #endregion
-
+    [Obsolete(ObsoleteMsg.OldNamespaceMsg)]
     public interface IEOrderlySortable<TElement> : IEList<TElement> where TElement : class { }
+    [Obsolete(ObsoleteMsg.OldNamespaceMsg)]
     public interface IEList<TElement> : IEnumerable where TElement : class
     {
         public List<TElement> Items { get; init; }
@@ -95,6 +96,7 @@ namespace ElShrine.Wpf.Model
         public List<TElement> FindAll(Predicate<TElement> match);
         public void Reverse();
     }
+    [Obsolete(ObsoleteMsg.OldNamespaceMsg)]
     public static class IEListExtension
     {
         public static TElement? FindByName<TList, TElement>

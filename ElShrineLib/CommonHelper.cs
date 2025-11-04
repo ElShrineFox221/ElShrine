@@ -143,7 +143,7 @@ namespace ElShrine
                 TextInfo textInfo = CultureInfo.CurrentCulture.TextInfo;
                 return textInfo.ToTitleCase(str.ToLower());
             }
-            else return char.ToUpper(str[0]) + str.Substring(1);
+            else return char.ToUpper(str[0]) + str[1..];
         }
         #endregion
 

@@ -35,7 +35,7 @@ namespace ElShrine.Wpf.Converters
             else throw new("Invalid target type.");
             return result;
         }
-        public static ColorData ToColor(object value)
+        public static ColorData ToColor(object? value)
         {
             ColorData colorData;
             if (value is ColorData cd) colorData = cd; 
