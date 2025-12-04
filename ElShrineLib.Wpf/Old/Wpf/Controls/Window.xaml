@@ -1,9 +1,9 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:Class="ElShrine.Old.Wpf.Controls.WindowEvent"
                     xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
                     xmlns:wpf="clr-namespace:ElShrine.Old.Wpf"
-                    xmlns:converters="clr-namespace:ElShrine.Old.Wpf.Converters"
-                    x:Class="ElShrine.Old.Wpf.Controls.WindowEvent">
+                    xmlns:converters="clr-namespace:ElShrine.Old.Wpf.Converters">
     <converters:ColorToBrush x:Key="ColorToBrush"/>
     <ObjectDataProvider x:Key="OptionProvider" MethodName="GetInstance" ObjectType="{x:Type wpf:Option}"/>
     <!--#region ElShrine Window Resources-->

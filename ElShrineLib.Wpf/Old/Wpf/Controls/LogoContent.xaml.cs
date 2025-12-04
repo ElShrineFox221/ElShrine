@@ -6,8 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using static ElShrine.Wpf.Methods;
-
+using ElShrine.Old.Wpf;
 namespace ElShrine.Old.Wpf.Controls
 {
     [Obsolete(ObsoleteMsg.OldNamespaceMsg)]
@@ -148,7 +147,7 @@ namespace ElShrine.Old.Wpf.Controls
             //LogoContainer
 
             LogoContainer_Canvas.Visibility = Visibility.Visible;
-            SimpleDoubleAnimation(duration.TimeSpan / 10, 1, null, null, LogoContainer_Canvas, OpacityProperty);
+            Methods.SimpleDoubleAnimation(duration.TimeSpan / 10, 1, null, null, LogoContainer_Canvas, OpacityProperty);
             //Canvas
 
             foreach (var item in UIElements)
@@ -265,8 +264,8 @@ namespace ElShrine.Old.Wpf.Controls
                 Duration d = GetDuration(rateRange, duration);
                 if (arc is not null)
                 {
-                    SimpleDoubleAnimation(d, startTo, startFrom, null, arc, Arc.StartAngleProperty, bt);
-                    SimpleDoubleAnimation(d, endTo, endFrom, null, arc, Arc.EndAngleProperty, bt);
+                    Methods.SimpleDoubleAnimation(d, startTo, startFrom, null, arc, Arc.StartAngleProperty, bt);
+                    Methods.SimpleDoubleAnimation(d, endTo, endFrom, null, arc, Arc.EndAngleProperty, bt);
                 }
             }
             LineAnimation(Line0, DrawingRateRanges.LineDBRange, TOD, TOB, TOD, TOD);
@@ -284,10 +283,10 @@ namespace ElShrine.Old.Wpf.Controls
                 Duration d = GetDuration(rateRange, duration);
                 if (line is not null)
                 {
-                    SimpleDoubleAnimation(d, point1To.X, point1From?.X, null, line, Line.X1Property, bt);
-                    SimpleDoubleAnimation(d, point2To.X, point2From?.X, null, line, Line.X2Property, bt);
-                    SimpleDoubleAnimation(d, point1To.Y, point1From?.Y, null, line, Line.Y1Property, bt);
-                    SimpleDoubleAnimation(d, point2To.Y, point2From?.Y, null, line, Line.Y2Property, bt);
+                    Methods.SimpleDoubleAnimation(d, point1To.X, point1From?.X, null, line, Line.X1Property, bt);
+                    Methods.SimpleDoubleAnimation(d, point2To.X, point2From?.X, null, line, Line.X2Property, bt);
+                    Methods.SimpleDoubleAnimation(d, point1To.Y, point1From?.Y, null, line, Line.Y1Property, bt);
+                    Methods.SimpleDoubleAnimation(d, point2To.Y, point2From?.Y, null, line, Line.Y2Property, bt);
                 }
             }
             #endregion
@@ -306,7 +305,7 @@ namespace ElShrine.Old.Wpf.Controls
                 {
                     LogoContainer.HasLoadedPre = false;
                     timer.Stop();
-                    SimpleDoubleAnimation(duration, 1, null, () =>
+                    Methods.SimpleDoubleAnimation(duration, 1, null, () =>
                     {
                         LogoContainer.Drawn = false;
                         LogoContainer.HasLoadedPre = true;

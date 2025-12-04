@@ -1,8 +1,9 @@
 ﻿using ElShrine.EGraphic;
 using System;
-using System.Windows.Media;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Windows.Media;
 using Color = System.Drawing.Color;
 using MediaColor = System.Windows.Media.Color;
 
@@ -31,6 +32,20 @@ namespace ElShrine.Wpf
         }
         public static ColorData ToColorData(this MediaColor color)
             => (color.A, color.R, color.G, color.B).ToColorData();
+
+        public static MediaColor Lerp(this MediaColor from, MediaColor target, double alpha)
+        {
+            // 钳制 alpha 在 0 到 1 之间
+            alpha = Math.Max(0, Math.Min(1, alpha));
+            double invAlpha = 1.0 - alpha;
+
+            return MediaColor.FromArgb(
+                (byte)(from.A * invAlpha + target.A * alpha),
+                (byte)(from.R * invAlpha + target.R * alpha),
+                (byte)(from.G * invAlpha + target.G * alpha),
+                (byte)(from.B * invAlpha + target.B * alpha)
+            );
+        }
         #endregion
 
         #region Console color
@@ -107,6 +122,26 @@ namespace ElShrine.Wpf
         {
             byte grey = color.ToGray();
             return MediaColor.FromArgb(255, grey, grey, grey);
+        }
+        #endregion
+
+        #region Named colors
+        private static readonly Dictionary<string, ColorData> namedColors = GetNamedColors();
+        public static IReadOnlyDictionary<string, ColorData> NamedColors => namedColors;
+        private static Dictionary<string, ColorData> GetNamedColors()
+        {
+            var colors = new Dictionary<string, ColorData>(StringComparer.OrdinalIgnoreCase);
+            var systemColors = typeof(Colors).GetProperties()
+                .Where(p => p.PropertyType == typeof(MediaColor) && p.GetValue(null) is MediaColor)
+                .ToDictionary(p => p.Name.ToUpperInvariant(), static p => ((MediaColor)p.GetValue(null)!).ToColorData());
+            foreach (var kvp in systemColors)
+            {
+                if (!colors.ContainsKey(kvp.Key))
+                {
+                    colors.Add(kvp.Key, kvp.Value);
+                }
+            }
+            return colors;
         }
         #endregion
     }

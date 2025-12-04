@@ -1,6 +1,6 @@
 ﻿using ElShrine.EGraphic;
+using ElShrine.Wpf;
 using ElShrine.Wpf.UITheme;
-using ElShrine.Wpf.ViewModel;
 using System.Collections.ObjectModel;
 using System.Windows;
 using VMC = ElShrine.Wpf.VMCommand;

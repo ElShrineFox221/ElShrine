@@ -1,12 +1,14 @@
 ﻿using ElShrine.Old.Wpf.Controls;
+using ElShrine.Wpf;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 
-namespace ElShrine.Wpf.ViewModel.LoadingWindow
+namespace ElShrine.Old.Wpf.ViewModel.LoadingWindow
 {
+    [Obsolete(ObsoleteMsg.OldNamespaceMsg)]
     public sealed class LoadingWindowViewModel : EWindowViewModelBase
     {
         public static class LoadingWindowStyle
@@ -34,9 +36,12 @@ namespace ElShrine.Wpf.ViewModel.LoadingWindow
             Style? style = (Style?)new Window().TryFindResource(StyleName);
             if (style is not null) window.Style = style;
             TimeSpan timeSpan = Span ?? TimeSpan.FromMilliseconds(3000);
-            Action act = Act ?? (() => { 
-                Methods.SimpleDoubleAnimation(new(TimeSpan.FromMilliseconds(300)), 0, null, null, window, UIElement.OpacityProperty); 
-            });
+            Action act;
+            if (Act is null) act = () =>
+            {
+                Methods.SimpleDoubleAnimation(new(TimeSpan.FromMilliseconds(300)), 0, null, null, window, UIElement.OpacityProperty);
+            };
+            else act = Act;
             Task.Run(() =>
             {
                 Thread.Sleep(TimeSpan.FromMilliseconds(1000));

@@ -5,7 +5,7 @@ using System.Windows.Media;
 
 namespace ElShrine.Wpf.Controls
 {
-    public class EListBox : ListBox, IThemeControl
+    public class EListBox : ListBox, IThemeControlOld
     {
         public EListBox? ScrollViewer { get; protected set; }
 

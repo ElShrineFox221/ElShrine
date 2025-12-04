@@ -1,7 +1,6 @@
 ﻿using ElShrine.Common.Interface;
 using ElShrine.VisualTool.MapEditor.Model;
 using ElShrine.Wpf;
-using ElShrine.Wpf.ViewModel;
 using System.Windows.Media;
 
 namespace ElShrine.VisualTool.MapEditor.ViewModel

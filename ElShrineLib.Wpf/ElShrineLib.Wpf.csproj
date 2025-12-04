@@ -6,6 +6,7 @@
     <UseWPF>true</UseWPF>
     <RootNamespace>ElShrine</RootNamespace>
     <BaseOutputPath>..\bin</BaseOutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +14,16 @@
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
+
+    <ItemGroup>
+		<AssemblyAttribute Include="System.Windows.ThemeInfoAttribute">
+			<_Parameter1>System.Windows.ResourceDictionaryLocation.None</_Parameter1>
+			<_Parameter1_IsLiteral>true</_Parameter1_IsLiteral>
+
+			<_Parameter2>System.Windows.ResourceDictionaryLocation.SourceAssembly</_Parameter2>
+			<_Parameter2_IsLiteral>true</_Parameter2_IsLiteral>
+		</AssemblyAttribute>
+	</ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ElShrineLib.Graphics\ElShrineLib.Graphics.csproj" />
@@ -22,6 +33,16 @@
     <Compile Update="Wpf\Controls\EExpander.xaml.cs">
       <Generator>MSBuild:Compile</Generator>
     </Compile>
+  </ItemGroup>
+	
+  <ItemGroup>
+	  <Analyzer Include="..\ElShrine.Wpf.Generators\bin\Release\netstandard2.0\ElShrineLib.Wpf.Generators.dll" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <Reference Include="ElShrineLib.Wpf.Generators.Attributes">
+      <HintPath>..\ElShrine.Wpf.Generators\bin\Release\netstandard2.0\ElShrineLib.Wpf.Generators.Attributes.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

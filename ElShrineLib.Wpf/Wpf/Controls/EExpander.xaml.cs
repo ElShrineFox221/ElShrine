@@ -8,7 +8,7 @@ using Brush = System.Windows.Media.Brush;
 
 namespace ElShrine.Wpf.Controls
 {
-    public class EExpander : Expander, IThemeControl
+    public class EExpander : Expander, IThemeControlOld
     {
         private ContentPresenter? contentHost;
         private RotateTransform? rotateTransform;

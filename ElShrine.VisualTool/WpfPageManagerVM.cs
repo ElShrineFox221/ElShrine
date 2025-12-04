@@ -1,5 +1,5 @@
 ﻿using ElShrine.EConsole;
-using ElShrine.Wpf.ViewModel;
+using ElShrine.Wpf;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;

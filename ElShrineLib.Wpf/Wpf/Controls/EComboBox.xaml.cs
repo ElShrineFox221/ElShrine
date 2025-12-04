@@ -6,7 +6,7 @@ using System.Windows.Media;
 
 namespace ElShrine.Wpf.Controls
 {
-    public class EComboBox : ComboBox, IThemeControl
+    public class EComboBox : ComboBox, IThemeControlOld
     {
         #region DPs
 

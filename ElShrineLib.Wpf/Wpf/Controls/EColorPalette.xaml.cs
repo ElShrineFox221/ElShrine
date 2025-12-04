@@ -1,6 +1,6 @@
 ﻿using ElShrine.EGraphic;
+using ElShrine.Wpf;
 using ElShrine.Wpf.UITheme;
-using ElShrine.Wpf.ViewModel;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -11,7 +11,7 @@ using VMC = ElShrine.Wpf.VMCommand;
 
 namespace ElShrine.Wpf.Controls
 {
-    public partial class EColorPalette : UserControl, IThemeControl
+    public partial class EColorPalette : UserControl, IThemeControlOld
     {
         public ColorData ResultColor
         {

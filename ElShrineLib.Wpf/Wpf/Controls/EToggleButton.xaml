@@ -189,29 +189,8 @@ Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRa
                                 </BeginStoryboard>
                             </Trigger.ExitActions>
                         </Trigger>
-                        <Trigger Property="IsChecked" Value="True">
+                        <Trigger Property="IsChecked" Value="False">
                             <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="innerScaleTransform" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.1">
-                                            <DoubleAnimation.EasingFunction>
-                                                <PowerEase/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                        <DoubleAnimation Storyboard.TargetName="innerScaleTransform" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.1">
-                                            <DoubleAnimation.EasingFunction>
-                                                <SineEase/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                        <DoubleAnimation Storyboard.TargetName="toggleSizeInnerChunk" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
-                                            <DoubleAnimation.EasingFunction>
-                                                <SineEase/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
                                 <BeginStoryboard>
                                     <Storyboard BeginTime="0:0:0.1">
                                         <DoubleAnimation Storyboard.TargetName="innerScaleTransform" Storyboard.TargetProperty="ScaleX" To="0.5" Duration="0:0:0.2">
@@ -225,6 +204,27 @@ Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRa
                                             </DoubleAnimation.EasingFunction>
                                         </DoubleAnimation>
                                         <DoubleAnimation Storyboard.TargetName="toggleSizeInnerChunk" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="innerScaleTransform" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.1">
+                                            <DoubleAnimation.EasingFunction>
+                                                <PowerEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="innerScaleTransform" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.1">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="toggleSizeInnerChunk" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
                                             <DoubleAnimation.EasingFunction>
                                                 <SineEase/>
                                             </DoubleAnimation.EasingFunction>

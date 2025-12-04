@@ -1,9 +1,11 @@
 ﻿using ElShrine.Common;
-using ElShrine.Wpf.ViewModel;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
+using static ElShrine.EConsole.ConsoleManager;
 
 namespace ElShrine.Wpf
 {
@@ -49,7 +51,6 @@ namespace ElShrine.Wpf
             bool result;
             if (CanExecuteFunction is null) result = true;
             else result = CanExecuteFunction(parameter);
-            if(canExcuteResult ^= result) CanExecuteChanged?.Invoke(this, new EventArgs());
             return result;
         }
         public void Execute(object? parameter)
@@ -63,11 +64,31 @@ namespace ElShrine.Wpf
             ExecuteAction(parameter);
         }
 
-        public void ExecuteWithWait(object? parameter)
+        public void InvokeSync(object? parameter, Dispatcher? dispatcher = null)
         {
-            Execute(parameter);
-            if (runningTask is not null && !runningTask.IsCompleted) runningTask.Wait(); 
+            dispatcher ??= Application.Current.Dispatcher;
+            Task? runningTask = null;
+            dispatcher.Invoke(() =>
+            {
+                ListContentInfo("Execute action on ui dispatcher");
+                Execute(parameter);
+                runningTask = RunningTask;
+            });
+            if (runningTask is not null)
+            {
+                ListContentInfo("Async action will blocks the thread...");
+                try
+                {
+                    runningTask.Wait();
+                }
+                finally
+                {
+                    ListContentInfo("Async action completed.");
+                }
+            }
+            else ListContentInfo("Sync action wont blocks the thread.");
         }
+
         public Action<object?>? ExecuteAction { get; init; }
         public Func<object?, bool>? CanExecuteFunction { get; init; }
 

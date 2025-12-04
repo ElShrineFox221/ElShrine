@@ -1,4 +1,4 @@
-﻿using ElShrine.Wpf.ViewModel;
+﻿using ElShrine.Wpf;
 using System.Windows;
 
 namespace ElShrine.VisualTool

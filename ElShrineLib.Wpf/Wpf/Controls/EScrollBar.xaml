@@ -258,9 +258,7 @@ Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.EnterActions>
-                                </Trigger>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Trigger.EnterActions>
+                                    <Trigger.ExitActions>
                                         <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
                                             <Storyboard>
                                                 <DoubleAnimation Storyboard.TargetName="scrollBarRoot" 
@@ -271,7 +269,7 @@ Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0
                                                 </DoubleAnimation>
                                             </Storyboard>
                                         </BeginStoryboard>
-                                    </Trigger.EnterActions>
+                                    </Trigger.ExitActions>
                                 </Trigger>
                                 <Trigger Property="IsMoveButtonVisibile" Value="False">
                                     <Setter TargetName="PART_LineLeftButton" Property="Visibility" Value="Collapsed"/>
@@ -384,9 +382,7 @@ Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.EnterActions>
-                                </Trigger>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Trigger.EnterActions>
+                                    <Trigger.ExitActions>
                                         <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
                                             <Storyboard>
                                                 <DoubleAnimation Storyboard.TargetName="scrollBarRoot" 
@@ -397,7 +393,7 @@ Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0
                                                 </DoubleAnimation>
                                             </Storyboard>
                                         </BeginStoryboard>
-                                    </Trigger.EnterActions>
+                                    </Trigger.ExitActions>
                                 </Trigger>
                                 <Trigger Property="IsMoveButtonVisibile" Value="False">
                                     <Setter TargetName="PART_LineUpButton" Property="Visibility" Value="Collapsed"/>

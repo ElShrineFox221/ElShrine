@@ -43,8 +43,8 @@ namespace ElShrine.Wpf.Converters
                             if (index != -1) str = str[1..];
                             else
                             {
-                                chars.IndexOfIngoreCase(str[^1]);
-                                if (index != -1) str = str[..^2];
+                                index = chars.IndexOfIngoreCase(str[^1]);
+                                if (index != -1) str = str[..^1];
                             }
                             d = double.Parse(str);
                             d *= index switch
@@ -94,6 +94,64 @@ namespace ElShrine.Wpf.Converters
             else if (targetType == typeof(CornerRadius)) result = new CornerRadius(values.v0, values.v1, values.v2, values.v3);
             else throw new NotImplementedException();
             return result;
+        }
+    }
+
+
+    public class QuadruplesMultiConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values == null || values.Length == 0 || values[0] == DependencyProperty.UnsetValue) return DependencyProperty.UnsetValue;
+            (double v0, double v1, double v2, double v3) current = QuadruplesConverter.ToValues(values[0]);
+            string opsParam = parameter?.ToString() ?? string.Empty;
+            if (string.IsNullOrEmpty(opsParam)) return QuadruplesConverter.ToQuadruple(current, targetType);
+
+            string[] operators = opsParam.Split('_');
+            int valueIndex = 1; 
+
+            foreach (string op in operators)
+            {
+                if (valueIndex >= values.Length || values[valueIndex] == DependencyProperty.UnsetValue) break;
+                var (v0, v1, v2, v3) = QuadruplesConverter.ToValues(values[valueIndex]);
+                static double toValidD(double d) => double.IsRealNumber(d) ? d : 0; 
+                switch (op.Trim())
+                {
+                    case "+":
+                        current.v0 += toValidD(v0);
+                        current.v1 += toValidD(v1);
+                        current.v2 += toValidD(v2);
+                        current.v3 += toValidD(v3);
+                        break;
+                    case "-":
+                        current.v0 -= toValidD(v0);
+                        current.v1 -= toValidD(v1);
+                        current.v2 -= toValidD(v2);
+                        current.v3 -= toValidD(v3);
+                        break;
+                    case "*":
+                        current.v0 *= toValidD(v0);
+                        current.v1 *= toValidD(v1);
+                        current.v2 *= toValidD(v2);
+                        current.v3 *= toValidD(v3);
+                        break;
+                    case "/":
+                        current.v0 = toValidD(v0) == 0 ? 0 : current.v0 / toValidD(v0);
+                        current.v1 = toValidD(v1) == 0 ? 0 : current.v1 / toValidD(v1);
+                        current.v2 = toValidD(v2) == 0 ? 0 : current.v2 / toValidD(v2);
+                        current.v3 = toValidD(v3) == 0 ? 0 : current.v3 / toValidD(v3);
+                        break;
+                    default:
+                        break;
+                }
+                valueIndex++;
+            }
+            return QuadruplesConverter.ToQuadruple(current, targetType);
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }

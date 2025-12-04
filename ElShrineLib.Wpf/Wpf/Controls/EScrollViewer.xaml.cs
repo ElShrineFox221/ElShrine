@@ -12,7 +12,7 @@ namespace ElShrine.Wpf.Controls
         Page = 2,
         All = 3,
     }
-    public class EScrollViewer : ScrollViewer, IThemeControl
+    public class EScrollViewer : ScrollViewer, IThemeControlOld
     {
         public EScrollBar? VerticalScrollBar { get; protected set; }
         public EScrollBar? HorizontalScrollBar { get; protected set; }

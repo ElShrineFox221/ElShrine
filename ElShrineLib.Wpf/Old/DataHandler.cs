@@ -28,8 +28,8 @@ namespace ElShrine.Old
             data = (T)(JsonSerializer.Deserialize(stream, typeof(T), options) ?? throw new Exception("Failed to deserialize."));
             //using JsonTextReader reader = new(new StreamReader(stream, Encoding.UTF8));
             //JsonSerializer serializer = JsonSerializer.Create(new() { Formatting = Newtonsoft.Json.Formatting.Indented });
-            //object? o = serializer.Deserialize(reader, typeof(T));
-            //if (o != null) data = (T)o;
+            //object? o = serializer.Deserialize(reader, typeof(TWindowVM));
+            //if (o != null) data = (TWindowVM)o;
             //else throw new("Failed to deserialize");
         }
     }

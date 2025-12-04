@@ -1,7 +1,6 @@
 ﻿using ElShrine.EOption;
 using ElShrine.Wpf;
 using ElShrine.Wpf.Controls;
-using ElShrine.Wpf.ViewModel;
 using System.Collections.ObjectModel;
 using System.Windows;
 

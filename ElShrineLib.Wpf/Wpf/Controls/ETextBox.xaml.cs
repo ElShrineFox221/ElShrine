@@ -11,7 +11,7 @@ using System.Windows.Media;
 
 namespace ElShrine.Wpf.Controls
 {
-    public class ETextBox : TextBox, IThemeControl
+    public partial class ETextBox : TextBox, IThemeControlOld
     {
         #region DPs
 
@@ -57,11 +57,17 @@ namespace ElShrine.Wpf.Controls
             get => (IEnumerable<object>)GetValue(SuggestionsSourceProperty);
             set => SetValue(SuggestionsSourceProperty, value);
         }
-       
+        public bool IsPasswordBox
+        {
+            get => (bool)GetValue(IsPasswordBoxProperty);
+            set => SetValue(IsPasswordBoxProperty, value);
+        }
+
         public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register(nameof(Header),  typeof(object), typeof(ETextBox), new(null));
         public static readonly DependencyProperty HeaderPlacementProperty = DependencyProperty.Register(nameof(HeaderPlacement),  typeof(ExpandDirection), typeof(ETextBox), new(ExpandDirection.Left));
         public static readonly DependencyProperty NoticeInfoProperty = DependencyProperty.Register(nameof(NoticeInfo),  typeof(string), typeof(ETextBox), new(string.Empty));
         public static readonly DependencyProperty SuggestionsSourceProperty = DependencyProperty.Register(nameof(SuggestionsSource),  typeof(IEnumerable<object>), typeof(ETextBox), new(null, OnSuggestionsSourceChanged));
+        public static readonly DependencyProperty IsPasswordBoxProperty = DependencyProperty.Register(nameof(IsPasswordBox),  typeof(bool), typeof(ETextBox), new(false));
 
         public event ValueChangedHandler<string>? AppliedSuggestion;
         #endregion
@@ -75,6 +81,7 @@ namespace ElShrine.Wpf.Controls
         #endregion
 
         static ETextBox() => DefaultStyleKeyProperty.OverrideMetadata(typeof(ETextBox), new FrameworkPropertyMetadata(typeof(ETextBox)));
+
 
         #region Initialize
         public override void OnApplyTemplate()

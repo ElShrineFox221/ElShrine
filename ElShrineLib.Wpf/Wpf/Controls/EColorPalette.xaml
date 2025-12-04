@@ -46,9 +46,7 @@ Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
                             </Storyboard>
                         </BeginStoryboard>
                     </Trigger.EnterActions>
-                </Trigger>
-                <Trigger Property="IsEnabled" Value="False">
-                    <Trigger.EnterActions>
+                    <Trigger.ExitActions>
                         <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
                             <Storyboard>
                                 <DoubleAnimation Storyboard.TargetName="controlRoot" 
@@ -59,7 +57,7 @@ Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0
                                 </DoubleAnimation>
                             </Storyboard>
                         </BeginStoryboard>
-                    </Trigger.EnterActions>
+                    </Trigger.ExitActions>
                 </Trigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
@@ -145,7 +143,7 @@ Background="{Binding Background, RelativeSource={RelativeSource AncestorType=Con
         </Style>
         <Style x:Key="ecp_action_ebuttonstyle" TargetType="local:EButton" BasedOn="{StaticResource {x:Type local:EButton}}">
             <Setter Property="Background" Value="{Binding Background, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
-            <Setter Property="SelectionBrush" Value="{Binding SelectionBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
+            <Setter Property="SecondaryBrush" Value="{Binding SelectionBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
             <Setter Property="BorderBrush" Value="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
             <Setter Property="FontBrush" Value="{Binding FontBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
             <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>

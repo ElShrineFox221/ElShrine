@@ -5,7 +5,7 @@ using System.Windows.Media;
 
 namespace ElShrine.Wpf.Controls
 {
-    public class EScrollBar : ScrollBar, IThemeControl
+    public class EScrollBar : ScrollBar, IThemeControlOld
     {
         #region DPs
 

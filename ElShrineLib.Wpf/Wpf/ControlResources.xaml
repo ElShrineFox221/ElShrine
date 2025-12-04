@@ -3,6 +3,9 @@
                     xmlns:theme="clr-namespace:ElShrine.Wpf.UITheme">
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EButton.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EProgressBar.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EImage.xaml"/>
+        
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EToggleButton.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EExpander.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EScrollBar.xaml"/>

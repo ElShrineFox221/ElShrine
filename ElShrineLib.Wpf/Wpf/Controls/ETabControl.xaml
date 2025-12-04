@@ -50,9 +50,7 @@ Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.EnterActions>
-                        </Trigger>
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Trigger.EnterActions>
+                            <Trigger.ExitActions>
                                 <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
                                     <Storyboard>
                                         <DoubleAnimation Storyboard.TargetName="controlRoot" 
@@ -63,7 +61,7 @@ Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0
                                         </DoubleAnimation>
                                     </Storyboard>
                                 </BeginStoryboard>
-                            </Trigger.EnterActions>
+                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="TabStripPlacement" Value="Top">
                             <Setter TargetName="headerContainer" Property="Grid.Row" Value="0"/>
@@ -351,9 +349,7 @@ Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
                                                 </Storyboard>
                                             </BeginStoryboard>
                                         </Trigger.EnterActions>
-                                    </Trigger>
-                                    <Trigger Property="IsEnabled" Value="False">
-                                        <Trigger.EnterActions>
+                                        <Trigger.ExitActions>
                                             <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
                                                 <Storyboard>
                                                     <DoubleAnimation Storyboard.TargetName="controlRoot" 
@@ -364,7 +360,7 @@ Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0
                                                     </DoubleAnimation>
                                                 </Storyboard>
                                             </BeginStoryboard>
-                                        </Trigger.EnterActions>
+                                        </Trigger.ExitActions>
                                     </Trigger>
                                     <Trigger Property="IsMouseOver" Value="True">
                                         <Trigger.EnterActions>

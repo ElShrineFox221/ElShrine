@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.Serialization;
 
-namespace ElShrine.Wpf.ViewModel
+namespace ElShrine.Wpf
 {
     [DataContract]
     public abstract class ViewModelBase : INotifyPropertyChanged

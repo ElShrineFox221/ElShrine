@@ -63,6 +63,7 @@ namespace ElShrine.Old.Wpf.Controls
         }
         public bool Visible { get; set; } = false;
     }
+    [Obsolete(ObsoleteMsg.OldNamespaceMsg)]
     public class ElShrineTempField : ContentControl
     {
         public void Initialize(int tagx = 5, int tagy = 3, int fieldx = 5, int fieldy = 5, int startx = 1, int starty = 3)

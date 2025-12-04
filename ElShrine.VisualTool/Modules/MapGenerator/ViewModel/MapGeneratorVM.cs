@@ -1,5 +1,5 @@
 ﻿using ElShrine.EOption;
-using ElShrine.Wpf.ViewModel;
+using ElShrine.Wpf;
 
 namespace ElShrine.VisualTool.Modules.MapGenerator.ViewModel
 {

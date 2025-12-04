@@ -7,6 +7,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using Methods = ElShrine.Old.Wpf.Methods;
 
 namespace ElShrine.Old.Wpf.Controls
 {
@@ -108,7 +109,7 @@ namespace ElShrine.Old.Wpf.Controls
         private void RollingArrow_Loaded(object sender, RoutedEventArgs e)
         {
             RollingArrow arrow = (RollingArrow)sender;
-            arrow.polygon = (Polygon?)Methods.FindChild(arrow, "FillArrow");
+            arrow.polygon = (Polygon?)ElShrine.Wpf.Methods.FindChild(arrow, "FillArrow");
             PointCollection? points = null;
             arrow.InitailizeRolling();
             arrow.Rolling = false;

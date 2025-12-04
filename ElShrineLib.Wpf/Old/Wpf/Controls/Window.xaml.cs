@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
+using Methods = ElShrine.Wpf.Methods;
 
 namespace ElShrine.Old.Wpf.Controls
 {
@@ -96,10 +97,10 @@ namespace ElShrine.Old.Wpf.Controls
         #endregion
         public static void ElShrineWindow_HeaderOpenButton_Click(object sender, bool opacityChange)
         {
-            Window? window = Methods.FindParent<Window>((DependencyObject)sender);
+            Window? window = ElShrine.Wpf.Methods.FindParent<Window>((DependencyObject)sender);
             if (window == null) return;
-            Border? HeaderPanel = (Border?)Methods.FindChild(window, "HeaderPanel");
-            Border? MainPanel = (Border?)Methods.FindChild(window, "MainPanel");
+            Border? HeaderPanel = (Border?)ElShrine.Wpf.Methods.FindChild(window, "HeaderPanel");
+            Border? MainPanel = (Border?)ElShrine.Wpf.Methods.FindChild(window, "MainPanel");
             if (HeaderPanel == null || MainPanel == null) return;
             HeaderPanel.BeginAnimation(FrameworkElement.WidthProperty,
                 new DoubleAnimation()
@@ -127,7 +128,7 @@ namespace ElShrine.Old.Wpf.Controls
         public static void AddHeaders(Window window, List<string> names, List<object> styles, List<double> fontSizes, List<RoutedEventHandler?>? delegates)
         {
             if (window.Style != (Style)Application.Current.FindResource("ElShrineWindow_HeaderStyle")) return;
-            ItemsControl? HeaderPanel = (ItemsControl?)Methods.FindChild(window, "HeaderItemsPanel");
+            ItemsControl? HeaderPanel = (ItemsControl?)ElShrine.Wpf.Methods.FindChild(window, "HeaderItemsPanel");
             ObservableCollection<Button> Buttons = [];
             if (HeaderPanel == null) return;
             object? style = styles[0];

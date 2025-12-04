@@ -7,8 +7,13 @@
         {
             var t = Task.Run(() =>
             {
-                ct?.ThrowIfCancellationRequested();
-                while (func()) Thread.Sleep(RunningInterval);
+                var continued = func();
+                while (continued)
+                {
+                    ct?.ThrowIfCancellationRequested();
+                    Thread.Sleep(RunningInterval);
+                    continued = func();
+                }
             });
             await t;
             onCompleted?.Invoke(t);

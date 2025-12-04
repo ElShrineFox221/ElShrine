@@ -1,6 +1,5 @@
 ﻿using ElShrine.EGraphic;
 using ElShrine.Wpf;
-using ElShrine.Wpf.ViewModel;
 using System.Runtime.Serialization;
 using System.Windows.Media;
 

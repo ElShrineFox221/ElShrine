@@ -1,6 +1,6 @@
 ﻿using ElShrine.EOption;
+using ElShrine.Wpf;
 using ElShrine.Wpf.Controls;
-using ElShrine.Wpf.ViewModel;
 using VMC = ElShrine.Wpf.VMCommand;
 
 namespace ElShrine.VisualTool.DebugPage

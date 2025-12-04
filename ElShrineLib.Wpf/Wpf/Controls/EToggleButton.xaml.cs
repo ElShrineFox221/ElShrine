@@ -6,7 +6,7 @@ using System.Windows.Media;
 
 namespace ElShrine.Wpf.Controls
 {
-    public class EToggleButton : ToggleButton, IThemeControl
+    public class EToggleButton : ToggleButton, IThemeControlOld
     {
 
         #region DPs

@@ -1,12 +1,14 @@
 ﻿using ElShrine.Common.Interface;
+using ElShrine.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 
-namespace ElShrine.Wpf.ViewModel
+namespace ElShrine.Old.Wpf.ViewModel
 {
+    [Obsolete(ObsoleteMsg.OldNamespaceMsg)]
     public abstract class CollectionViewModelBase<ItemModel, ItemViewModel>(List<ItemModel> items) : ViewModelBase, IEVMCollection, IEDirtable where ItemViewModel : ViewModelBase<ItemModel>, IEVMEquatabe<ItemViewModel> where ItemModel : class
     {
         protected override void Initialize() => ReconstructViewModels();

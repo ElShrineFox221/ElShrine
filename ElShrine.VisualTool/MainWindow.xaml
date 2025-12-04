@@ -1,4 +1,4 @@
-﻿<Window x:Class="ElShrine.VisualTool.MainWindow"
+﻿<controls:EWindow x:Class="ElShrine.VisualTool.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,8 +7,8 @@
         xmlns:controls="clr-namespace:ElShrine.Wpf.Controls;assembly=ElShrineLib.Wpf"
         d:DataContext="{d:DesignInstance Type=viewmodel:MainWindowViewModel}"
         mc:Ignorable="d"
-        Title="MainWindow" Height="720" Width="1100" MinWidth="300" MinHeight="600" FontSize="12">
-    <Window.Resources>
+        Title="MainWindow" Height="720" Width="1100" MinWidth="300" MinHeight="600" FontSize="12" EBorderCornerRadius="5" Padding="0" DragResizeEdgeWidth="8">
+    <controls:EWindow.Resources>
         <DataTemplate x:Key="ModuleInfoDataTemplate" DataType="{x:Type viewmodel:WpfPageInfoVM}">
             <Grid>
                 <Border x:Name="rootBorder" CornerRadius="10" Padding="9,3" Width="150">
@@ -63,9 +63,9 @@
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>
-        
-    </Window.Resources>
-    <Grid>
+
+    </controls:EWindow.Resources>
+    <Grid Margin="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
@@ -74,7 +74,8 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
-        <controls:ETabControl Grid.Row="1" x:Name="ModulesTabControl" BorderThickness="1" ClipToBounds="False" HorizontalHeaderAlignment="Left"/>
+
+        <controls:ETabControl Grid.Row="1" x:Name="ModulesTabControl" BorderThickness="1" ClipToBounds="False" HorizontalHeaderAlignment="Left" BorderCornerRadius="4"/>
         <Canvas Grid.Row="0" Height="20">
             <Grid Canvas.Right="20" >
                 <controls:EExpander ExpandDirection="Down" SlideDistance="200" BorderCornerRadius="5">
@@ -113,6 +114,31 @@ ItemsSource="{Binding ModuleManager.EnabledModules}" ItemTemplate="{StaticResour
                 </controls:EExpander>
             </Grid>
         </Canvas>
-        
+        <Grid Grid.Column="1" Grid.RowSpan="2">
+            <StackPanel Background="#FFFFFF">
+                <StackPanel Orientation="Vertical">
+                    <controls:EImage x:Name="testImage" MaxHeight="110" Stretch="Uniform" Margin="4" Visibility="Visible">
+
+                    </controls:EImage>
+                    <controls:EImage x:Name="testImage1" MaxHeight="24" Style="{StaticResource EImage_SimpleStyle}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <controls:ETextBox x:Name="urlBox" NoticeInfo="URL"></controls:ETextBox>
+                    <controls:EButton x:Name="testSwitchEnabledBtn" Click="testSwitchEnabledBtn_Click" Content="SwitchEnabled"/>
+                    <controls:EButton x:Name="testConfrimBtn" Click="testConfrimBtn_Click" Content="Confrim"/>
+                    <controls:EButton x:Name="testProChangeBtn" Click="testProChangeBtn_Click" Content="ChangeValue"/>
+                    <controls:EButton x:Name="testProModeBtn" Style="{StaticResource EButton_BackColorStyle}" Click="testProModeBtn_Click" Content="Mode"/>
+                    <controls:EButton>
+                        <Grid Width="200">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <controls:EButton Name="testEBTNN" Content="test ebtn n" Width="100"/>
+                        </Grid>
+                    </controls:EButton>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
     </Grid>
-</Window>
+</controls:EWindow>

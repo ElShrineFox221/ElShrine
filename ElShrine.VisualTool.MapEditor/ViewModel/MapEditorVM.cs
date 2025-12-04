@@ -2,7 +2,7 @@
 using ElShrine.EOption;
 using ElShrine.VisualTool;
 using ElShrine.VisualTool.MapEditor.Model;
-using ElShrine.Wpf.ViewModel;
+using ElShrine.Wpf;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.ComponentModel;

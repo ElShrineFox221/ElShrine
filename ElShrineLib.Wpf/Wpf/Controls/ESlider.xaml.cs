@@ -13,7 +13,7 @@ namespace ElShrine.Wpf.Controls
     {
         LightLower, LightUpper, LightAll, None
     }
-    public class ESlider : Slider, IThemeControl
+    public class ESlider : Slider, IThemeControlOld
     {
         #region DPs
 

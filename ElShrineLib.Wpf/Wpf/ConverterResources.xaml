@@ -3,17 +3,24 @@
                     xmlns:theme="clr-namespace:ElShrine.Wpf.UITheme"
                     xmlns:converters="clr-namespace:ElShrine.Wpf.Converters">
     <ObjectDataProvider x:Key="ThemeProvider" MethodName="GetInstance" ObjectType="{x:Type theme:ThemeManager}"/>
-    
+
     <converters:BoolReverseConverter x:Key="BoolReverseConverter"/>
     <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     <converters:IsNullToVisibilityConverter x:Key="IsNullToVisibilityConverter"/>
     <converters:ColorToSolidBrushConverter x:Key="ColorToSolidBrushConverter"/>
     <converters:ColorLerpToSolidBrushConverter x:Key="ColorLerpToSolidBrushConverter"/>
     <converters:QuadruplesConverter x:Key="QuadruplesConverter"/>
+    <converters:QuadruplesMultiConverter x:Key="QuadruplesMultiConverter"/>
     <converters:NumToStringConverter x:Key="NumToStringConverter"/>
+    <converters:NumToStringMultiConverter x:Key="NumToStringMultiConverter"/>
     <converters:EnumTextLocalizeConverter x:Key="EnumTextLocalizeConverter"/>
     <converters:LocalizeConverter x:Key="LocalizeConverter"/>
+    <converters:ImageSourceCoverter x:Key="ImageSourceCoverter"/>
+
+    <converters:CircularProgressToPathConverter x:Key="CircularProgressToPathConverter"/>
+
     <DataTemplate x:Key="EnumComboBoxDataTemplate">
         <TextBlock Text="{Binding Converter={StaticResource EnumTextLocalizeConverter}}"/>
     </DataTemplate>
+
 </ResourceDictionary>

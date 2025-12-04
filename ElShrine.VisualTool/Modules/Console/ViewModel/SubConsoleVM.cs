@@ -1,5 +1,5 @@
 ﻿using ElShrine.ETimer;
-using ElShrine.Wpf.ViewModel;
+using ElShrine.Wpf;
 using System.Collections.ObjectModel;
 using System.Windows;
 

@@ -4,7 +4,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:viewmodel="clr-namespace:ElShrine.Wpf.ViewModel"
+             xmlns:viewmodel="clr-namespace:ElShrine.Old.Wpf.ViewModel"
              xmlns:converters="clr-namespace:ElShrine.Wpf.Converters"
              d:DataContext="{d:DesignInstance Type=viewmodel:ColorVM}"
              mc:Ignorable="d">

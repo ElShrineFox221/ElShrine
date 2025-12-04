@@ -24,6 +24,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElShrine.VisualTool.Process
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElShrine.VisualTool.DebugPage", "ElShrine.VisualTool.DebugPage\ElShrine.VisualTool.DebugPage.csproj", "{04B6C8B2-9132-4492-81C4-A410BC9ACB3D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElShrineLib.Wpf.Generators", "ElShrine.Wpf.Generators\ElShrineLib.Wpf.Generators.csproj", "{F41931D4-8D61-45E1-B1D8-367DAC4872E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElShrineLib.Wpf.Generators.Attributes", "ElShrineLib.Wpf.Generators.Attributes\ElShrineLib.Wpf.Generators.Attributes.csproj", "{4CEA932A-E0E8-46D4-9AD0-87700717AD46}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +66,14 @@ Global
 		{04B6C8B2-9132-4492-81C4-A410BC9ACB3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04B6C8B2-9132-4492-81C4-A410BC9ACB3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04B6C8B2-9132-4492-81C4-A410BC9ACB3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F41931D4-8D61-45E1-B1D8-367DAC4872E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F41931D4-8D61-45E1-B1D8-367DAC4872E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F41931D4-8D61-45E1-B1D8-367DAC4872E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F41931D4-8D61-45E1-B1D8-367DAC4872E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CEA932A-E0E8-46D4-9AD0-87700717AD46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CEA932A-E0E8-46D4-9AD0-87700717AD46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CEA932A-E0E8-46D4-9AD0-87700717AD46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CEA932A-E0E8-46D4-9AD0-87700717AD46}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

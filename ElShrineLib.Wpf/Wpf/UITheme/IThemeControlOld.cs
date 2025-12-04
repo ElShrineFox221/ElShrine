@@ -3,7 +3,7 @@ using System.Windows.Media;
 
 namespace ElShrine.Wpf.UITheme
 {
-    public interface IThemeControl
+    public interface IThemeControlOld
     {
         public CornerRadius BorderCornerRadius { get; set; }
         public Thickness BorderThickness { get; set; }

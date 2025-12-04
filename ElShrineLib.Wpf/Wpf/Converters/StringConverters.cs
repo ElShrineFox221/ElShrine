@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
+using System.Windows;
 using System.Windows.Data;
 
 namespace ElShrine.Wpf.Converters
@@ -29,7 +30,9 @@ namespace ElShrine.Wpf.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             double numValue = ToDouble(value);
-            numValue *= ToDouble(parameter, 1);
+            var paraStr = parameter?.ToString() ?? string.Empty;
+            if (paraStr.EqualIgnoreCase("sinease")) numValue = (Math.Sin(Math.PI * 2 * (numValue - 0.25)) + 1) / 2;
+            else numValue *= ToDouble(paraStr, 1);
             return ToObj(numValue, targetType);
         }
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -38,7 +41,7 @@ namespace ElShrine.Wpf.Converters
             numValue /= ToDouble(parameter, 1);
             return ToObj(numValue, targetType);
         }
-        private static double ToDouble(object value, double? defalut = null)
+        public static double ToDouble(object value, double? defalut = null)
         {
             double numValue;
             if (value is null) numValue = defalut ?? 0;
@@ -49,14 +52,14 @@ namespace ElShrine.Wpf.Converters
             else numValue = defalut is not null ? defalut.Value : throw new NotImplementedException();
             return numValue;
         }
-        private static object ToObj(double value, Type targetType)
+        public static object ToObj(double value, Type targetType)
         {
             object obj;
             if (targetType == typeof(int)) obj = (int)value;
             else if (targetType == typeof(float)) obj = (float)value;
             else if (targetType == typeof(double)) obj = value;
             else if (targetType == typeof(string)) obj = value.ToString();
-            else throw new NotImplementedException();
+            else obj = value;
             return obj;
         }
 
@@ -99,5 +102,57 @@ namespace ElShrine.Wpf.Converters
         }
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
             => throw new NotImplementedException();
+    }
+
+    public class NumToStringMultiConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values == null || values.Length == 0 || values[0] == DependencyProperty.UnsetValue) return DependencyProperty.UnsetValue;
+            double current = NumToStringConverter.ToDouble(values[0]);
+            string opsParam = parameter?.ToString() ?? string.Empty;
+            if (string.IsNullOrEmpty(opsParam)) return NumToStringConverter.ToObj(current, targetType);
+
+            string[] operators = opsParam.Split('_');
+            int valueIndex = 1;
+
+            foreach (string op in operators)
+            {
+                var opl = op.ToLower();
+                if (valueIndex >= values.Length || values[valueIndex] == DependencyProperty.UnsetValue) break;
+                var v = NumToStringConverter.ToDouble(values[valueIndex]);
+                static double toValidD(double d) => double.IsRealNumber(d) ? d : 0;
+                switch (opl.Trim())
+                {
+                    case "+":
+                        current += toValidD(v);
+                        break;
+                    case "-":
+                        current -= toValidD(v);
+                        break;
+                    case "*":
+                        current *= toValidD(v);
+                        break;
+                    case "/":
+                        current = toValidD(v) == 0 ? 0 : current / toValidD(v);
+                        break;
+                    case "max":
+                        current = Math.Max(current, toValidD(v));
+                        break;
+                    case "min":
+                        current = Math.Min(current, toValidD(v));
+                        break;
+                    default:
+                        break;
+                }
+                valueIndex++;
+            }
+            return NumToStringConverter.ToObj(current, targetType);
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

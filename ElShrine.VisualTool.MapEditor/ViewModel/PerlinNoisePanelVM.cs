@@ -1,7 +1,7 @@
-﻿using ElShrine.VisualTool.MapEditor.Common.PerlinNoise;
+﻿using ElShrine.Old.Wpf.ViewModel;
+using ElShrine.VisualTool.MapEditor.Common.PerlinNoise;
 using ElShrine.VisualTool.MapEditor.Model;
 using ElShrine.Wpf;
-using ElShrine.Wpf.ViewModel;
 using System.ComponentModel;
 using System.Drawing;
 

@@ -1,5 +1,5 @@
 ﻿using ElShrine.EConsole;
-using ElShrine.Wpf.ViewModel;
+using ElShrine.Wpf;
 using System.Windows.Media;
 
 namespace ElShrine.VisualTool.Modules.Console.ViewModel

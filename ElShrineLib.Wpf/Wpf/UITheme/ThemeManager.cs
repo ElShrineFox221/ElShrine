@@ -1,7 +1,8 @@
-﻿using ElShrine.EFile;
+﻿using ElShrine.Common;
+using ElShrine.EFile;
 using ElShrine.EOption;
-using ElShrine.Wpf.ViewModel;
 using System.Collections.Generic;
+using System.Windows;
 
 namespace ElShrine.Wpf.UITheme
 {
@@ -38,6 +39,34 @@ namespace ElShrine.Wpf.UITheme
         {
             var r = DataHandler.Read<Themes>([.. LoadedThemes]);
             if (r.Success && r.Data is not null) LoadedThemes.ReplaceAll(r.Data);
+        }
+
+        public event ValueChangedHandler<Theme>? CurrentThemeChanged;
+        private readonly static List<DependencyObject> registeredDPOs = [];
+        public static bool RegisterCoerceThemeDPs<T>(T control) where T : DependencyObject, IThemeControlBase
+        {
+            if (registeredDPOs.Contains(control)) return false;
+            registeredDPOs.Add(control);
+            CoerceValue(control);
+            if (control is FrameworkElement fe)
+            {
+                GetInstance().CurrentThemeChanged += control.GlobalThemeChanged;
+                fe.Unloaded += (_, _) =>
+                {
+                    registeredDPOs.Remove(control);
+                    GetInstance().CurrentThemeChanged -= control.GlobalThemeChanged;
+                };
+            }
+            return true;
+        }
+        public static void CoerceValue<T>(T control) where T : DependencyObject, IThemeControlBase
+        {
+            control.CoerceValue(ThemeProperties.SecondaryBrushProperty);
+            control.CoerceValue(ThemeProperties.PrimaryBrushProperty);
+            control.CoerceValue(ThemeProperties.FontBrushProperty);
+            control.CoerceValue(ThemeProperties.BackBrushProperty);
+            control.CoerceValue(ThemeProperties.AnimaDurationInProperty);
+            control.CoerceValue(ThemeProperties.AnimaDurationOutProperty);
         }
     }
 }

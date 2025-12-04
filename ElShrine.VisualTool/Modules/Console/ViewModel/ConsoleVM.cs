@@ -1,6 +1,6 @@
 ﻿using ElShrine.EConsole;
 using ElShrine.EOption;
-using ElShrine.Wpf.ViewModel;
+using ElShrine.Wpf;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,7 +21,7 @@ namespace ElShrine.VisualTool.Modules.Console.ViewModel
         public static ConsoleVM GetInstance() => Instance ??= new();
         public SubConsoleVM SubConsole { get; } = new() { OverrideFilter = (l) => l.InfoLineType != InformationLineType.Normal };
 
-        private ListBox? LinesListBox = null;
+        private ListBox? LinesListBox { get; set; }
         public ObservableCollection<InformationLineVM> InfoLines { get; set; } = [];
 
         private bool recordTimeVisible = true;

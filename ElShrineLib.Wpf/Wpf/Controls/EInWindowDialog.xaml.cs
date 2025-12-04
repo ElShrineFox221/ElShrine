@@ -113,7 +113,7 @@ namespace ElShrine.Wpf.Controls
                 var r = typeMatched && nameMatched;
                 return r;
             });
-            if (HostElement is null) HostElement = root as FrameworkElement;
+            HostElement ??= root as FrameworkElement;
         }
 
         private void UpdatePositionAndSize(bool forceUpdate = false)

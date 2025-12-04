@@ -1,6 +1,6 @@
 ﻿using ElShrine.VisualTool.MapEditor.Common;
 using ElShrine.VisualTool.MapEditor.Model;
-using ElShrine.Wpf.ViewModel;
+using ElShrine.Wpf;
 using MathNet.Numerics.LinearAlgebra;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
