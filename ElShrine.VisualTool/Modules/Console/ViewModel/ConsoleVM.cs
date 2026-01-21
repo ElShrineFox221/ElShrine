@@ -31,7 +31,7 @@ namespace ElShrine.VisualTool.Modules.Console.ViewModel
             set
             {
                 recordTimeVisible = value;
-                NoticePropertyChanged(nameof(RecordTimeVisible));
+                NotifyPropertyChanged(nameof(RecordTimeVisible));
             }
         }
 

@@ -1,0 +1,26 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
+                    xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions">
+    <ControlTemplate x:Key="EThumb_BaseTemplate" TargetType="controls:EThumb">
+        <Grid x:Name="PART_EThumbRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EThumb}}">
+            <Grid.OpacityMask>
+                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EThumbRoot}"/>
+            </Grid.OpacityMask>
+            <Border x:Name="PART_MainBorder" BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}" />
+            <ext:StateListener.Rules>
+                <ext:RuleCollection>
+                    <ext:Rule Target="{Binding ElementName=PART_MainBorder}" StateMap="
+                        MouseOut=>Back=PR;
+                        MouseIn=>Back=SE;
+                        MouseDown=>Back=Lerp(SE, BG, 0.4)"/>
+                </ext:RuleCollection>
+            </ext:StateListener.Rules>
+        </Grid>
+    </ControlTemplate>
+    <Style TargetType="controls:EThumb">
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template" Value="{StaticResource EThumb_BaseTemplate}"/>
+    </Style>
+</ResourceDictionary>

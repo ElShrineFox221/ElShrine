@@ -1,179 +1,68 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
-                    xmlns:extensions="clr-namespace:ElShrine.Wpf.Controls.Extensions"
-                    xmlns:system="clr-namespace:System;assembly=mscorlib">
-    <Style TargetType="{x:Type controls:EScrollBar}">
+                    xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib"
+                    xmlns:converters="clr-namespace:ElShrine.Wpf.Converters">
+    <Style TargetType="controls:EScrollBar">
         <Style.Resources>
-            <system:Double x:Key="halfDouble">0.3</system:Double>
-            <Style x:Key="esb_base_repeatBtnStyle" TargetType="RepeatButton">
-                <Setter Property="Padding" Value="0"/>
-                <Setter Property="Background" Value="{Binding Background,RelativeSource={RelativeSource AncestorType=controls:EScrollBar}}"/>
-                <Setter Property="BorderBrush" Value="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=controls:EScrollBar}}"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="RepeatButton">
-                            <Border x:Name="repeatBtnRoot" Background="Transparent">
-                                <Border.BorderBrush>
-                                    <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
-                                        <Binding Path="BorderBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
-                                        <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="repeatBtnRoot"/>
-                                        <Binding Path="SelectionBrush" RelativeSource="{RelativeSource AncestorType=controls:EScrollBar}"/>
-                                        <Binding Path="(extensions:AnimationProperitiesExtension.BackColorRate)" ElementName="repeatBtnRoot"/>
-                                        <Binding Path="Background" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
-                                    </MultiBinding>
-                                </Border.BorderBrush>
-                                <ContentPresenter Content="{TemplateBinding Content}"/>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Trigger.EnterActions>
-                                        <BeginStoryboard HandoffBehavior="Compose">
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="repeatBtnRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
-                                                    <DoubleAnimation.EasingFunction>
-                                                        <SineEase/>
-                                                    </DoubleAnimation.EasingFunction>
-                                                </DoubleAnimation>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.EnterActions>
-                                    <Trigger.ExitActions>
-                                        <BeginStoryboard HandoffBehavior="Compose">
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="repeatBtnRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
-                                                    <DoubleAnimation.EasingFunction>
-                                                        <SineEase/>
-                                                    </DoubleAnimation.EasingFunction>
-                                                </DoubleAnimation>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.ExitActions>
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Trigger.EnterActions>
-                                        <BeginStoryboard HandoffBehavior="Compose">
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="repeatBtnRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0.5" Duration="0:0:0.2">
-                                                    <DoubleAnimation.EasingFunction>
-                                                        <SineEase/>
-                                                    </DoubleAnimation.EasingFunction>
-                                                </DoubleAnimation>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.EnterActions>
-                                    <Trigger.ExitActions>
-                                        <BeginStoryboard HandoffBehavior="Compose">
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="repeatBtnRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0" Duration="0:0:0.2">
-                                                    <DoubleAnimation.EasingFunction>
-                                                        <SineEase/>
-                                                    </DoubleAnimation.EasingFunction>
-                                                </DoubleAnimation>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.ExitActions>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-            <Style x:Key="esb_horizontal_repeatBtnStyle" TargetType="RepeatButton" 
-                   BasedOn="{StaticResource esb_base_repeatBtnStyle}">
-                <Setter Property="Height" Value="{Binding Height, RelativeSource={RelativeSource AncestorType=controls:EScrollBar}}"/>
-                <Setter Property="Width" Value="{Binding Height, RelativeSource={RelativeSource Mode=Self}}"/>
-            </Style>
-            <Style x:Key="esb_vertical_repeatBtnStyle" TargetType="RepeatButton" 
-                   BasedOn="{StaticResource esb_base_repeatBtnStyle}">
-                <Setter Property="Height" Value="{Binding Width, RelativeSource={RelativeSource Mode=Self}}"/>
-                <Setter Property="Width" Value="{Binding Width, RelativeSource={RelativeSource AncestorType=controls:EScrollBar}}"/>
-            </Style>
-            <ControlTemplate x:Key="esb_track_repeatBtnTemplate" TargetType="{x:Type RepeatButton}">
-                <Grid x:Name="rootGrid" Margin="0">
-                    <Rectangle Fill="Transparent" Height="{TemplateBinding Height}" Width="{TemplateBinding Width}"/>
-                    <ContentControl>
-                        <ContentPresenter x:Name="buttonContentPresenter" Focusable="False" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
-                    </ContentControl>
-                </Grid>
-            </ControlTemplate>
-            <ControlTemplate x:Key="esb_track_thumbTemplate" TargetType="Thumb">
-                <Border x:Name="thumbRoot" 
-                        BorderThickness="0" CornerRadius="{Binding BorderCornerRadius, RelativeSource={RelativeSource AncestorType=controls:EScrollBar}}">
-                    <Border.Background>
-                        <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
-                            <Binding Path="BorderBrush" RelativeSource="{RelativeSource AncestorType=controls:EScrollBar}"/>
-                            <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="thumbRoot"/>
-                            <Binding Path="SelectionBrush" RelativeSource="{RelativeSource AncestorType=controls:EScrollBar}"/>
-                            <Binding Path="(extensions:AnimationProperitiesExtension.BackColorRate)" ElementName="thumbRoot"/>
-                            <Binding Path="Background" RelativeSource="{RelativeSource AncestorType=controls:EScrollBar}"/>
-                        </MultiBinding>
-                    </Border.Background>
+            <converters:CommonModifyConverter x:Key="CommonModifyConverter"/>
+            <ControlTemplate x:Key="esb_erepeatBtn_stepTemplate" TargetType="controls:ERepeatButton">
+                <Border x:Name="esb_erb_st_root" BorderThickness="0" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:ERepeatButton}}" Background="Transparent" Margin="-0.5,0">
+                    <ext:StateListener.Rules>
+                        <ext:RuleCollection>
+                            <ext:Rule Target="{Binding ElementName=PART_Path}" StateMap="MouseOut=>Stroke=PR;MouseIn=>Stroke=SE;MouseDown=>Stroke=Lerp(SE,BC,0.4)"/>
+                        </ext:RuleCollection>
+                    </ext:StateListener.Rules>
+                    <Viewbox x:Name="PART_ContentContainer">
+                        <Path x:Name="PART_Path" Width="11" Height="6" Stretch="Uniform" Data="M0,0 L5,5 L10,0" StrokeThickness="1.5"/>
+                    </Viewbox>
                 </Border>
-                <ControlTemplate.Triggers>
-                    <Trigger Property="IsMouseOver" Value="True">
-                        <Trigger.EnterActions>
-                            <BeginStoryboard HandoffBehavior="Compose">
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
-                                        <DoubleAnimation.EasingFunction>
-                                            <SineEase/>
-                                        </DoubleAnimation.EasingFunction>
-                                    </DoubleAnimation>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </Trigger.EnterActions>
-                        <Trigger.ExitActions>
-                            <BeginStoryboard HandoffBehavior="Compose">
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
-                                        <DoubleAnimation.EasingFunction>
-                                            <SineEase/>
-                                        </DoubleAnimation.EasingFunction>
-                                    </DoubleAnimation>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </Trigger.ExitActions>
-                    </Trigger>
-                    <Trigger Property="IsDragging" Value="True">
-                        <Trigger.EnterActions>
-                            <BeginStoryboard HandoffBehavior="Compose">
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0.5" Duration="0:0:0.2">
-                                        <DoubleAnimation.EasingFunction>
-                                            <SineEase/>
-                                        </DoubleAnimation.EasingFunction>
-                                    </DoubleAnimation>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </Trigger.EnterActions>
-                        <Trigger.ExitActions>
-                            <BeginStoryboard HandoffBehavior="Compose">
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="thumbRoot" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0" Duration="0:0:0.2">
-                                        <DoubleAnimation.EasingFunction>
-                                            <SineEase/>
-                                        </DoubleAnimation.EasingFunction>
-                                    </DoubleAnimation>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </Trigger.ExitActions>
-                    </Trigger>
-                </ControlTemplate.Triggers>
+            </ControlTemplate>
+            <ControlTemplate x:Key="esb_erepeatBtn_endTemplate" TargetType="controls:ERepeatButton">
+                <Border x:Name="esb_erb_et_root" BorderThickness="0" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:ERepeatButton}}" Background="Transparent" Margin="-0.5,0">
+                    <ext:StateListener.Rules>
+                        <ext:RuleCollection>
+                            <ext:Rule Target="{Binding ElementName=PART_Path}" StateMap="MouseOut=>Stroke=PR;MouseIn=>Stroke=SE;MouseDown=>Stroke=Lerp(SE,BC,0.4)"/>
+                        </ext:RuleCollection>
+                    </ext:StateListener.Rules>
+                    <Viewbox>
+                        <Path x:Name="PART_Path" Width="11" Height="6" Stretch="Uniform" Data="M0,0 L5,5 L10,0 M0,5 L10,5" StrokeThickness="1.5"/>
+                    </Viewbox>
+                </Border>
+            </ControlTemplate>
+            <ControlTemplate x:Key="esb_ethumb_Template" TargetType="controls:EThumb">
+                <Border x:Name="esb_ethumb_t_root" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EScrollBar}}">
+                    <Border x:Name="PART_MainBorder" BorderThickness="0" CornerRadius="{TemplateBinding EBorderCornerRadius}"/>
+                    <ext:StateListener.Rules>
+                        <ext:RuleCollection>
+                            <ext:Rule Target="{Binding ElementName=PART_MainBorder}" StateMap="
+                                      MouseOut=>Back=PR;
+                                      MouseIn=>Back=SE;
+                                      MouseDown=>Back=Lerp(SE, BC, 0.4)"/>
+                        </ext:RuleCollection>
+                    </ext:StateListener.Rules>
+                </Border>
             </ControlTemplate>
         </Style.Resources>
-        <Setter Property="BorderCornerRadius" Value="0"/>
-        <Setter Property="BorderBrush" Value="{Binding CurrentTheme.BorderColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-        <Setter Property="SelectionBrush" Value="{Binding CurrentTheme.SelectionColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-        <Setter Property="Background" Value="{Binding CurrentTheme.BackColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="EBorderCornerRadius" Value="{Binding RelativeSource={RelativeSource Self}, Path=BarSize, Converter={StaticResource CommonModifyConverter}, ConverterParameter=LRTB_0.5L}"/>
         <Style.Triggers>
             <Trigger Property="Orientation" Value="Horizontal">
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type controls:EScrollBar}">
-                            <Border x:Name="scrollBarRoot" BorderBrush="{TemplateBinding BorderBrush}">
+                            <Border x:Name="PART_EScrollBarRoot" Background="Transparent" Height="{TemplateBinding BarSize}" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EScrollBar}}">
+                                <ext:StateListener.Rules>
+                                    <ext:RuleCollection>
+                                        <ext:Rule Target="{Binding ElementName=PART_TrackContainer}" StateMap="
+                                                  MouseOut=>Border=PR, Back=Lerp(BC,PR,0.2);
+                                                  MouseIn=>Border=SE, Back=Lerp(BC,SE,0.2)"/>
+                                    </ext:RuleCollection>
+                                </ext:StateListener.Rules>
                                 <Grid>
+                                    <Grid.OpacityMask>
+                                        <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EScrollBarRoot}"/>
+                                    </Grid.OpacityMask>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="auto"/>
                                         <ColumnDefinition Width="auto"/>
@@ -181,96 +70,47 @@
                                         <ColumnDefinition Width="auto"/>
                                         <ColumnDefinition Width="auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <RepeatButton x:Name="PART_LineStartButton" Grid.Column="0"
-                                                  Style="{StaticResource esb_horizontal_repeatBtnStyle}" Command="{x:Static ScrollBar.ScrollToLeftEndCommand}">
-                                        <Viewbox>
-                                            <Path Width="11" Height="6" Stretch="Uniform" Data="M0,0 L5,5 L10,0 M0,5 L10,5"  StrokeThickness="1.5" Stroke="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=Border}}">
-                                                <Path.RenderTransform>
-                                                    <RotateTransform CenterX="5" CenterY="3" Angle="90"/>
-                                                </Path.RenderTransform>
-                                            </Path>
-                                        </Viewbox>
-                                    </RepeatButton>
-                                    <RepeatButton x:Name="PART_LineEndButton" Grid.Column="4"
-                                                  Style="{StaticResource esb_horizontal_repeatBtnStyle}" Command="{x:Static ScrollBar.ScrollToRightEndCommand}">
-                                        <Viewbox>
-                                            <Path Width="11" Height="6" Stretch="Uniform" Data="M0,0 L5,5 L10,0 M0,5 L10,5"  StrokeThickness="1.5" Stroke="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=Border}}">
-                                                <Path.RenderTransform>
-                                                    <RotateTransform CenterX="5" CenterY="3" Angle="270"/>
-                                                </Path.RenderTransform>
-                                            </Path>
-                                        </Viewbox>
-                                    </RepeatButton>
-                                    <RepeatButton x:Name="PART_LineLeftButton" Grid.Column="1" 
-                                                  Style="{StaticResource esb_horizontal_repeatBtnStyle}" Command="{x:Static ScrollBar.LineLeftCommand}">
-                                        <Viewbox>
-                                            <Path Width="11" Height="6" Stretch="Uniform" Data="M0,0 L5,5 L10,0"  StrokeThickness="1.5" Stroke="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=Border}}">
-                                                <Path.RenderTransform>
-                                                    <RotateTransform CenterX="5" CenterY="3" Angle="90"/>
-                                                </Path.RenderTransform>
-                                            </Path>
-                                        </Viewbox>
-                                    </RepeatButton>
-                                    <RepeatButton x:Name="PART_LineRightButton" Grid.Column="3" 
-                                                  Style="{StaticResource esb_horizontal_repeatBtnStyle}" Command="{x:Static ScrollBar.LineRightCommand}">
-                                        <Viewbox>
-                                            <Path Width="11" Height="6" Stretch="Uniform" Data="M0,0 L5,5 L10,0"  StrokeThickness="1.5" Stroke="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=Border}}">
-                                                <Path.RenderTransform>
-                                                    <RotateTransform CenterX="5" CenterY="3" Angle="270"/>
-                                                </Path.RenderTransform>
-                                            </Path>
-                                        </Viewbox>
-                                    </RepeatButton>
-                                    <Border x:Name="trackContainer" Grid.Column="2"
-                                            Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=controls:EScrollBar}}" CornerRadius="{TemplateBinding BorderCornerRadius}">
-                                        <Border.Background>
-                                            <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
-                                                <Binding Path="Background" RelativeSource="{RelativeSource AncestorType=controls:EScrollBar}"/>
-                                                <Binding Source="{StaticResource halfDouble}"/>
-                                                <Binding Path="BorderBrush" RelativeSource="{RelativeSource AncestorType=controls:EScrollBar}"/>
-                                            </MultiBinding>
-                                        </Border.Background>
+                                    <controls:ERepeatButton x:Name="PART_LineStartButton" Grid.Column="0"
+                                                            Command="{x:Static ScrollBar.ScrollToLeftEndCommand}" Template="{StaticResource esb_erepeatBtn_endTemplate}" RenderTransformOrigin="0.5,0.5">
+                                        <controls:ERepeatButton.LayoutTransform>
+                                            <RotateTransform Angle="90"/>
+                                        </controls:ERepeatButton.LayoutTransform>
+                                    </controls:ERepeatButton>
+                                    <controls:ERepeatButton x:Name="PART_LineEndButton" Grid.Column="4"
+                                                            Command="{x:Static ScrollBar.ScrollToRightEndCommand}" Template="{StaticResource esb_erepeatBtn_endTemplate}" RenderTransformOrigin="0.5,0.5">
+                                        <controls:ERepeatButton.LayoutTransform>
+                                            <RotateTransform Angle="270"/>
+                                        </controls:ERepeatButton.LayoutTransform>
+                                    </controls:ERepeatButton>
+                                    <controls:ERepeatButton x:Name="PART_LineLeftButton" Grid.Column="1" 
+                                                            Command="{x:Static ScrollBar.LineLeftCommand}" Template="{StaticResource esb_erepeatBtn_stepTemplate}" RenderTransformOrigin="0.5,0.5">
+                                        <controls:ERepeatButton.LayoutTransform>
+                                            <RotateTransform Angle="90"/>
+                                        </controls:ERepeatButton.LayoutTransform>
+                                    </controls:ERepeatButton>
+                                    <controls:ERepeatButton x:Name="PART_LineRightButton" Grid.Column="3" 
+                                                            Command="{x:Static ScrollBar.LineRightCommand}" Template="{StaticResource esb_erepeatBtn_stepTemplate}" RenderTransformOrigin="0.5,0.5">
+                                        <controls:ERepeatButton.LayoutTransform>
+                                            <RotateTransform Angle="270"/>
+                                        </controls:ERepeatButton.LayoutTransform>
+                                    </controls:ERepeatButton>
+                                    <Border x:Name="PART_TrackContainer" Grid.Column="2" CornerRadius="{TemplateBinding EBorderCornerRadius}" Height="{TemplateBinding BarSize}">
                                         <Track x:Name="PART_Track">
                                             <Track.DecreaseRepeatButton>
-                                                <RepeatButton Command="{x:Static ScrollBar.PageLeftCommand}" Template="{StaticResource esb_track_repeatBtnTemplate}"/>
+                                                <RepeatButton Command="{x:Static ScrollBar.PageLeftCommand}" Style="{DynamicResource RepeatButton_TransparentStyle}"/>
                                             </Track.DecreaseRepeatButton>
                                             <Track.IncreaseRepeatButton>
-                                                <RepeatButton Command="{x:Static ScrollBar.PageRightCommand}" Template="{StaticResource esb_track_repeatBtnTemplate}"/>
+                                                <RepeatButton Command="{x:Static ScrollBar.PageRightCommand}" Style="{DynamicResource RepeatButton_TransparentStyle}"/>
                                             </Track.IncreaseRepeatButton>
                                             <Track.Thumb>
-                                                <Thumb Template="{StaticResource esb_track_thumbTemplate}" MinWidth="{TemplateBinding Height}"/>
+                                                <controls:EThumb EBorderCornerRadius="{TemplateBinding EBorderCornerRadius}" VerticalAlignment="Stretch"
+                                                                 Template="{StaticResource esb_ethumb_Template}"/>
                                             </Track.Thumb>
                                         </Track>
                                     </Border>
                                 </Grid>
                             </Border>
                             <ControlTemplate.Triggers>
-                                <Trigger Property="IsEnabled" Value="True">
-                                    <Trigger.EnterActions>
-                                        <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="scrollBarRoot"
-Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
-                                                    <DoubleAnimation.EasingFunction>
-                                                        <SineEase/>
-                                                    </DoubleAnimation.EasingFunction>
-                                                </DoubleAnimation>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.EnterActions>
-                                    <Trigger.ExitActions>
-                                        <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="scrollBarRoot" 
-Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0:0.16">
-                                                    <DoubleAnimation.EasingFunction>
-                                                        <SineEase/>
-                                                    </DoubleAnimation.EasingFunction>
-                                                </DoubleAnimation>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.ExitActions>
-                                </Trigger>
                                 <Trigger Property="IsMoveButtonVisibile" Value="False">
                                     <Setter TargetName="PART_LineLeftButton" Property="Visibility" Value="Collapsed"/>
                                     <Setter TargetName="PART_LineRightButton" Property="Visibility" Value="Collapsed"/>
@@ -296,8 +136,18 @@ Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type controls:EScrollBar}">
-                            <Border x:Name="scrollBarRoot" BorderBrush="{TemplateBinding BorderBrush}">
+                            <Border x:Name="PART_EScrollBarRoot" Background="Transparent" Width="{TemplateBinding BarSize}"  ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EScrollBar}}">
+                                <ext:StateListener.Rules>
+                                    <ext:RuleCollection>
+                                        <ext:Rule Target="{Binding ElementName=PART_TrackContainer}" StateMap="
+                                                  MouseOut=>Border=PR, Back=Lerp(BC,PR,0.2);
+                                                  MouseIn=>Border=SE, Back=Lerp(BC,SE,0.2)"/>
+                                    </ext:RuleCollection>
+                                </ext:StateListener.Rules>
                                 <Grid>
+                                    <Grid.OpacityMask>
+                                        <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EScrollBarRoot}"/>
+                                    </Grid.OpacityMask>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="auto"/>
                                         <RowDefinition Height="auto"/>
@@ -305,96 +155,46 @@ Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0
                                         <RowDefinition Height="auto"/>
                                         <RowDefinition Height="auto"/>
                                     </Grid.RowDefinitions>
-                                    <RepeatButton x:Name="PART_LineStartButton" Grid.Row="0"
-                      Style="{StaticResource esb_vertical_repeatBtnStyle}" Command="{x:Static ScrollBar.ScrollToTopCommand}">
-                                        <Viewbox>
-                                            <Path Width="11" Height="6" Stretch="Uniform" Data="M0,0 L5,5 L10,0 M0,5 L10,5"  StrokeThickness="1.5" Stroke="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=Border}}">
-                                                <Path.RenderTransform>
-                                                    <RotateTransform CenterX="5" CenterY="3" Angle="180"/>
-                                                </Path.RenderTransform>
-                                            </Path>
-                                        </Viewbox>
-                                    </RepeatButton>
-                                    <RepeatButton x:Name="PART_LineEndButton" Grid.Row="4"
-                      Style="{StaticResource esb_vertical_repeatBtnStyle}" Command="{x:Static ScrollBar.ScrollToBottomCommand}">
-                                        <Viewbox>
-                                            <Path Width="11" Height="6" Stretch="Uniform" Data="M0,0 L5,5 L10,0 M0,5 L10,5" StrokeThickness="1.5" Stroke="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=Border}}">
-                                                <Path.RenderTransform>
-                                                    <RotateTransform CenterX="5" CenterY="3" Angle="0"/>
-                                                </Path.RenderTransform>
-                                            </Path>
-                                        </Viewbox>
-                                    </RepeatButton>
-                                    <RepeatButton x:Name="PART_LineUpButton" Grid.Row="1" 
-                      Style="{StaticResource esb_vertical_repeatBtnStyle}" Command="{x:Static ScrollBar.LineUpCommand}">
-                                        <Viewbox>
-                                            <Path Width="11" Height="6" Stretch="Uniform" Data="M0,0 L5,5 L10,0" StrokeThickness="1.5" Stroke="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=Border}}">
-                                                <Path.RenderTransform>
-                                                    <RotateTransform CenterX="5" CenterY="3" Angle="180"/>
-                                                </Path.RenderTransform>
-                                            </Path>
-                                        </Viewbox>
-                                    </RepeatButton>
-                                    <RepeatButton x:Name="PART_LineDownButton" Grid.Row="3" 
-                      Style="{StaticResource esb_vertical_repeatBtnStyle}" Command="{x:Static ScrollBar.LineDownCommand}">
-                                        <Viewbox>
-                                            <Path Width="11" Height="6" Stretch="Uniform" Data="M0,0 L5,5 L10,0"  StrokeThickness="1.5" Stroke="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=Border}}">
-                                                <Path.RenderTransform>
-                                                    <RotateTransform CenterX="5" CenterY="3" Angle="0"/>
-                                                </Path.RenderTransform>
-                                            </Path>
-                                        </Viewbox>
-                                    </RepeatButton>
-                                    <Border x:Name="trackContainer" Grid.Row="2" 
-                                            Width="{Binding ActualWidth,RelativeSource={RelativeSource AncestorType=controls:EScrollBar}}" CornerRadius="{TemplateBinding BorderCornerRadius}">
-                                        <Border.Background>
-                                            <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
-                                                <Binding Path="Background" RelativeSource="{RelativeSource AncestorType=controls:EScrollBar}"/>
-                                                <Binding Source="{StaticResource halfDouble}"/>
-                                                <Binding Path="BorderBrush" RelativeSource="{RelativeSource AncestorType=controls:EScrollBar}"/>
-                                            </MultiBinding>
-                                        </Border.Background>
+                                    <controls:ERepeatButton x:Name="PART_LineStartButton" Grid.Row="0"
+                                                  Command="{x:Static ScrollBar.ScrollToTopCommand}" Template="{StaticResource esb_erepeatBtn_endTemplate}" RenderTransformOrigin="0.5,0.5">
+                                        <controls:ERepeatButton.LayoutTransform>
+                                            <RotateTransform Angle="180"/>
+                                        </controls:ERepeatButton.LayoutTransform>
+                                    </controls:ERepeatButton>
+                                    <controls:ERepeatButton x:Name="PART_LineEndButton" Grid.Row="4"
+                                                            Command="{x:Static ScrollBar.ScrollToBottomCommand}" Template="{StaticResource esb_erepeatBtn_endTemplate}" RenderTransformOrigin="0.5,0.5">
+                                        <controls:ERepeatButton.LayoutTransform>
+                                            <RotateTransform Angle="0"/>
+                                        </controls:ERepeatButton.LayoutTransform>
+                                    </controls:ERepeatButton>
+                                    <controls:ERepeatButton x:Name="PART_LineUpButton" Grid.Row="1" 
+                                                            Command="{x:Static ScrollBar.LineUpCommand}" Template="{StaticResource esb_erepeatBtn_stepTemplate}" RenderTransformOrigin="0.5,0.5">
+                                        <controls:ERepeatButton.LayoutTransform>
+                                            <RotateTransform Angle="180"/>
+                                        </controls:ERepeatButton.LayoutTransform>
+                                    </controls:ERepeatButton>
+                                    <controls:ERepeatButton x:Name="PART_LineDownButton" Grid.Row="3" 
+                                                  Command="{x:Static ScrollBar.LineDownCommand}" Template="{StaticResource esb_erepeatBtn_stepTemplate}" RenderTransformOrigin="0.5,0.5">
+                                        <controls:ERepeatButton.LayoutTransform>
+                                            <RotateTransform Angle="0"/>
+                                        </controls:ERepeatButton.LayoutTransform>
+                                    </controls:ERepeatButton>
+                                    <Border x:Name="PART_TrackContainer" Grid.Row="2" CornerRadius="{TemplateBinding EBorderCornerRadius}">
                                         <Track x:Name="PART_Track" IsDirectionReversed="true">
                                             <Track.DecreaseRepeatButton>
-                                                <RepeatButton Command="{x:Static ScrollBar.PageUpCommand}" Template="{StaticResource esb_track_repeatBtnTemplate}"/>
+                                                <RepeatButton Command="{x:Static ScrollBar.PageUpCommand}" Style="{DynamicResource RepeatButton_TransparentStyle}"/>
                                             </Track.DecreaseRepeatButton>
                                             <Track.IncreaseRepeatButton>
-                                                <RepeatButton Command="{x:Static ScrollBar.PageDownCommand}" Template="{StaticResource esb_track_repeatBtnTemplate}"/>
+                                                <RepeatButton Command="{x:Static ScrollBar.PageDownCommand}" Style="{DynamicResource RepeatButton_TransparentStyle}"/>
                                             </Track.IncreaseRepeatButton>
                                             <Track.Thumb>
-                                                <Thumb Template="{StaticResource esb_track_thumbTemplate}" MinHeight="{TemplateBinding Width}"/>
+                                                <controls:EThumb EBorderCornerRadius="{TemplateBinding EBorderCornerRadius}" Template="{StaticResource esb_ethumb_Template}"/>
                                             </Track.Thumb>
                                         </Track>
                                     </Border>
                                 </Grid>
                             </Border>
                             <ControlTemplate.Triggers>
-                                <Trigger Property="IsEnabled" Value="True">
-                                    <Trigger.EnterActions>
-                                        <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="scrollBarRoot"
-Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
-                                                    <DoubleAnimation.EasingFunction>
-                                                        <SineEase/>
-                                                    </DoubleAnimation.EasingFunction>
-                                                </DoubleAnimation>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.EnterActions>
-                                    <Trigger.ExitActions>
-                                        <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="scrollBarRoot" 
-Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0:0.16">
-                                                    <DoubleAnimation.EasingFunction>
-                                                        <SineEase/>
-                                                    </DoubleAnimation.EasingFunction>
-                                                </DoubleAnimation>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.ExitActions>
-                                </Trigger>
                                 <Trigger Property="IsMoveButtonVisibile" Value="False">
                                     <Setter TargetName="PART_LineUpButton" Property="Visibility" Value="Collapsed"/>
                                     <Setter TargetName="PART_LineDownButton" Property="Visibility" Value="Collapsed"/>

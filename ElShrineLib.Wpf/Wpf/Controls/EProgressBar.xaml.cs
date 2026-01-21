@@ -1,4 +1,5 @@
 ﻿using ElShrine.Common;
+using ElShrine.Modules;
 using ElShrine.Wpf.UITheme;
 using System;
 using System.Globalization;
@@ -19,8 +20,9 @@ namespace ElShrine.Wpf.Controls
     public partial class EProgressBar : ContentControl, IThemeControlBase
     {
         static EProgressBar() => DefaultStyleKeyProperty.OverrideMetadata(typeof(EProgressBar), new FrameworkPropertyMetadata(typeof(EProgressBar)));
-        public EProgressBar() => ThemeManager.RegisterCoerceThemeDPs(this);
-        public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => ThemeManager.CoerceValue(this);
+        public EProgressBar() => UIThemesManager.RegisterCoerceThemeDPs(this);
+        public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => UIThemesManager.CoerceValue(this);
+        public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => StateListenersManager.Instance.RedoSetterTransitions(this);
 
         #region Dependency Properties - Additional
         public bool IsIndeterminate
@@ -137,14 +139,6 @@ namespace ElShrine.Wpf.Controls
                 _indeterminateStoryboard = null;
             }
         }
-        #endregion
-
-        #region IThemeControlBase
-
-        /// <summary>
-        /// 当任何 IThemeControlBase 属性发生变化时调用的回调方法。
-        /// </summary>
-        public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) { }
         #endregion
     }
     internal class EProgressBarAnimationValueCoverter : IMultiValueConverter

@@ -30,7 +30,7 @@ namespace ElShrine.VisualTool
         public static VMC Discard => new(parameter => WpfPageManager.Discard());
 
         #region VM props & methods
-        private void NoticeDirtyChanged() => NoticePropertyChanged(nameof(IsDirty));
+        private void NoticeDirtyChanged() => NotifyPropertyChanged(nameof(IsDirty));
         
         public void RefreshIndexes()
         {
@@ -97,7 +97,7 @@ namespace ElShrine.VisualTool
                         }
                     }
                 }
-                NoticePropertyChanged();
+                NotifyPropertyChanged();
                 ListContentInfo($"Rebuild {EnabledModules.Count} tab {"item".GetPural(EnabledModules.Count)} with realoaded {"module".GetPural(EnabledModules.Count)}");
             }
             else ListWarnInfo([GetWarningItem(), new(" Target tab controller is invalid.")]);

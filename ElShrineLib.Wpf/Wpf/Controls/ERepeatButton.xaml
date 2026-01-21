@@ -1,0 +1,34 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
+                    xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions">
+    <ControlTemplate x:Key="ERepeatButton_BaseTemplate" TargetType="controls:ERepeatButton">
+        <Grid x:Name="PART_ERepeatButtonRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:ERepeatButton}}">
+            <Grid.OpacityMask>
+                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_ERepeatButtonRoot}"/>
+            </Grid.OpacityMask>
+            <ext:StateListener.Rules>
+                <ext:RuleCollection>
+                    <ext:Rule Target="{Binding ElementName=PART_MainBorder}" StateMap="
+                              MouseOut=>Back=BC, Border=PR;
+                              MouseIn=>Back=Lerp(BC,SE,0.1), Border=SE;
+                              MouseDown=>Back=Lerp(BC,SE,0.2), Border=Lerp(SE,BC,0.4);"/>
+                </ext:RuleCollection>
+            </ext:StateListener.Rules>
+            <Border x:Name="PART_MainBorder" BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}">
+                <ContentControl x:Name="PART_ContentContainer"
+                            Foreground="{TemplateBinding FontBrush}" Background="Transparent" Margin="{TemplateBinding Padding}" >
+                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                </ContentControl>
+            </Border>
+        </Grid>
+    </ControlTemplate>
+    <Style TargetType="controls:ERepeatButton">
+        <Setter Property="Padding" Value="5,0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="EBorderThickness" Value="1"/>
+        <Setter Property="EBorderCornerRadius" Value="2"/>
+        <Setter Property="Template" Value="{StaticResource ERepeatButton_BaseTemplate}"/>
+    </Style>
+</ResourceDictionary>

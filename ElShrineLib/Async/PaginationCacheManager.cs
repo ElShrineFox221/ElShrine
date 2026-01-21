@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using static ElShrine.EConsole.ConsoleManager;
 namespace ElShrine.Async
 {
     sealed record PreloadTask(Task Task, CancellationTokenSource Cts, int OuterPageIndex)
@@ -142,10 +141,6 @@ namespace ElShrine.Async
                     await GetDataFromSource(cacheData, cacheKey, preloadPage, cancellationToken);
                 }
                 catch (OperationCanceledException) { }
-                catch (Exception ex)
-                {
-                    ListErrorInfo([GetErrorItem(), new($"Preload failed for index {preloadPage.PIndex}: {ex.Message}")]);
-                }
                 finally
                 {
                     var container = cacheData.PreloadTaskContainer;

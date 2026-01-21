@@ -2,20 +2,39 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:theme="clr-namespace:ElShrine.Wpf.UITheme">
     <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/ConverterResources.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EInWindowDialog.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EHeaderControl.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/ESelectedIndicator.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EButton.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EToggleButton.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EProgressBar.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EImage.xaml"/>
-        
-        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EToggleButton.xaml"/>
-        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EExpander.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EThumb.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/ESlider.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/ERepeatButton.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EScrollBar.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EScrollViewer.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EListBoxItem.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EListBox.xaml"/>
-        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EListView.xaml"/>
-        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EComboBox.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EExpander.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/ETextBox.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/ETabControl.xaml"/>
-        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/ESlider.xaml"/>
-        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EInWindowDialog.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EComboBox.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EColorPalette.xaml"/>
+        <!--
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EWindow.xaml"/>
+        //
+
+        
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EListViewItem.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EListView.xaml"/>
+
+        
+        
+        
+        
+       -->
+        
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

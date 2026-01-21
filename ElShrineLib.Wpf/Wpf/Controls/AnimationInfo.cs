@@ -63,7 +63,7 @@ namespace ElShrine.Wpf.Controls
             if (animations.Length == 0) triggerMode = AnimationInfoTriggerMode.None;
             if (triggerMode == AnimationInfoTriggerMode.InReversedOrder) 
             {
-                animations = [.. animations.Reverse()];
+                animations.Reverse();
                 triggerMode = AnimationInfoTriggerMode.InOrder;
             }
             //Associate and play

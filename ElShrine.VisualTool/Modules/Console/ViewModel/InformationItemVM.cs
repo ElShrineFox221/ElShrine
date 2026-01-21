@@ -14,7 +14,7 @@ namespace ElShrine.VisualTool.Modules.Console.ViewModel
             set
             {
                 ignoreWarp = value;
-                NoticePropertyChanged(nameof(Text));
+                NotifyPropertyChanged(nameof(Text));
             }
         }
         public Color ForeColor => ((Model.PaintStyle == InformationPaintStyle.Empty) ? modelParent.BasePaintStyle : Model.PaintStyle).ToConsoleColor().ToMediaColor();

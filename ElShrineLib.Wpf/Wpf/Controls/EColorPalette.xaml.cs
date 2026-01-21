@@ -1,501 +1,333 @@
-﻿using ElShrine.EGraphic;
-using ElShrine.Wpf;
+﻿using ElShrine.Common;
+using ElShrine.Graphics;
+using ElShrine.Modules;
 using ElShrine.Wpf.UITheme;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
-using VMC = ElShrine.Wpf.VMCommand;
 
 namespace ElShrine.Wpf.Controls
 {
-    public partial class EColorPalette : UserControl, IThemeControlOld
+    public sealed class HistoryColor(uint colorData, bool favorite) : ViewModelBase
     {
+        public ColorData Color => Graphics.ColorData.FromData(ColorData);
+        public uint ColorData
+        {
+            get => field;
+            set
+            {
+                if (field != value)
+                {
+                    field = value;
+                    NotifyPropertyChanged(nameof(ColorData), nameof(Color));
+                }
+            }
+        } = colorData;
+        public bool Favorite
+        {
+            get => field;
+            set
+            {
+                if (field != value)
+                {
+                    field = value;
+                    NotifyPropertyChanged(nameof(Favorite));
+                }
+            }
+        } = favorite;
+    }
+    [GenerateDPCli]
+    public partial class EColorPalette : Control, IThemeControlBase, INotifyPropertyChanged
+    {
+        #region Implements
+        static EColorPalette() => DefaultStyleKeyProperty.OverrideMetadata(typeof(EColorPalette), new FrameworkPropertyMetadata(typeof(EColorPalette)));
+        public EColorPalette()
+        {
+            PropertyChanged += OnPropertyChanged;
+            Loaded += (s, e) =>
+            {
+                RefreshCachedColors();
+                NotifyPropertyChanged(nameof(Hex),
+                   nameof(MaxAlphaColor), nameof(GrayColor),
+                   nameof(MaxHSVSaturationColor), nameof(MaxHSLSaturationColor), nameof(MinSaturationColor),
+                   nameof(MaxHSVValueColor), nameof(CentreHSLLightnessColor));
+            };
+            UIThemesManager.RegisterCoerceThemeDPs(this);
+        }
+        public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => UIThemesManager.CoerceValue(this);
+        public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => StateListenersManager.Instance.RedoSetterTransitions(this);
+        #endregion
+
+        #region INotifyPropertyChanged
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected virtual void OnPropertyChanged(object? sender, PropertyChangedEventArgs e) { }
+        public void NotifyPropertyChanged(params IEnumerable<string> propNames)
+        {
+            foreach (var name in propNames)
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            }
+        }
+        #endregion
+
+
+        #region DPs
+        public readonly static DependencyProperty ResultColorProperty = DependencyProperty.Register(nameof(ResultColor), typeof(ColorData), typeof(EColorPalette), new(defaultValue: ColorDataExtensions.GetAccentColor(), propertyChangedCallback: ResultColorChanged));
+        public readonly static DependencyProperty CurrentColorProperty = DependencyProperty.Register(nameof(CurrentColor), typeof(ColorData), typeof(EColorPalette), new(defaultValue: ColorDataExtensions.GetAccentColor(), propertyChangedCallback: CurrentColorChanged));
+        public readonly static DependencyProperty IsPreviewModeProperty = DependencyProperty.Register(nameof(IsPreviewMode), typeof(bool), typeof(EColorPalette), new(defaultValue: true, propertyChangedCallback: IsPreviewModeChanged));
+        public readonly static DependencyProperty IsHistoryColorsVisibleProperty = DependencyProperty.Register(nameof(IsHistoryColorsVisible), typeof(bool), typeof(EColorPalette), new(defaultValue: true));
+        public readonly static DependencyProperty HistoryColorsLimitProperty = DependencyProperty.Register(nameof(HistoryColorsLimit), typeof(int), typeof(EColorPalette), new(defaultValue: 20));
         public ColorData ResultColor
         {
             get => (ColorData)GetValue(ResultColorProperty);
-            set => SetValue(ResultColorProperty, value);
+            protected set => SetValue(ResultColorProperty, value);
         }
-        public static readonly DependencyProperty ResultColorProperty = DependencyProperty.Register(nameof(ResultColor), typeof(ColorData), typeof(EColorPalette), new(new ColorData()));
-        public bool ConstantUpdateResultColor
+        public ColorData CurrentColor
         {
-            get => (bool)GetValue(ConstantUpdateResultColorProperty);
-            set => SetValue(ConstantUpdateResultColorProperty, value);
-        }
-        public static readonly DependencyProperty ConstantUpdateResultColorProperty = DependencyProperty.Register(nameof(ConstantUpdateResultColor), typeof(bool), typeof(EColorPalette), new(false));
-
-        public EColorPalette()
-        {
-            InitializeComponent();
-            alphaSlider.ValueChanged += OnSliderChanged;
-            redSlider.ValueChanged += OnSliderChanged;
-            greenSlider.ValueChanged += OnSliderChanged;
-            blueSlider.ValueChanged += OnSliderChanged;
-            hSlider.ValueChanged += OnSliderChanged;
-            sSlider.ValueChanged += OnSliderChanged;
-            vSlider.ValueChanged += OnSliderChanged;
-            hslHSlider.ValueChanged += OnSliderChanged;
-            hslSSlider.ValueChanged += OnSliderChanged;
-            hslLSlider.ValueChanged += OnSliderChanged;
-            confrimBtn.Command = ConfrimCommand;
-            cancelBtn.Command = CancelCommand;
-            Loaded += (_, _) =>
+            get => (ColorData)GetValue(CurrentColorProperty);
+            protected set
             {
-                var colorData = new ColorData();
-                MainColorData = colorData;
-                UpdateSliders(colorData);
+                if (CurrentColor.ToSpace(value.Space).Data != value.Data) SetValue(CurrentColorProperty, value.Clone());
+            }
+        }
+        public bool IsPreviewMode
+        {
+            get => (bool)GetValue(IsPreviewModeProperty);
+            set => SetValue(IsPreviewModeProperty, value);
+        }
+        public bool IsHistoryColorsVisible
+        {
+            get => (bool)GetValue(IsHistoryColorsVisibleProperty);
+            set => SetValue(IsHistoryColorsVisibleProperty, value);
+        }
+        public int HistoryColorsLimit
+        {
+            get => (int)GetValue(HistoryColorsLimitProperty);
+            set => SetValue(HistoryColorsLimitProperty, value);
+        }
+        private static void ResultColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) { }
+        private static void CurrentColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is EColorPalette palette)
+            {
+                var newColorClone = ((ColorData)e.NewValue).ToARGB();
+                if (palette.IsPreviewMode && palette.ResultColor.ToARGB().Data != newColorClone.Data) palette.ResultColor = newColorClone;
+                palette.RefreshCachedColors();
+                palette.NotifyPropertyChanged(nameof(Hex), 
+                    nameof(MaxAlphaColor), nameof(GrayColor),
+                    nameof(MaxHSVSaturationColor), nameof(MaxHSLSaturationColor), nameof(MinSaturationColor),
+                    nameof(MaxHSVValueColor), nameof(CentreHSLLightnessColor));
+                
+            }
+        }
+        private static void IsPreviewModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is EColorPalette palette)
+            {
+                if(e.NewValue is bool nb && e.OldValue is bool ob && nb ^ ob)
+                {
+                    palette.ResultColor = nb ? palette.CurrentColor : palette.InitialColor;
+                }
+            }
+        }
+        #endregion
+
+        #region Properties
+        private ColorSpace currentSpace = ColorSpace.ARGB;
+        private ColorData GetTargetData() => currentSpace switch
+        {
+            ColorSpace.ARGB => ARGBColor,
+            ColorSpace.AHSV => AHSVColor,
+            ColorSpace.AHSL => AHSLColor,
+            _ => ARGBColor,
+        };
+        private const double angleFactor = 360d / 255d;
+        public double A
+        {
+            get => CurrentColor.A;
+            set
+            {
+                var tar = GetTargetData();
+                tar.A = (byte)Math.Clamp(Math.Round(value), 0, 255);
+                CurrentColor = tar;
+            }
+        }
+        public double V1
+        {
+            get => Math.Round(GetTargetData().V1 * (currentSpace == ColorSpace.ARGB ? 1 : angleFactor));
+            set
+            {
+                var tar = GetTargetData();
+                tar.V1 = (byte)Math.Clamp(Math.Round(value / (currentSpace == ColorSpace.ARGB ? 1 : angleFactor)), 0, 255);
+                CurrentColor = tar;
+                var name = currentSpace switch
+                {
+                    ColorSpace.AHSV => nameof(MaxHSVSaturationColor),
+                    ColorSpace.AHSL => nameof(MaxHSLSaturationColor),
+                    _ => string.Empty,
+                };
+                if(name != string.Empty) NotifyPropertyChanged(name);
+            }
+        }
+        public double V2
+        {
+            get => GetTargetData().V2;
+            set
+            {
+                var tar = GetTargetData();
+                tar.V2 = (byte)Math.Clamp(Math.Round(value), 0, 255);
+                CurrentColor = tar;
+            }
+        }
+        public double V3
+        {
+            get => GetTargetData().V3;
+            set
+            {
+                var tar = GetTargetData();
+                tar.V3 = (byte)Math.Clamp(Math.Round(value), 0, 255);
+                CurrentColor = tar;
+            }
+        }
+        public string Hex
+        {
+            get => CurrentColor.ToARGB().Hex8;
+            set
+            {
+                if (value.StartsWith('#')) value = value[1..];
+                if (value.Length != 8) value = value.PadLeft(8, 'F')[0..8];
+                var clone = CurrentColor.ToARGB();
+                if(clone.Hex8 != value)
+                {
+                    clone.Hex8 = value;
+                    CurrentColor = clone;
+                }
+            }
+        }
+
+        #region Cached colors
+        public ColorData ARGBColor { get; set; } = ColorData.FromData();
+        public ColorData AHSVColor { get; set; } = ColorData.FromData();
+        public ColorData AHSLColor { get; set; } = ColorData.FromData();
+        private void RefreshCachedColors()
+        {
+            var argbClone = CurrentColor.ToARGB();
+            if (ARGBColor.ToARGB().Data != argbClone.Data) ARGBColor = argbClone;
+            if (AHSVColor.ToARGB().Data != argbClone.Data) AHSVColor = CurrentColor.ToAHSV();
+            if (AHSLColor.ToARGB().Data != argbClone.Data) AHSLColor = CurrentColor.ToAHSL();
+            NotifyPropertyChanged(nameof(A), nameof(V1), nameof(V2), nameof(V3));
+        }
+        #endregion
+        private void SpaceChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var newSpaceItemIndex = e.AddedItems.Count > 0 ? PART_SlidersTabControl?.Items?.IndexOf(e.AddedItems[0]) ?? -1 : -1;
+            currentSpace = newSpaceItemIndex switch
+            {
+                0 => ColorSpace.ARGB,
+                1 => ColorSpace.AHSV,
+                2 => ColorSpace.AHSL,
+                _ => ColorSpace.ARGB
             };
+            RefreshCachedColors();
         }
-
-        #region UI
-
-        #region DPs
-
-        #region Theme
-        public CornerRadius BorderCornerRadius
-        {
-            get => (CornerRadius)GetValue(BorderCornerRadiusProperty);
-            set => SetValue(BorderCornerRadiusProperty, value);
-        }
-        public Brush FontBrush
-        {
-            get => (Brush)GetValue(FontBrushProperty);
-            set => SetValue(FontBrushProperty, value);
-        }
-        public Brush SelectionBrush
-        {
-            get => (Brush)GetValue(SelectionBrushProperty);
-            set => SetValue(SelectionBrushProperty, value);
-        }
-        public Brush ClickBrush
-        {
-            get => (Brush)GetValue(ClickBrushProperty);
-            set => SetValue(ClickBrushProperty, value);
-        }
-
-        public static readonly DependencyProperty BorderCornerRadiusProperty = DependencyProperty.Register(nameof(BorderCornerRadius), typeof(CornerRadius), typeof(EColorPalette), new(Theme.Default.CornerRadius));
-        public static readonly DependencyProperty FontBrushProperty = DependencyProperty.Register(nameof(FontBrush), typeof(Brush), typeof(EColorPalette), new(Theme.Default.FontColor.ToSolidBrush()));
-        public static readonly DependencyProperty SelectionBrushProperty = DependencyProperty.Register(nameof(SelectionBrush), typeof(Brush), typeof(EColorPalette), new(Theme.Default.SelectionColor.ToSolidBrush()));
-        public static readonly DependencyProperty ClickBrushProperty = DependencyProperty.Register(nameof(ClickBrush), typeof(Brush), typeof(EColorPalette), new(Theme.Default.ClickColor.ToSolidBrush()));
         #endregion
 
+        #region Calucated properties
+        public ColorData MaxAlphaColor => CurrentColor.WithAlpha(255);
+        public ColorData GrayColor => MaxAlphaColor.ToGrayColor();
+        public ColorData MaxHSVSaturationColor => AHSVColor.WithAlpha(255).WithHsvSaturation(1);
+        public ColorData MaxHSLSaturationColor => AHSLColor.WithAlpha(255).WithHslSaturation(1);
+        public ColorData MinSaturationColor => MaxAlphaColor.WithHsvSaturation(0);
+        public ColorData MaxHSVValueColor => AHSVColor.WithAlpha(255).WithHsvValue(1);
+        public ColorData CentreHSLLightnessColor => AHSLColor.WithAlpha(255).WithHslLightness(0.5);
         #endregion
 
-        #endregion
-
-        #region HistroyColor
-        public bool HistorColorsShown
+        private ETabControl? PART_SlidersTabControl;
+        private Border? PART_ResultColorPreview;
+        private Border? PART_OriginalColorPreview;
+        private Border? PART_GreyColorPreview;
+        private ListBox? PART_HistoryColorsBox;
+        private Button? PART_ConfrimBtn;
+        private Button? PART_CancelBtn;
+        public override void OnApplyTemplate()
         {
-            get => (bool)GetValue(HistorColorsShownProperty);
-            set => SetValue(HistorColorsShownProperty, value);
-        }
-        public int HistoryColorsMaxCount
-        {
-            get => (int)GetValue(HistoryColorsMaxCountProperty); 
-            set => SetValue(HistoryColorsMaxCountProperty, value); 
-        }
-        public bool AddToHistoryColors
-        {
-            get => (bool) GetValue(AddToHistoryColorsProperty);
-            set => SetValue(AddToHistoryColorsProperty, value);
-        }
-       
-        public static readonly DependencyProperty HistorColorsShownProperty =
-            DependencyProperty.Register(nameof(HistorColorsShown), typeof(bool), typeof(EColorPalette), new(true));
-        public static readonly DependencyProperty HistoryColorsMaxCountProperty =
-            DependencyProperty.Register(nameof(HistoryColorsMaxCount), typeof(int), typeof(EColorPalette), new(20));
-        public static readonly DependencyProperty AddToHistoryColorsProperty =
-            DependencyProperty.Register(nameof(AddToHistoryColors), typeof(bool), typeof(EColorPalette), new(true));
-
-        public static ObservableCollection<HistroyColor> HistoryColors { get; protected set; } = [];
-
-        public class HistroyColor(ColorData model) : ViewModelBase<ColorData>(model)
-        {
-            private bool selected = false;
-            public bool Selected
-            {
-                get => selected;
-                set
-                {
-                    selected = value;
-                    NoticePropertyChanged(nameof(Selected));
-                }
-            }
-
-            private bool marked = false;
-            public bool Marked
-            {
-                get => marked;
-                set
-                {
-                    marked = value;
-                    NoticePropertyChanged(nameof(Marked));
-                }
-            }
-        }
-
-        public void AddOrSelectHistoryColor(ColorData colorData, bool addCheck, bool reorder)
-        {
-            var index = HistoryColors.ToList().FindIndex(d => d.Model.DataEqual(colorData));
-            var addChecked = !addCheck || (HistorColorsShown && AddToHistoryColors);
-            if (addCheck) index = AddHistoryColor(colorData, reorder, addChecked); 
-            UpdateHistoryColorsSelection(colorData);
-        }
-        protected static void UpdateHistoryColorsSelection(ColorData colorData)
-        {
-            for (int i = 0; i < HistoryColors.Count; i++)
-            {
-                var historyColor = HistoryColors[i];
-                historyColor.Selected = colorData.DataEqual(historyColor.Model);
-            }
-        } 
-        public static int AddHistoryColor(ColorData colorData, bool reorder, bool confrimAdd)
-        {
-            var index = HistoryColors.ToList().FindIndex(d => d.Model.DataEqual(colorData));
-            if (index == -1)
-            {
-                //add
-                if (confrimAdd)
-                {
-                    HistoryColors.Insert(0, new(colorData));
-                    index = 0;
-                }
-            }
-            else
-            {
-                //select or reorder
-                if (reorder)
-                {
-                    HistoryColors.RemoveAt(index);
-                    HistoryColors.Insert(0, new(colorData));
-                    index = 0;
-                }
-            }
-            return index;
-        }
-        public static void RemoveHistoryColor(ColorData colorData)
-        {
-            var index = HistoryColors.ToList().FindIndex(d => d.Model.DataEqual(colorData));
-            if (index != -1) HistoryColors.RemoveAt(index);
-        }
-        public static void MarkHistoryColor(ColorData colorData, bool? marked)
-        {
-            var index = HistoryColors.ToList().FindIndex(d => d.Model.DataEqual(colorData));
-            if (index == -1) HistoryColors[AddHistoryColor(colorData, true, true)].Marked = marked ?? true;
-            else HistoryColors[index].Marked = marked ?? !HistoryColors[index].Marked;
-        }
-        public static void ClearHistoryColors() => HistoryColors.Clear();
-
-        public static VMC AddHistoryColorCommand => new(parameter =>
-        {
-            ColorData? colorData = null;
-            if (parameter is int i) colorData = i.ToColorData();
-            else if (parameter is ColorData cd) colorData = cd.Clone();
-            if (colorData is not null) AddHistoryColor(colorData, false, true);
-        });
-        public static VMC RemoveHistoryColorCommand => new(parameter =>
-        {
-            ColorData? colorData = null;
-            if (parameter is int i) colorData = i.ToColorData();
-            else if (parameter is ColorData cd) colorData = cd.Clone();
-            if (colorData is not null) RemoveHistoryColor(colorData);
-        });
-        public static VMC ClearHistoryColorsCommand => new(parameter => ClearHistoryColors());
-        public static VMC MarkHistoryColorCommand => new(parameter =>
-        {
-            ColorData? colorData = null;
-            if (parameter is int i) colorData = i.ToColorData();
-            else if (parameter is ColorData cd) colorData = cd.Clone();
-            if (colorData is not null) MarkHistoryColor(colorData, null);
-        });
-        public void ConfrimResultColor()
-        {
-            OnResultColorUpdated?.Invoke(CachedColorData.Clone(), MainColorData.Clone(), ControlDataUpdates.Confrim);
-            CachedColorData = MainColorData.Clone();
-            ResultColor = MainColorData.Clone();
-            AddOrSelectHistoryColor(MainColorData.Clone(), false, true);
-        }
-        public void CancelResultColor()
-        {
-            OnResultColorUpdated?.Invoke(MainColorData.Clone(), CachedColorData.Clone(), ControlDataUpdates.Cancel);
-            MainColorData = CachedColorData.Clone();
-        }
-
-        public delegate void ResultColorUpdatedEventHandler(ColorData oldData, ColorData newData, ControlDataUpdates updates);
-        public event ResultColorUpdatedEventHandler? OnResultColorUpdated;
-        #endregion
-
-        #region HSV/HSL
-        public ColorData MaxHsvSColorData
-        {
-            get => (ColorData)GetValue(MaxHsvSColorDataProperty);
-            protected set => SetValue(MaxHsvSColorDataPropertyKey, value);
-        }
-        private static readonly DependencyPropertyKey MaxHsvSColorDataPropertyKey = DependencyProperty.RegisterReadOnly(nameof(MaxHsvSColorData), typeof(ColorData), typeof(EColorPalette), new(new ColorData()));
-        public static readonly DependencyProperty MaxHsvSColorDataProperty = MaxHsvSColorDataPropertyKey.DependencyProperty;
-
-        public ColorData MinHsvSColorData
-        {
-            get => (ColorData)GetValue(MinHsvSColorDataProperty);
-            protected set => SetValue(MinHsvSColorDataPropertyKey, value);
-        }
-        private static readonly DependencyPropertyKey MinHsvSColorDataPropertyKey = DependencyProperty.RegisterReadOnly(nameof(MinHsvSColorData), typeof(ColorData), typeof(EColorPalette), new(new ColorData()));
-        public static readonly DependencyProperty MinHsvSColorDataProperty = MinHsvSColorDataPropertyKey.DependencyProperty;
-
-        public ColorData MaxVColorData
-        {
-            get => (ColorData)GetValue(MaxVColorDataProperty);
-            protected set => SetValue(MaxVColorDataPropertyKey, value);
-        }
-        private static readonly DependencyPropertyKey MaxVColorDataPropertyKey = DependencyProperty.RegisterReadOnly(nameof(MaxVColorData), typeof(ColorData), typeof(EColorPalette), new(new ColorData()));
-        public static readonly DependencyProperty MaxVColorDataProperty = MaxVColorDataPropertyKey.DependencyProperty;
-
-        public ColorData MinVColorData
-        {
-            get => (ColorData)GetValue(MinVColorDataProperty);
-            protected set => SetValue(MinVColorDataPropertyKey, value);
-        }
-        private static readonly DependencyPropertyKey MinVColorDataPropertyKey = DependencyProperty.RegisterReadOnly(nameof(MinVColorData), typeof(ColorData), typeof(EColorPalette), new(new ColorData()));
-        public static readonly DependencyProperty MinVColorDataProperty = MinVColorDataPropertyKey.DependencyProperty;
-
-        public ColorData MaxHslSColorData
-        {
-            get => (ColorData)GetValue(MaxHslSColorDataProperty);
-            protected set => SetValue(MaxHslSColorDataPropertyKey, value);
-        }
-        private static readonly DependencyPropertyKey MaxHslSColorDataPropertyKey = DependencyProperty.RegisterReadOnly(nameof(MaxHslSColorData), typeof(ColorData), typeof(EColorPalette), new(new ColorData()));
-        public static readonly DependencyProperty MaxHslSColorDataProperty = MaxHslSColorDataPropertyKey.DependencyProperty;
-
-        public ColorData MinHslSColorData
-        {
-            get => (ColorData)GetValue(MinHslSColorDataProperty);
-            protected set => SetValue(MinHslSColorDataPropertyKey, value);
-        }
-        private static readonly DependencyPropertyKey MinHslSColorDataPropertyKey = DependencyProperty.RegisterReadOnly(nameof(MinHslSColorData), typeof(ColorData), typeof(EColorPalette), new(new ColorData()));
-        public static readonly DependencyProperty MinHslSColorDataProperty = MinHslSColorDataPropertyKey.DependencyProperty;
-
-        public ColorData CentreLColorData
-        {
-            get => (ColorData)GetValue(CentreLColorDataProperty);
-            protected set => SetValue(CentreLColorDataPropertyKey, value);
-        }
-        private static readonly DependencyPropertyKey CentreLColorDataPropertyKey = DependencyProperty.RegisterReadOnly(nameof(CentreLColorData), typeof(ColorData), typeof(EColorPalette), new(new ColorData()));
-        public static readonly DependencyProperty CentreLColorDataProperty = CentreLColorDataPropertyKey.DependencyProperty;
-
-        public ColorData MaxAlphaColorData
-        {
-            get => (ColorData)GetValue(MaxAlphaColorDataProperty);
-            protected set => SetValue(MaxAlphaColorDataPropertyKey, value);
-        }
-        private static readonly DependencyPropertyKey MaxAlphaColorDataPropertyKey = DependencyProperty.RegisterReadOnly(nameof(MaxAlphaColorData), typeof(ColorData), typeof(EColorPalette), new(new ColorData()));
-        public static readonly DependencyProperty MaxAlphaColorDataProperty = MaxAlphaColorDataPropertyKey.DependencyProperty;
-
-        #endregion
-
-        #region Back Colors
-        public ColorData GrayColorData
-        {
-            get => (ColorData)GetValue(GrayColorDataProperty);
-            protected set => SetValue(GrayColorDataPropertyKey, value);
-        }
-        private static readonly DependencyPropertyKey GrayColorDataPropertyKey = DependencyProperty.RegisterReadOnly(nameof(GrayColorData), typeof(ColorData), typeof(EColorPalette), new(new ColorData()));
-        public static readonly DependencyProperty GrayColorDataProperty = GrayColorDataPropertyKey.DependencyProperty;
-
-        public ColorData OppositeColorData
-        {
-            get => (ColorData)GetValue(OppositeColorDataProperty);
-            protected set => SetValue(OppositeColorDataPropertyKey, value);
-        }
-        private static readonly DependencyPropertyKey OppositeColorDataPropertyKey = DependencyProperty.RegisterReadOnly(nameof(OppositeColorData), typeof(ColorData), typeof(EColorPalette), new(new ColorData()));
-        public static readonly DependencyProperty OppositeColorDataProperty = OppositeColorDataPropertyKey.DependencyProperty;
-
-        public ColorData CachedColorData
-        {
-            get => (ColorData)GetValue(CachedColorDataProperty);
-            protected set => SetValue(CachedColorDataPropertyKey, value);
-        }
-        private static readonly DependencyPropertyKey CachedColorDataPropertyKey = DependencyProperty.RegisterReadOnly(nameof(CachedColorData), typeof(ColorData), typeof(EColorPalette), new(new ColorData()));
-        public static readonly DependencyProperty CachedColorDataProperty = CachedColorDataPropertyKey.DependencyProperty;
-        #endregion
-
-        #region Palette - color modify
-
-        public ColorData MainColorData
-        {
-            get => (ColorData)GetValue(MainColorDataProperty);
-            set => SetValue(MainColorDataProperty, value);
-        }
-        public static readonly DependencyProperty MainColorDataProperty =
-            DependencyProperty.Register(nameof(MainColorData), typeof(ColorData), typeof(EColorPalette), new FrameworkPropertyMetadata(new ColorData(), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnMainColorChanged));
-
-        public string MainColorHex8
-        {
-            get => (string)GetValue(MainColorHex8Property);
-            set => SetValue(MainColorHex8Property, value);
-        }
-        public static readonly DependencyProperty MainColorHex8Property =
-            DependencyProperty.Register(nameof(MainColorHex8), typeof(string), typeof(EColorPalette), new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnHexChanged));
-
-        protected bool Updating = false;
-        private static void OnMainColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var cp = (EColorPalette)d;
-            if (cp.Updating) return;
-            cp.Updating = true;
-            cp.OnMainColorChanged(((ColorData)e.NewValue).Clone(), ((ColorData)e.OldValue).Clone());
-            cp.Updating = false;
-        }
-        private static void OnHexChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var cp = (EColorPalette)d;
-            if (cp.Updating) return;
-            cp.Updating = true;
-            var oldHex8 = (string)e.OldValue;
-            var newHex8 = (string)e.NewValue;
-            if (!oldHex8.EqualIgnoreCase(newHex8))
-            {
-                var colorData = new ColorData
-                {
-                    Hex8 = newHex8
-                };
-                cp.OnMainColorChanged(colorData, cp.MainColorData.Clone());
-            }
-            cp.Updating = false;
-        }
-        protected virtual void OnMainColorChanged(ColorData newColor, ColorData oldColor)
-        {
-            MainColorHex8 = newColor.Hex8;
-            UpdateSliders(newColor, paletteSpaceTabControl.SelectedIndex);
-            UpdateBackColors(newColor);
-            UpdateHistoryColorsSelection(newColor);
-            if (ConstantUpdateResultColor)
-            {
-                ResultColor = newColor.Clone();
-                OnResultColorUpdated?.Invoke(oldColor.Clone(), newColor.Clone(), ControlDataUpdates.Update);
-            }
-            Updating = false;
-        }
-        protected virtual void OnSliderChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (Updating) return;
-            if (sender == alphaSlider) MainColorData = ((byte)e.NewValue, MainColorData.V1, MainColorData.V2, MainColorData.V3).ToColorData(MainColorData.Space);
-            else
-            {
-                var newColor  = paletteSpaceTabControl.SelectedIndex switch
-                {
-                    1 => (MainColorData.A, (byte)hSlider.Value, (byte)sSlider.Value, (byte)vSlider.Value).ToColorData(ColorSpace.AHSV),
-                    2 => (MainColorData.A, (byte)hslHSlider.Value, (byte)hslSSlider.Value, (byte)hslLSlider.Value).ToColorData(ColorSpace.AHSL),
-                    _ => (MainColorData.A, (byte)redSlider.Value, (byte)greenSlider.Value, (byte)blueSlider.Value).ToColorData(ColorSpace.ARGB),
-                };
-                MainColorData = newColor;
-            }
-        }
-        protected void UpdateBackColors(ColorData newColorData)
-        {
-            var maxAlphaData = (int)(newColorData.Data | 0xFF000000);
-            var maxAlphaColorData = new ColorData(maxAlphaData, newColorData.Space);
-            var hsvData = maxAlphaColorData.ToAHSV();
-            MaxHsvSColorData = (hsvData.Data | 0x0000FF00).ToColorData(ColorSpace.AHSV);
-            MinHsvSColorData = ((int)(hsvData.Data & 0xFFFF00FF)).ToColorData(ColorSpace.AHSV);
-            MaxVColorData = (hsvData.Data | 0x000000FF).ToColorData(ColorSpace.AHSV);
-            MinVColorData = ((int)(hsvData.Data & 0xFFFFFF00)).ToColorData(ColorSpace.AHSV);
+            base.OnApplyTemplate();
+            PART_SlidersTabControl = GetTemplateChild(nameof(PART_SlidersTabControl)) as ETabControl;
+            PART_ResultColorPreview = GetTemplateChild(nameof(PART_ResultColorPreview)) as Border;
+            PART_OriginalColorPreview = GetTemplateChild(nameof(PART_OriginalColorPreview)) as Border;
+            PART_GreyColorPreview = GetTemplateChild(nameof(PART_GreyColorPreview)) as Border;
+            PART_HistoryColorsBox = GetTemplateChild(nameof(PART_HistoryColorsBox)) as ListBox;
+            PART_ConfrimBtn = GetTemplateChild(nameof(PART_ConfrimBtn)) as Button;
+            PART_CancelBtn = GetTemplateChild(nameof(PART_CancelBtn)) as Button;
             //
-            var hslData = maxAlphaColorData.ToAHSL();
-            MaxHslSColorData = (hslData.Data | 0x0000FF00).ToColorData(ColorSpace.AHSL);
-            MinHslSColorData = ((int)(hslData.Data & 0xFFFF00FF)).ToColorData(ColorSpace.AHSL);
-            CentreLColorData = ((int)((hslData.Data & 0xFFFFFF00) | 0x0000007F)).ToColorData(ColorSpace.AHSL);
-            //
-            MaxAlphaColorData = maxAlphaColorData;
-            GrayColorData = maxAlphaColorData.ToGray();
-            OppositeColorData = maxAlphaColorData.ToOpposite();
-        }
-        protected void UpdateSliders(ColorData colorData, int targetPannelIndex = -1)
-        {
-            switch (targetPannelIndex)
+            if (PART_SlidersTabControl is not null) PART_SlidersTabControl.SelectionChanged += SpaceChanged;
+            if (PART_ResultColorPreview is not null) PART_ResultColorPreview.MouseDown += (s, e) =>
             {
-                case 0:
-                    updateRgbSliders(colorData);
-                    
-                    break;
-                case 1:
-                    updateHsvSliders(colorData);
-                    break;
-                case 2:
-                    updateHslSliders(colorData);
-                    break;
-                default:
-                    updateRgbSliders(colorData);
-                    updateHsvSliders(colorData);
-                    updateHslSliders(colorData);
-                    break;
-            }
-            alphaSlider.Value = colorData.A;
-            void updateRgbSliders(ColorData colorData)
+                ResultColor = CurrentColor;
+                AddHistoryColor(ResultColor);
+            };
+            if (PART_OriginalColorPreview is not null) PART_OriginalColorPreview.MouseDown += (s, e) => CurrentColor = InitialColor;
+            if (PART_GreyColorPreview is not null) PART_GreyColorPreview.MouseDown += (s, e) => CurrentColor = GrayColor;
+            if (PART_HistoryColorsBox is not null)
             {
-                colorData = colorData.ToARGB();
-                redSlider.Value = colorData.V1;
-                greenSlider.Value = colorData.V2;
-                blueSlider.Value = colorData.V3;
+                PART_HistoryColorsBox.SelectionChanged += (s, e) =>
+                {
+                    if (e.AddedItems.Count > 0 && e.AddedItems[0] is HistoryColor hc) CurrentColor = hc.Color;
+                };
             }
-            void updateHsvSliders(ColorData colorData)
-            {
-                colorData = colorData.ToAHSV();
-                hSlider.Value = colorData.V1;
-                sSlider.Value = colorData.V2;
-                vSlider.Value = colorData.V3;
-            }
-            void updateHslSliders(ColorData colorData)
-            {
-                colorData = colorData.ToAHSL();
-                hslHSlider.Value = colorData.V1;
-                hslSSlider.Value = colorData.V2;
-                hslLSlider.Value = colorData.V3;
-            }
+            if (PART_ConfrimBtn is not null) PART_ConfrimBtn.Click += (s, e) => Confrim();
+            if (PART_CancelBtn is not null) PART_CancelBtn.Click += (s, e) => CancelClose();
         }
 
-        public void SetInitialColor(ColorData colorData)
+        #region History colors
+        
+        public static ObservableCollection<HistoryColor> HistoryColors { get; } = [];
+        public static void AddHistoryColor(ColorData color, bool? favorite = null)
         {
-            MainColorData = colorData.Clone();
-            ResultColor = colorData.Clone();
-            CachedColorData = colorData.Clone();
+            var colorData = color.ToARGB();
+            var hc = HistoryColors.ToList().Find(hc => hc.ColorData == colorData.Data);
+            hc ??= new HistoryColor(colorData.Data, favorite ?? false);
+            if (favorite is false) hc.Favorite = false;
+            if (favorite is true) hc.Favorite = true;
+            HistoryColors.Remove(hc);
+            HistoryColors.Add(hc);
+        }
+        public static void RemoveHistoryColor(ColorData color)
+        {
+            var colorData = color.ToARGB();
+            var hc = new HistoryColor(colorData.Data, false);
+            HistoryColors.Remove(hc);
+        }
+        public static void ClearHistoryColors()
+        {
+            HistoryColors.Clear();
         }
         #endregion
 
-        public bool ConfrimButtonShown
+        #region Actions
+        public ColorData InitialColor { get; private set; } = ColorDataExtensions.GetAccentColor();
+        public void Open(ColorData? initialColor = null)
         {
-            get => (bool)GetValue(ConfrimButtonShownProperty);
-            set => SetValue(ConfrimButtonShownProperty, value);
+            initialColor ??= ResultColor ?? CurrentColor ?? ColorDataExtensions.GetAccentColor();
+            CurrentColor = initialColor;
+            InitialColor = initialColor;
+            NotifyPropertyChanged(nameof(InitialColor));
+            //Selector
         }
-        public static readonly DependencyProperty ConfrimButtonShownProperty =
-            DependencyProperty.Register(nameof(ConfrimButtonShown), typeof(bool), typeof(EColorPalette), new(true));
+        public void Confrim()
+        {
+            ResultColor = CurrentColor;
+            AddHistoryColor(CurrentColor);
+        }
+        public void CancelClose()
+        {
+            return;
+        }
+        #endregion
 
-        private void ColorCarrierBorder_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if(sender is Border bd && bd.Background is SolidColorBrush scb)
-            {
-                var colorData = scb.Color.ToColorData();
-                if (e.LeftButton == MouseButtonState.Pressed) AddOrSelectHistoryColor(colorData, true, false);
-                else if(e.RightButton == MouseButtonState.Pressed) MainColorData = colorData;
-            }
-        }
-        private void HistoryCarrierBorder_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (sender is Border bd && bd.Background is SolidColorBrush scb)
-            {
-                var colorData = scb.Color.ToColorData();
-                if (e.LeftButton == MouseButtonState.Pressed) MainColorData = colorData;
-                else if (e.RightButton == MouseButtonState.Pressed) RemoveHistoryColor(colorData);
-                else if (e.MiddleButton == MouseButtonState.Pressed) MarkHistoryColor(colorData, null);
-            }
-        }
-        private VMC ConfrimCommand => new(o => ConfrimResultColor());
-        private VMC CancelCommand => new(o => CancelResultColor());
-
-        private void PaletteSpaceTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (e.Source is TabControl tbc) UpdateSliders(MainColorData, tbc.SelectedIndex);
-        }
     }
 }

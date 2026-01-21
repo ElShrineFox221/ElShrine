@@ -2,10 +2,9 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
                     xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions"
-                    xmlns:converters="clr-namespace:ElShrine.Wpf.Converters"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <ControlTemplate x:Key="EImage_BaseTemplate" TargetType="controls:EImage">
-        <Grid x:Name="PART_EImageRoot">
+        <Grid x:Name="PART_EImageRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EImage}}">
             <Grid.OpacityMask>
                 <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EImageRoot}"/>
             </Grid.OpacityMask>
@@ -14,10 +13,7 @@
                        Margin="0" Source="{TemplateBinding LoadedImageSource}" Stretch="{TemplateBinding Stretch}" Visibility="Visible"/>
             </Grid>
             <Border x:Name="PART_Background" 
-                    BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}" Padding="{TemplateBinding Padding}"
-                    ext:ColorTransN.StateMap="
-                    Normal=Border:BR;
-                    MouseIn=Border:SE;" Background="Transparent">
+                    BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}" Padding="{TemplateBinding Padding}" Background="Transparent">
                 <Grid>
                     <Grid x:Name="PART_LoadingOverlay" Background="#4A000000" Visibility="Collapsed">
                         <controls:EProgressBar x:Name="PART_ProgressBar" 
@@ -31,14 +27,7 @@
                             <RowDefinition Height="auto"/>
                         </Grid.RowDefinitions>
                         <Border x:Name="PART_ErrorNoticeOverlay" 
-                                Grid.Row="1" Padding="2" CornerRadius="5" Visibility="Collapsed" Margin="10" BorderBrush="Transparent">
-                            <Border.Background>
-                                <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}" ConverterParameter="alpha.lerp">
-                                    <Binding RelativeSource="{RelativeSource TemplatedParent}" Path="BackBrush"/>
-                                    <Binding Source="0.4"/>
-                                    <Binding RelativeSource="{RelativeSource Self}" Path="BorderBrush"/>
-                                </MultiBinding>
-                            </Border.Background>
+                                Grid.Row="1" Padding="2" CornerRadius="5" Visibility="Collapsed" Margin="10">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -49,10 +38,10 @@
                                                   Margin="5" 
                                                   Command="{x:Static controls:EImage.RetryDefault}" 
                                                   CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"
-                                                  IsEnabled="{Binding Source={x:Static controls:EImage.RetryDefault}, Path=IsRunning, Converter={StaticResource BoolReverseConverter}}" 
+                                                  IsEnabled="{Binding Source={x:Static controls:EImage.RetryDefault}, Path=IsRunning, Converter={StaticResource CommonModifyConverter}}" 
                                                   MaxHeight="24" EBorderThickness="0" EBorderCornerRadius="4" BackBrush="White" Padding="5,2">
                                     <controls:EButton.Content>
-                                        <TextBlock Text="&#xE777;" Foreground="{Binding ElementName=PART_Background, Path=BorderBrush}" FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        <TextBlock Style="{StaticResource TextBlock_IconStyle}" Text="&#xE777;" Foreground="{Binding ElementName=PART_Background, Path=BorderBrush}"/>
                                     </controls:EButton.Content>
                                 </controls:EButton>
                             </Grid>
@@ -60,6 +49,12 @@
                     </Grid>
                 </Grid>
             </Border>
+            <ext:StateListener.Rules>
+                <ext:RuleCollection>
+                    <ext:Rule Target="{Binding ElementName=PART_Background}" StateMap="MouseOut=>Border=PR; MouseIn=>Border=SE"/>
+                    <ext:Rule Target="{Binding ElementName=PART_ErrorNoticeOverlay}" StateMap="MouseOut=>Back=MultiplyAlpha(BC, 0.6)"/>
+                </ext:RuleCollection>
+            </ext:StateListener.Rules>
         </Grid>
     </ControlTemplate>
     <Style TargetType="{x:Type controls:EImage}">
@@ -71,12 +66,9 @@
         <Setter Property="Stretch" Value="Uniform"/>
         <Setter Property="Template" Value="{StaticResource EImage_BaseTemplate}"/>
     </Style>
-    
+
     <ControlTemplate x:Key="EImage_SimpleTemplate" TargetType="controls:EImage">
-        <ControlTemplate.Resources>
-            <SolidColorBrush x:Key="TransparentBrush" Color="Transparent"/>
-        </ControlTemplate.Resources>
-        <Grid x:Name="PART_EImageRoot">
+        <Grid x:Name="PART_EImageRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EImage}}">
             <Grid.OpacityMask>
                 <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EImageRoot}"/>
             </Grid.OpacityMask>
@@ -85,28 +77,18 @@
    Margin="0" Source="{TemplateBinding LoadedImageSource}" Stretch="{TemplateBinding Stretch}" Visibility="Visible"/>
             </Grid>
             <Border x:Name="PART_Background" 
-                BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}" Padding="{TemplateBinding Padding}"
-                ext:ColorTransN.StateMap="
-                Normal=Border:BR;
-                MouseIn=Border:SE;" Background="Transparent">
+                BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}" Padding="{TemplateBinding Padding}" Background="Transparent">
                 <Grid>
                     <Grid x:Name="PART_LoadingOverlay" Background="#4A000000" Visibility="Collapsed"/>
                     <controls:EButton x:Name="PART_ErrorNoticeOverlay" 
                                       Margin="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Visibility="Collapsed"
                                       Command="{x:Static controls:EImage.RetryDefault}" 
                                       CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"
-                                      IsEnabled="{Binding Source={x:Static controls:EImage.RetryDefault}, Path=IsRunning, Converter={StaticResource BoolReverseConverter}}" 
+                                      IsEnabled="{Binding Source={x:Static controls:EImage.RetryDefault}, Path=IsRunning, Converter={StaticResource CommonModifyConverter}}" 
                                       EBorderThickness="0" EBorderCornerRadius="{TemplateBinding EBorderCornerRadius}"
-                                      MaxHeight="40" MaxWidth="40" FontSize="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth, Converter={StaticResource NumToStringConverter}, ConverterParameter=0.5}">
-                        <controls:EButton.BackBrush>
-                            <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}" ConverterParameter="alpha.lerp">
-                                <Binding RelativeSource="{RelativeSource TemplatedParent}" Path="BackBrush"/>
-                                <Binding Source="0.3"/>
-                                <Binding Source="{StaticResource TransparentBrush}"/>
-                            </MultiBinding>
-                        </controls:EButton.BackBrush>
+                                      MaxHeight="40" MaxWidth="40" FontSize="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth, Converter={StaticResource CommonModifyConverter}, ConverterParameter=*0.5}">
                         <controls:EButton.Content>
-                            <TextBlock Text="&#xE777;" Foreground="{Binding ElementName=PART_Background, Path=BorderBrush}" FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <TextBlock Style="{StaticResource TextBlock_IconStyle}" Text="&#xE777;" Foreground="{Binding ElementName=PART_Background, Path=BorderBrush}"/>
                         </controls:EButton.Content>
                         <controls:EButton.ToolTip>
                             <TextBlock Margin="5" Text="{TemplateBinding ErrorMsg}" Foreground="Red" VerticalAlignment="Center" TextWrapping="Wrap" MinWidth="10" MaxHeight="40" TextTrimming="CharacterEllipsis"/>
@@ -114,6 +96,12 @@
                     </controls:EButton>
                 </Grid>
             </Border>
+            <ext:StateListener.Rules>
+                <ext:RuleCollection>
+                    <ext:Rule Target="{Binding ElementName=PART_Background}" StateMap="MouseOut=>Border=PR; MouseIn=>Border=SE"/>
+                    <ext:Rule Target="{Binding ElementName=PART_ErrorNoticeOverlay}" StateMap="MouseOut=>Back=MultiplyAlpha(BC, 0.6)"/>
+                </ext:RuleCollection>
+            </ext:StateListener.Rules>
         </Grid>
     </ControlTemplate>
     <Style x:Key="EImage_SimpleStyle" TargetType="controls:EImage" BasedOn="{StaticResource {x:Type controls:EImage}}">

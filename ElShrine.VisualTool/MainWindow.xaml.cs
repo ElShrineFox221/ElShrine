@@ -1,6 +1,6 @@
-﻿using ElShrine.Debug;
+﻿using ElShrine.Common.Interpreter;
+using ElShrine.Debug;
 using ElShrine.EConsole;
-using ElShrine.VisualTool.Modules.Console.ViewModel;
 using ElShrine.Wpf;
 using ElShrine.Wpf.Controls;
 using System.Windows;
@@ -27,6 +27,10 @@ namespace ElShrine.VisualTool
                 ConsoleManager.DefaultSub = false;
                 
                 ConsoleManager.SetController(new SystemConsoleController());
+                /*const string expr = "if(a==0)x = -test(0, 2, a) + b * (c / -d)";
+                var exprP = Interpreter.CreateInterpreter(new TokenRegistry(), new ParserRuleRegistry());
+                var exprNode = exprP.Parse(expr);
+                exprNode.Evaluate(new PTEPContext());*/
             };
         }
         private void EnabledModulesListView_DragItemDropped(object sender, object item, ListView source)
@@ -53,32 +57,19 @@ namespace ElShrine.VisualTool
                 }
             }
         }
-
-        private void testSwitchEnabledBtn_Click(object sender, RoutedEventArgs e)
+        
+        public List<TestData> TestDatas { get; set; } = [];
+        private void EListView_Loaded(object sender, RoutedEventArgs e)
         {
-            testImage.IsEnabled = !testImage.IsEnabled;
-            testImage1.IsEnabled = !testImage1.IsEnabled;
+            for (int i = 0; i < 20; i++)
+            {
+                TestDatas.Add(new($"D{i}", i));
+            }
+            if(sender is ListView lv) lv.ItemsSource = TestDatas;
         }
-
-        private void testConfrimBtn_Click(object sender, RoutedEventArgs e)
+    }public class TestData(string d, int v)
         {
-            testImage.Url = urlBox.Text;
-            testImage1.Url = urlBox.Text;
+            public string Data { get; set; } = d;
+            public int V { get; set; } = v;
         }
-
-        private void testEBTNN_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void testProChangeBtn_Click(object sender, RoutedEventArgs e)
-        {
-
-
-        }
-
-        private void testProModeBtn_Click(object sender, RoutedEventArgs e)
-        {
-        }
-    }
 }

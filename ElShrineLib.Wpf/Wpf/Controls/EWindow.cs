@@ -1,4 +1,5 @@
 ﻿using ElShrine.Common;
+using ElShrine.Modules;
 using ElShrine.Wpf.UITheme;
 using System;
 using System.ComponentModel;
@@ -119,6 +120,12 @@ namespace ElShrine.Wpf.Controls
         public static readonly DependencyProperty IsSelectionWindowEnabledProperty = DependencyProperty.Register(nameof(IsSelectionWindowEnabled), typeof(bool), typeof(EWindow), new PropertyMetadata(true));
         #endregion
 
+        public readonly static DependencyProperty AllowDragResizeProperty = DependencyProperty.Register(nameof(AllowDragResize), typeof(bool), typeof(EWindow), new PropertyMetadata(true));
+        public bool AllowDragResize
+        {
+            get => (bool)GetValue(AllowDragResizeProperty);
+            set => SetValue(AllowDragResizeProperty, value);
+        }
         #endregion
 
         private Border? MainBorder;
@@ -127,12 +134,12 @@ namespace ElShrine.Wpf.Controls
         static EWindow() => DefaultStyleKeyProperty.OverrideMetadata(typeof(EWindow), new FrameworkPropertyMetadata(typeof(EWindow)));
         public EWindow() : base()
         {
-            ThemeManager.RegisterCoerceThemeDPs(this);
+            UIThemesManager.RegisterCoerceThemeDPs(this);
             StateChanged += EWindow_StateChanged;
             MouseEnter += EWindow_MouseEnter;
             MouseLeave += EWindow_MouseLeave;
         }
-        public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => ThemeManager.CoerceValue(this);
+        public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => UIThemesManager.CoerceValue(this);
         public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) { }
 
         #region override
@@ -170,7 +177,7 @@ namespace ElShrine.Wpf.Controls
             UpdateMaxRestoreIcon();
             if(WindowState == WindowState.Normal)
             {
-                if (MainBorder is not null) MainBorder.Opacity = 0;
+                MainBorder?.Opacity = 0;
                 FadeIn(this, 0.15, null, false);
             }
         }
@@ -190,7 +197,7 @@ namespace ElShrine.Wpf.Controls
             FadeOut(window, 0.0, 0.3, (e) =>
             {
                 window.WindowState = WindowState.Minimized;
-                if (window.MainBorder is not null) window.MainBorder.Opacity = 1;
+                window.MainBorder?.Opacity = 1;
             }, false);
         }
         public static void MaximizeOrRestoreWindow(EWindow window)
@@ -274,63 +281,60 @@ namespace ElShrine.Wpf.Controls
 
         #region Resize
         
-        public int DragResizeEdgeWidth { get; set; } = 4;
+        public int DragResizeEdgeWidth { get; set; } = 6;
         private IntPtr WindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
-            if (msg == WM_NCHITTEST)
+            var result = IntPtr.Zero;
+            switch (msg)
             {
-                Point sp = new((short)(lParam & 0xFFFF), (short)(lParam >> 16));
-                Point clientPoint = PointFromScreen(sp);
-                if (WindowState != WindowState.Normal)
-                {
-                    if (clientPoint.Y < (TitleBarGrid?.ActualHeight ?? 0))
-                    {
-                        handled = true;
-                        return HTCLIENT;
-                    }
-                    return IntPtr.Zero;
-                }
-
-                int xDir = 0;
-                if (clientPoint.X < DragResizeEdgeWidth) xDir = 1;
-                else if (clientPoint.X > (ActualWidth - DragResizeEdgeWidth)) xDir = 2;
-
-                int yDir = 0;
-                if (clientPoint.Y < DragResizeEdgeWidth) yDir = 1;
-                else if (clientPoint.Y > (ActualHeight - DragResizeEdgeWidth)) yDir = 2;
-
-                if (xDir != 0 || yDir != 0)
-                {
+                case WM_NCHITTEST:
+                    result = HandleHitTest(lParam, ref handled);
+                    break;
+                case WM_GETMINMAXINFO:
                     handled = true;
-                    return (xDir + yDir * 3) switch
-                    {
-                        // Edges
-                        1 => HTLEFT,
-                        2 => HTRIGHT,
-                        3 => HTTOP,
-                        6 => HTBOTTOM,
-                        // Corners
-                        4 => HTTOPLEFT,
-                        5 => HTTOPRIGHT,
-                        7 => HTBOTTOMLEFT,
-                        8 => HTBOTTOMRIGHT,
-                        // Default
-                        _ => IntPtr.Zero,
-                    };
-                }
-
-                if (TitleBarGrid != null && clientPoint.Y < TitleBarGrid.ActualHeight)
-                {
-                    handled = true;
-                    return HTCLIENT;
-                }
+                    result = AdjustMaximizedWindow(lParam);
+                    break;
             }
-            if (msg == WM_GETMINMAXINFO)
+            return result;
+        }
+        private nint HandleHitTest(IntPtr lParam, ref bool handled)
+        {
+            //Get relative position
+            var screenPos = new Point((short)(lParam & 0xFFFF), (short)(lParam >> 16));
+            var clientPos = PointFromScreen(screenPos);
+            //Handle header hit
+            var hitResult = (IsInsideTitleBar(clientPos) && (handled = true)) ? HTCLIENT : IntPtr.Zero;
+            //Handle maximized or minmized window
+            if (WindowState != WindowState.Normal) return hitResult;
+            //Handle resize
+            if (AllowDragResize)
             {
-                handled = true;
-                return AdjustMaximizedWindow(lParam);
+                var _hitResult = GetResizeHitZone(clientPos);
+                if (_hitResult != NONE && (handled = true)) hitResult = _hitResult;
             }
-            return IntPtr.Zero;
+            return hitResult;
+        }
+        private bool IsInsideTitleBar(Point clientPoint)
+        {
+            double titleHeight = TitleBarGrid?.ActualHeight ?? 0;
+            return clientPoint.Y >= 0 && clientPoint.Y < titleHeight;
+        }
+        private int GetResizeHitZone(Point pt)
+        {
+            double w = ActualWidth, h = ActualHeight, edge = DragResizeEdgeWidth;
+            double corner = edge * 2;
+
+            if (pt.X <= corner && pt.Y <= corner) return HTTOPLEFT;
+            if (pt.X >= w - corner && pt.Y <= corner) return HTTOPRIGHT; 
+            if (pt.X <= corner && pt.Y >= h - corner) return HTBOTTOMLEFT; 
+            if (pt.X >= w - corner && pt.Y >= h - corner) return HTBOTTOMRIGHT; 
+
+            if (pt.X <= edge) return HTLEFT;
+            if (pt.X >= w - edge) return HTRIGHT;
+            if (pt.Y <= edge) return HTTOP;
+            if (pt.Y >= h - edge) return HTBOTTOM;
+
+            return NONE;
         }
         #endregion
 
@@ -351,6 +355,7 @@ namespace ElShrine.Wpf.Controls
                 EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut },
                 FillBehavior = FillBehavior.HoldEnd
             };
+            MainBorder.BorderBrush ??= new SolidColorBrush(fromSolidBrush.Color);
             MainBorder.BorderBrush.BeginAnimation(SolidColorBrush.ColorProperty, null);
             if (MainBorder.BorderBrush != fromBrush)
             {

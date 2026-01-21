@@ -7,10 +7,10 @@ namespace ElShrine.Wpf
     public abstract class ViewModelBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
-        protected virtual void NoticePropertyChanged(object sender, string memberName) => PropertyChanged?.Invoke(sender, new PropertyChangedEventArgs(memberName));
-        public void NoticePropertyChanged(params string[] memberNames)
+        protected virtual void NotifyPropertyChanged(object sender, string memberName) => PropertyChanged?.Invoke(sender, new PropertyChangedEventArgs(memberName));
+        public void NotifyPropertyChanged(params string[] memberNames)
         {
-            foreach (var member in memberNames) NoticePropertyChanged(this, member);
+            foreach (var member in memberNames) NotifyPropertyChanged(this, member);
         }
 
         public ViewModelBase()

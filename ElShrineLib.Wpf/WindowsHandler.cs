@@ -17,6 +17,7 @@ namespace ElShrine
         public const int HTBOTTOMRIGHT = 17;
         public const int HTCAPTION = 2;
         public const int HTCLIENT = 1;
+        public const int NONE = 0;
 
         [LibraryImport("user32.dll")]
         internal static partial IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);

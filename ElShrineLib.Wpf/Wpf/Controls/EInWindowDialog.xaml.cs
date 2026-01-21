@@ -104,7 +104,7 @@ namespace ElShrine.Wpf.Controls
         {
             var root = this.GetRootDependencyObject();
             
-            HostElement = root.FindVisualChildRecursive(dobj =>
+            HostElement = root.FindChild(dobj =>
             {
                 var parentType = OverlayParentType;
                 var parentName = OverlayParentName;
@@ -207,7 +207,7 @@ namespace ElShrine.Wpf.Controls
             maskFadeOut.Completed += (s, e) =>
             {
                 isAnimating = false;
-                if (overlayRoot is not null) overlayRoot.Visibility = Visibility.Collapsed;
+                overlayRoot?.Visibility = Visibility.Collapsed;
             };
 
             OverlayMask.BeginAnimation(OpacityProperty, maskFadeOut);

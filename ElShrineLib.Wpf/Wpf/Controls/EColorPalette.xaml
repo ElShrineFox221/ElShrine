@@ -1,531 +1,282 @@
-﻿<UserControl x:Name="colorPalette" 
-             x:Class="ElShrine.Wpf.Controls.EColorPalette"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:ElShrine.Wpf.Controls"
-             xmlns:modelSource="clr-namespace:ElShrine.EGraphic;assembly=ElShrineGraphicsLib"
-             xmlns:extensions="clr-namespace:ElShrine.Wpf.Controls.Extensions"
-             xmlns:system="clr-namespace:System;assembly=mscorlib"
-             mc:Ignorable="d">
-    <UserControl.Style>
-        <Style TargetType="local:EColorPalette">
-            <Setter Property="MinWidth" Value="300"/>
-            <Setter Property="Width" Value="300"/>
-            <Setter Property="Height" Value="auto"/>
-            <Setter Property="BorderCornerRadius" Value="5"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="BorderBrush" Value="{Binding CurrentTheme.BorderColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-            <Setter Property="SelectionBrush" Value="{Binding CurrentTheme.SelectionColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-            <Setter Property="ClickBrush" Value="{Binding CurrentTheme.ClickColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-            <Setter Property="Foreground" Value="{Binding CurrentTheme.FontColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-            <Setter Property="Background" Value="{Binding CurrentTheme.BackColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-            <Setter Property="FontSize" Value="{Binding CurrentTheme.FontSizeNormal, Source={StaticResource ThemeProvider}}"/>
-            <Setter Property="FontBrush" Value="{Binding CurrentTheme.FontColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-        </Style>
-    </UserControl.Style>
-    <UserControl.Template>
-        <ControlTemplate TargetType="local:EColorPalette">
-            <Border x:Name="controlRoot" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding BorderCornerRadius}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" Padding="{TemplateBinding Padding}">
-                <ContentPresenter/>
-            </Border>
-            <ControlTemplate.Triggers>
-                <Trigger Property="IsEnabled" Value="True">
-                    <Trigger.EnterActions>
-                        <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetName="controlRoot"
-Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
-                                    <DoubleAnimation.EasingFunction>
-                                        <SineEase/>
-                                    </DoubleAnimation.EasingFunction>
-                                </DoubleAnimation>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </Trigger.EnterActions>
-                    <Trigger.ExitActions>
-                        <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetName="controlRoot" 
-Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0:0.16">
-                                    <DoubleAnimation.EasingFunction>
-                                        <SineEase/>
-                                    </DoubleAnimation.EasingFunction>
-                                </DoubleAnimation>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </Trigger.ExitActions>
-                </Trigger>
-            </ControlTemplate.Triggers>
-        </ControlTemplate>
-    </UserControl.Template>
-    <UserControl.Resources>
-        <!--#region Color Brushes-->
-        <DrawingBrush x:Key="TransparentSignBrush" 
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
+                    xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EButton.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/ESlider.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+    <ControlTemplate x:Key="EColorPalette_BaseTemplate" TargetType="controls:EColorPalette">
+        <ControlTemplate.Resources>
+            <!--#region Color Brushes-->
+            <DrawingBrush x:Key="TransparentSignBrush" 
                       Viewport="0,0,12,11" ViewportUnits="Absolute" Stretch="None" TileMode="Tile">
-            <DrawingBrush.Drawing>
-                <DrawingGroup>
-                    <GeometryDrawing Brush="#d0cec7">
-                        <GeometryDrawing.Geometry>
-                            <GeometryGroup>
-                                <RectangleGeometry Rect="0,0,6,5" />
-                                <RectangleGeometry Rect="6,6,6,5" />
-                            </GeometryGroup>
-                        </GeometryDrawing.Geometry>
-                    </GeometryDrawing>
-                    <GeometryDrawing Brush="#e7e7e2">
-                        <GeometryDrawing.Geometry>
-                            <RectangleGeometry Rect="0,5,12,1" />
-                        </GeometryDrawing.Geometry>
-                    </GeometryDrawing>
-                </DrawingGroup>
-            </DrawingBrush.Drawing>
-        </DrawingBrush>
-        <LinearGradientBrush x:Key="RedGradientBrush" StartPoint="0,0" EndPoint="1,0">
-            <GradientStop Color="#ffffff"/>
-            <GradientStop Color="#ff0000" Offset="1"/>
-        </LinearGradientBrush>
-        <LinearGradientBrush x:Key="GreenGradientBrush" StartPoint="0,0" EndPoint="1,0">
-            <GradientStop Color="#ffffff"/>
-            <GradientStop Color="#00ff00" Offset="1"/>
-        </LinearGradientBrush>
-        <LinearGradientBrush x:Key="BlueGradientBrush" StartPoint="0,0" EndPoint="1,0">
-            <GradientStop Color="#ffffff"/>
-            <GradientStop Color="#0000ff" Offset="1"/>
-        </LinearGradientBrush>
-        <LinearGradientBrush x:Key="ColorSpectrumBrush" StartPoint="1,0" EndPoint="0,0">
-            <GradientStop Color="#ff0000"/>
-            <GradientStop Color="#ff00ff" Offset="0.207"/>
-            <GradientStop Color="#0000ff" Offset="0.334"/>
-            <GradientStop Color="#00ffff" Offset="0.501"/>
-            <GradientStop Color="#00ff00" Offset="0.668"/>
-            <GradientStop Color="#ffff00" Offset="0.835"/>
-            <GradientStop Color="#ff0000" Offset="1"/>
-        </LinearGradientBrush>
-        <!--#endregion-->
-        <DataTemplate x:Key="ecp_backcolored_esliderthumbtemplate" DataType="system:Object">
-            <Border Width="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=local:ESlider}}" 
-Height="{Binding Width, RelativeSource={RelativeSource Mode=Self}}" 
-BorderThickness="2" 
-BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=ContentControl}}"
-CornerRadius="{Binding BorderCornerRadius, RelativeSource={RelativeSource AncestorType=local:ESlider}}"
-Background="{Binding Background, RelativeSource={RelativeSource AncestorType=ContentControl}}">
-            </Border>
-        </DataTemplate>
-        <Style x:Key="ecp_backcolored_esliderstyle" 
-               TargetType="local:ESlider" BasedOn="{StaticResource BackBrushed_ESliderStyle}">
-            <Setter Property="Margin" Value="1,5,5,0"/>
-            <Setter Property="Height" Value="30"/>
-            <Setter Property="Maximum" Value="255"/>
-            <Setter Property="Minimum" Value="0"/>
-            <Setter Property="TickFrequency" Value="1"/>
-            <Setter Property="IsSnapToTickEnabled" Value="True"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="FillBack" Value="{StaticResource TransparentSignBrush}"/>
-            <Setter Property="Background" Value="{Binding Background, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
-            <Setter Property="SelectionBrush" Value="{Binding SelectionBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
-            <Setter Property="BorderBrush" Value="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
-        </Style>
-        <Style x:Key="ecp_round_etextboxstyle" TargetType="local:ETextBox" BasedOn="{StaticResource {x:Type local:ETextBox}}">
-            <Setter Property="Margin" Value="5,5,1,0"/>
-            <Setter Property="Width" Value="40"/>
-            <Setter Property="Height" Value="30"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Background" Value="{Binding Background, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
-            <Setter Property="SelectionBrush" Value="{Binding SelectionBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
-            <Setter Property="BorderBrush" Value="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
-            <Setter Property="FontBrush" Value="{Binding FontBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
-            <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
-        </Style>
-        <Style x:Key="ecp_action_ebuttonstyle" TargetType="local:EButton" BasedOn="{StaticResource {x:Type local:EButton}}">
-            <Setter Property="Background" Value="{Binding Background, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
-            <Setter Property="SecondaryBrush" Value="{Binding SelectionBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
-            <Setter Property="BorderBrush" Value="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
-            <Setter Property="FontBrush" Value="{Binding FontBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
-            <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"/>
-        </Style>
-    </UserControl.Resources>
-    <Grid>
-        <Border x:Name="controlRoot">
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <GeometryDrawing Brush="#d0cec7">
+                            <GeometryDrawing.Geometry>
+                                <GeometryGroup>
+                                    <RectangleGeometry Rect="0,0,6,5" />
+                                    <RectangleGeometry Rect="6,6,6,5" />
+                                </GeometryGroup>
+                            </GeometryDrawing.Geometry>
+                        </GeometryDrawing>
+                        <GeometryDrawing Brush="#e7e7e2">
+                            <GeometryDrawing.Geometry>
+                                <RectangleGeometry Rect="0,5,12,1" />
+                            </GeometryDrawing.Geometry>
+                        </GeometryDrawing>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+            <LinearGradientBrush x:Key="RedGradientBrush" StartPoint="0,0" EndPoint="1,0">
+                <GradientStop Color="#ffffff"/>
+                <GradientStop Color="#ff0000" Offset="1"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="GreenGradientBrush" StartPoint="0,0" EndPoint="1,0">
+                <GradientStop Color="#ffffff"/>
+                <GradientStop Color="#00ff00" Offset="1"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="BlueGradientBrush" StartPoint="0,0" EndPoint="1,0">
+                <GradientStop Color="#ffffff"/>
+                <GradientStop Color="#0000ff" Offset="1"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="ColorSpectrumBrush" StartPoint="1,0" EndPoint="0,0">
+                <GradientStop Color="#ff0000"/>
+                <GradientStop Color="#ff00ff" Offset="0.207"/>
+                <GradientStop Color="#0000ff" Offset="0.334"/>
+                <GradientStop Color="#00ffff" Offset="0.501"/>
+                <GradientStop Color="#00ff00" Offset="0.668"/>
+                <GradientStop Color="#ffff00" Offset="0.835"/>
+                <GradientStop Color="#ff0000" Offset="1"/>
+            </LinearGradientBrush>
+            <!--#endregion-->
+            <DataTemplate x:Key="HistoryColors_DataTemplate" DataType="controls:HistoryColor">
+                <Grid Width="15" Height="15">
+                    <Border CornerRadius="{Binding EBorderCornerRadius, RelativeSource={RelativeSource AncestorType=controls:EListBox}}" Background="{Binding Color, Converter={StaticResource CommonConverter}}"/>
+                </Grid>
+            </DataTemplate>
+        </ControlTemplate.Resources>
+        <Border x:Name="PART_EColorPaletteRoot" 
+                Background="{TemplateBinding BackBrush}" BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}" 
+                BorderBrush="{TemplateBinding PrimaryBrush}">
+            <Border.OpacityMask>
+                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EColorPaletteRoot}"/>
+            </Border.OpacityMask>
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
+                    <RowDefinition x:Name="R0" Height="*"/>
+                    <RowDefinition x:Name="R1" Height="Auto"/>
+                    <RowDefinition x:Name="R2" Height="Auto"/>
+                    <RowDefinition x:Name="R3" Height="Auto"/>
                 </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition Width="auto"/>
-                </Grid.ColumnDefinitions>
-                <Grid x:Name="colorResultPannel" Grid.ColumnSpan="2" Height="100" Background="Transparent">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                <Grid x:Name="PART_ColorPreviewContainer" Margin="3">
+                    <Grid.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="{Binding EBorderCornerRadius, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Style>
+                    </Grid.Resources>
                     <Grid.RowDefinitions>
                         <RowDefinition/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <Border x:Name="grayColorBorder" 
-                            CornerRadius="5" Margin="5,5,0,0" Background="{StaticResource TransparentSignBrush}">
-                        <Border CornerRadius="5" Background="{Binding GrayColorData, ElementName=colorPalette, Converter={StaticResource ColorToSolidBrushConverter}}" MouseDown="ColorCarrierBorder_MouseDown">
-                            <Border.ToolTip>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="auto"/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <TextBlock FontWeight="Bold">Gray Color</TextBlock>
-                                    <TextBlock Grid.Row="1" Text="[Left Click]"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="1" FontStyle="Italic" Text=" try add to history colors"/>
-                                    <TextBlock Grid.Row="2" Text="[Right Click]"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" FontStyle="Italic" Text=" set to current color"/>
-                                </Grid>
-                            </Border.ToolTip>
-                        </Border>
-                    </Border>
-                    <Border x:Name="oppositeColorBorder" Grid.Row="1" 
-                            CornerRadius="5" Margin="5,0,0,5" Background="{StaticResource TransparentSignBrush}">
-                        <Border CornerRadius="5" Background="{Binding OppositeColorData, ElementName=colorPalette, Converter={StaticResource ColorToSolidBrushConverter}}" MouseDown="ColorCarrierBorder_MouseDown">
-                            <Border.ToolTip>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="auto"/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <TextBlock FontWeight="Bold">Opposite Color</TextBlock>
-                                    <TextBlock Grid.Row="1" Text="[Left Click]"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="1" FontStyle="Italic" Text=" try add to history colors"/>
-                                    <TextBlock Grid.Row="2" Text="[Right Click]"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" FontStyle="Italic" Text=" set to current color"/>
-                                </Grid>
-                            </Border.ToolTip>
-                        </Border>
-                    </Border>
-                    <Border x:Name="resultColorBorder" Grid.Column="1" Grid.RowSpan="2" 
-                            CornerRadius="5" Margin="0,5" Background="{StaticResource TransparentSignBrush}">
-                        <Border CornerRadius="5" Background="{Binding MainColorData, ElementName=colorPalette, Converter={StaticResource ColorToSolidBrushConverter}}" MouseDown="ColorCarrierBorder_MouseDown">
-                            <Border.ToolTip>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="auto"/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <TextBlock FontWeight="Bold">Current Color</TextBlock>
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" FontStyle="Italic" Text="this is current palette color."/>
-                                    <TextBlock Grid.Row="2" Text="[Left Click]"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" FontStyle="Italic" Text=" try add to history colors"/>
-                                </Grid>
-                            </Border.ToolTip>
-                        </Border>
-                    </Border>
-                    <Border x:Name="originalColorBorder" Grid.Column="2" Grid.RowSpan="2" 
-                            CornerRadius="5" Margin="0,5,5,5" Background="{StaticResource TransparentSignBrush}">
-                        <Border CornerRadius="5" Background="{Binding CachedColorData, ElementName=colorPalette, Converter={StaticResource ColorToSolidBrushConverter}}" MouseDown="ColorCarrierBorder_MouseDown">
-                            <Border.ToolTip>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="auto"/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <TextBlock FontWeight="Bold">Original Color</TextBlock>
-                                    <TextBlock Grid.Row="1" Text="[Left Click]"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="1" FontStyle="Italic" Text=" try add to history colors"/>
-                                    <TextBlock Grid.Row="2" Text="[Right Click]"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" FontStyle="Italic" Text=" set to current color"/>
-                                </Grid>
-                            </Border.ToolTip>
-                        </Border>
-                    </Border>
-                </Grid>
-                <local:ETabControl x:Name="paletteSpaceTabControl" Grid.Row="1" Grid.ColumnSpan="2" 
-                                   Background="{Binding Background, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}" SelectionBrush="{Binding SelectionBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}" BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}" FontBrush="{Binding FontBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}" BorderThickness="0" Margin="5" SelectionChanged="PaletteSpaceTabControl_SelectionChanged" ClipToBounds="True">
-                    <TabItem Header="RGB">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="auto"/>
-                            </Grid.ColumnDefinitions>
-                            <local:ESlider x:Name="redSlider" Grid.Row="0" Style="{StaticResource ecp_backcolored_esliderstyle}" ThumbTemplate="{StaticResource ecp_backcolored_esliderthumbtemplate}" FillFore="{StaticResource RedGradientBrush}"/>
-                            <local:ESlider x:Name="greenSlider" Grid.Row="1" Style="{StaticResource ecp_backcolored_esliderstyle}" ThumbTemplate="{StaticResource ecp_backcolored_esliderthumbtemplate}" FillFore="{StaticResource GreenGradientBrush}"/>
-                            <local:ESlider x:Name="blueSlider" Grid.Row="2" Style="{StaticResource ecp_backcolored_esliderstyle}" ThumbTemplate="{StaticResource ecp_backcolored_esliderthumbtemplate}" FillFore="{StaticResource BlueGradientBrush}"/>
-                            <local:ETextBox Grid.Row="0" Grid.Column="1" Text="{Binding Value, ElementName=redSlider, Converter={StaticResource NumToStringConverter}}" Style="{StaticResource ecp_round_etextboxstyle}"/>
-                            <local:ETextBox Grid.Row="1" Grid.Column="1" Text="{Binding Value, ElementName=greenSlider, Converter={StaticResource NumToStringConverter}}" Style="{StaticResource ecp_round_etextboxstyle}"/>
-                            <local:ETextBox Grid.Row="2" Grid.Column="1" Text="{Binding Value, ElementName=blueSlider, Converter={StaticResource NumToStringConverter}}" Style="{StaticResource ecp_round_etextboxstyle}"/>
-                        </Grid>
-                    </TabItem>
-                    <TabItem Header="HSV">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="auto"/>
-                            </Grid.ColumnDefinitions>
-                            <local:ESlider x:Name="hSlider" Grid.Row="0" Style="{StaticResource ecp_backcolored_esliderstyle}" ThumbTemplate="{StaticResource ecp_backcolored_esliderthumbtemplate}"
-                                           FillFore="{StaticResource ColorSpectrumBrush}"/>
-                            <local:ESlider x:Name="sSlider" Grid.Row="1" Style="{StaticResource ecp_backcolored_esliderstyle}" ThumbTemplate="{StaticResource ecp_backcolored_esliderthumbtemplate}">
-                                <local:ESlider.FillFore>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                        <GradientStop Color="{Binding MinHsvSColorData, ElementName=colorPalette, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-                                        <GradientStop Color="{Binding MaxHsvSColorData, ElementName=colorPalette, Converter={StaticResource ColorToSolidBrushConverter}}" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </local:ESlider.FillFore>
-                            </local:ESlider>
-                            <local:ESlider x:Name="vSlider" Grid.Row="2" Style="{StaticResource ecp_backcolored_esliderstyle}" ThumbTemplate="{StaticResource ecp_backcolored_esliderthumbtemplate}">
-                                <local:ESlider.FillFore>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                        <GradientStop Color="{Binding MinVColorData, ElementName=colorPalette, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-                                        <GradientStop Color="{Binding MaxVColorData, ElementName=colorPalette, Converter={StaticResource ColorToSolidBrushConverter}}" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </local:ESlider.FillFore>
-                            </local:ESlider>
-                            <local:ETextBox Grid.Row="0" Grid.Column="1" Text="{Binding Value, ElementName=hSlider, Converter={StaticResource NumToStringConverter}}" Style="{StaticResource ecp_round_etextboxstyle}"/>
-                            <local:ETextBox Grid.Row="1" Grid.Column="1" Text="{Binding Value, ElementName=sSlider, Converter={StaticResource NumToStringConverter}}" Style="{StaticResource ecp_round_etextboxstyle}"/>
-                            <local:ETextBox Grid.Row="2" Grid.Column="1" Text="{Binding Value, ElementName=vSlider, Converter={StaticResource NumToStringConverter}}" Style="{StaticResource ecp_round_etextboxstyle}"/>
-                        </Grid>
-                    </TabItem>
-                    <TabItem Header="HSL">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="auto"/>
-                            </Grid.ColumnDefinitions>
-                            <local:ESlider x:Name="hslHSlider" Grid.Row="0" Style="{StaticResource ecp_backcolored_esliderstyle}" ThumbTemplate="{StaticResource ecp_backcolored_esliderthumbtemplate}"
-                                           FillFore="{StaticResource ColorSpectrumBrush}"/>
-                            <local:ESlider x:Name="hslSSlider" Grid.Row="1" Style="{StaticResource ecp_backcolored_esliderstyle}" ThumbTemplate="{StaticResource ecp_backcolored_esliderthumbtemplate}">
-                                <local:ESlider.FillFore>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                        <GradientStop Color="{Binding MinHslSColorData, ElementName=colorPalette, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-                                        <GradientStop Color="{Binding MaxHslSColorData, ElementName=colorPalette, Converter={StaticResource ColorToSolidBrushConverter}}" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </local:ESlider.FillFore>
-                            </local:ESlider>
-                            <local:ESlider x:Name="hslLSlider" Grid.Row="2" Style="{StaticResource ecp_backcolored_esliderstyle}" ThumbTemplate="{StaticResource ecp_backcolored_esliderthumbtemplate}">
-                                <local:ESlider.FillFore>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                        <GradientStop Color="Black"/>
-                                        <GradientStop Color="{Binding CentreLColorData, ElementName=colorPalette, Converter={StaticResource ColorToSolidBrushConverter}}" Offset="0.5"/>
-                                        <GradientStop Color="White" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </local:ESlider.FillFore>
-                            </local:ESlider>
-                            <local:ETextBox Grid.Row="0" Grid.Column="1" Text="{Binding Value, ElementName=hslHSlider, Converter={StaticResource NumToStringConverter}}" Style="{StaticResource ecp_round_etextboxstyle}"/>
-                            <local:ETextBox Grid.Row="1" Grid.Column="1" Text="{Binding Value, ElementName=hslSSlider, Converter={StaticResource NumToStringConverter}}" Style="{StaticResource ecp_round_etextboxstyle}"/>
-                            <local:ETextBox Grid.Row="2" Grid.Column="1" Text="{Binding Value, ElementName=hslLSlider, Converter={StaticResource NumToStringConverter}}" Style="{StaticResource ecp_round_etextboxstyle}"/>
-                        </Grid>
-                    </TabItem>
-                </local:ETabControl>
-                <local:ESlider x:Name="alphaSlider" Grid.Row="2" 
-                               Style="{StaticResource ecp_backcolored_esliderstyle}" ThumbTemplate="{StaticResource ecp_backcolored_esliderthumbtemplate}" Margin="6,0,5,5">
-                    <local:ESlider.FillFore>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                            <GradientStop Color="Transparent"/>
-                            <GradientStop Color="{Binding MaxAlphaColorData, ElementName=colorPalette, Converter={StaticResource ColorToSolidBrushConverter}}" Offset="1"/>
-                        </LinearGradientBrush>
-                    </local:ESlider.FillFore>
-                </local:ESlider>
-                <local:ETextBox Grid.Row="2" Grid.Column="1" Text="{Binding Value, ElementName=alphaSlider, Converter={StaticResource NumToStringConverter}}" Style="{StaticResource ecp_round_etextboxstyle}" Margin="5,0,6,5"/>
-                <Grid Grid.Row="3" Grid.ColumnSpan="2">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="2*"/>
                     </Grid.ColumnDefinitions>
-                    <local:EToggleButton Margin="5,0,-5,5" Background="{Binding Background, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}" SelectionBrush="{Binding SelectionBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}" BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}" FontBrush="{Binding FontBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}" IsChecked="{Binding AddToHistoryColors, ElementName=colorPalette}" Content="Add to collection" HorizontalContentAlignment="Center" Visibility="{Binding HistorColorsShown, ElementName=colorPalette, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=collapse}"/>
-                    <local:ETextBox Grid.Column="1" Header="  HexCode  " Text="{Binding MainColorHex8, ElementName=colorPalette}" Style="{StaticResource ecp_round_etextboxstyle}" Width="auto" Margin="5,0,6,5"/>
+                    <Border Grid.RowSpan="2" Background="{StaticResource TransparentSignBrush}" Margin="2">
+                        <Border x:Name="PART_ResultColorPreview" Background="{Binding CurrentColor, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource CommonConverter}}"/>
+                    </Border>
+                    <Border Grid.Column="1" Background="{StaticResource TransparentSignBrush}" Margin="2">
+                        <Border x:Name="PART_OriginalColorPreview" Background="{Binding InitialColor, RelativeSource={RelativeSource TemplatedParent},Mode=OneWay, Converter={StaticResource CommonConverter}}"/>
+                    </Border>
+                    <Border x:Name="PART_GreyColorPreview" Grid.Column="1" Grid.Row="1" Margin="2" Background="{Binding GrayColor, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource CommonConverter}}"/>
                 </Grid>
-                <local:EExpander Grid.Row="4" Grid.ColumnSpan="2" Margin="5,0,5,5" Header="History Colors"
-                                 Background="{Binding Background, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}" SelectionBrush="{Binding SelectionBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}" BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}" FontBrush="{Binding FontBrush, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=local:EColorPalette}}"
-                                 Visibility="{Binding HistorColorsShown, ElementName=colorPalette, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=collapse}">
-                    <ItemsControl ItemsSource="{x:Static local:EColorPalette.HistoryColors}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="modelSource:ColorData.HistoryColor">
-                                <Border x:Name="historyColorContainer" Margin="3,0" BorderThickness="0,0,0,2">
-                                    <Border.BorderBrush>
-                                        <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
-                                            <Binding Path="Background" RelativeSource="{RelativeSource AncestorType=local:EColorPalette}"/>
-                                            <Binding Path="(extensions:AnimationProperitiesExtension.BackColorRate)" ElementName="historyColorContainer"/>
-                                            <Binding Path="BorderBrush" RelativeSource="{RelativeSource AncestorType=local:EColorPalette}"/>
-                                            <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="historyColorContainer"/>
-                                            <Binding Path="SelectionBrush" RelativeSource="{RelativeSource AncestorType=local:EColorPalette}"/>
-                                        </MultiBinding>
-                                    </Border.BorderBrush>
-                                    <Border Width="24" Height="24" Margin="0,3" CornerRadius="3" Background="{StaticResource TransparentSignBrush}">
-                                        <Border MouseDown="HistoryCarrierBorder_MouseDown" Background="{Binding Model, Converter={StaticResource ColorToSolidBrushConverter}}" CornerRadius="3" RenderTransformOrigin="0.5,0.5">
-                                            <Border.RenderTransform>
-                                                <ScaleTransform x:Name="scaleTransform" ScaleX="1" ScaleY="1"/>
-                                            </Border.RenderTransform>
-                                            <Border.ToolTip>
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="auto"/>
-                                                        <ColumnDefinition/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition/>
-                                                        <RowDefinition/>
-                                                        <RowDefinition/>
-                                                        <RowDefinition/>
-                                                        <RowDefinition/>
-                                                    </Grid.RowDefinitions>
-                                                    <TextBlock FontWeight="Bold">History Color</TextBlock>
-                                                    <TextBlock FontWeight="Bold" Grid.Row="1" Text="{Binding Model.Hex8}"/>
-                                                    <TextBlock Grid.Row="2" Text="[Left Click]"/>
-                                                    <TextBlock Grid.Row="2" Grid.Column="1" FontStyle="Italic" Text=" set current color"/>
-                                                    <TextBlock Grid.Row="3" Text="[Middle Click]"/>
-                                                    <TextBlock Grid.Row="3" Grid.Column="1" FontStyle="Italic" Text=" mark"/>
-                                                    <TextBlock Grid.Row="4" Text="[Right Click]"/>
-                                                    <TextBlock Grid.Row="4" Grid.Column="1" FontStyle="Italic" Text=" remove"/>
-                                                </Grid>
-                                            </Border.ToolTip>
-                                        </Border>
-                                    </Border>
-                                </Border>
-                                <DataTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Trigger.EnterActions>
-                                            <BeginStoryboard HandoffBehavior="Compose">
-                                                <Storyboard>
-                                                    <DoubleAnimation Storyboard.TargetName="scaleTransform" Storyboard.TargetProperty="ScaleX" To="1.1" Duration="0:0:0.2">
-                                                        <DoubleAnimation.EasingFunction>
-                                                            <SineEase/>
-                                                        </DoubleAnimation.EasingFunction>
-                                                    </DoubleAnimation>
-                                                    <DoubleAnimation Storyboard.TargetName="scaleTransform" Storyboard.TargetProperty="ScaleY" To="1.1" Duration="0:0:0.2">
-                                                        <DoubleAnimation.EasingFunction>
-                                                            <SineEase/>
-                                                        </DoubleAnimation.EasingFunction>
-                                                    </DoubleAnimation>
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </Trigger.EnterActions>
-                                        <Trigger.ExitActions>
-                                            <BeginStoryboard HandoffBehavior="Compose">
-                                                <Storyboard>
-                                                    <DoubleAnimation Storyboard.TargetName="scaleTransform" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.2">
-                                                        <DoubleAnimation.EasingFunction>
-                                                            <SineEase/>
-                                                        </DoubleAnimation.EasingFunction>
-                                                    </DoubleAnimation>
-                                                    <DoubleAnimation Storyboard.TargetName="scaleTransform" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.2">
-                                                        <DoubleAnimation.EasingFunction>
-                                                            <SineEase/>
-                                                        </DoubleAnimation.EasingFunction>
-                                                    </DoubleAnimation>
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </Trigger.ExitActions>
-                                    </Trigger>
-                                    <DataTrigger Binding="{Binding Selected}" Value="True">
-                                        <DataTrigger.EnterActions>
-                                            <BeginStoryboard HandoffBehavior="Compose">
-                                                <Storyboard>
-                                                    <DoubleAnimation Storyboard.TargetName="historyColorContainer" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
-                                                        <DoubleAnimation.EasingFunction>
-                                                            <SineEase/>
-                                                        </DoubleAnimation.EasingFunction>
-                                                    </DoubleAnimation>
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </DataTrigger.EnterActions>
-                                        <DataTrigger.ExitActions>
-                                            <BeginStoryboard HandoffBehavior="Compose">
-                                                <Storyboard>
-                                                    <DoubleAnimation Storyboard.TargetName="historyColorContainer" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
-                                                        <DoubleAnimation.EasingFunction>
-                                                            <SineEase/>
-                                                        </DoubleAnimation.EasingFunction>
-                                                    </DoubleAnimation>
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </DataTrigger.ExitActions>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Marked}" Value="True">
-                                        <DataTrigger.EnterActions>
-                                            <BeginStoryboard HandoffBehavior="Compose">
-                                                <Storyboard>
-                                                    <DoubleAnimation Storyboard.TargetName="historyColorContainer" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="1" Duration="0:0:0.2">
-                                                        <DoubleAnimation.EasingFunction>
-                                                            <SineEase/>
-                                                        </DoubleAnimation.EasingFunction>
-                                                    </DoubleAnimation>
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </DataTrigger.EnterActions>
-                                        <DataTrigger.ExitActions>
-                                            <BeginStoryboard HandoffBehavior="Compose">
-                                                <Storyboard>
-                                                    <DoubleAnimation Storyboard.TargetName="historyColorContainer" Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0" Duration="0:0:0.2">
-                                                        <DoubleAnimation.EasingFunction>
-                                                            <SineEase/>
-                                                        </DoubleAnimation.EasingFunction>
-                                                    </DoubleAnimation>
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </DataTrigger.ExitActions>
-                                    </DataTrigger>
-                                </DataTemplate.Triggers>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </local:EExpander>
-                <Grid x:Name="buttonPannel" Grid.Row="5" Grid.ColumnSpan="2" Margin="5,0,5,5"
-                      Visibility="{Binding ConfrimButtonShown, ElementName=colorPalette, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=collapse}">
+                <Grid x:Name="PART_SliderContainer" Grid.Row="1" Grid.IsSharedSizeScope="True">
+                    <Grid.Resources>
+                        <Style TargetType="controls:ESlider" x:Key="ecp_eslider_style" BasedOn="{StaticResource ESlider_BackBrushedStyle}">
+                            <Setter Property="Margin" Value="5,0,0,0"/>
+                            <Setter Property="Minimum" Value="0"/>
+                            <Setter Property="Maximum" Value="255"/>
+                        </Style>
+                        <Style TargetType="controls:ETextBox" x:Key="ecp_etextbox_style">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter Property="Grid.Column" Value="1"/>
+                            <Setter Property="Height" Value="20"/>
+                            <Setter Property="Width" Value="40"/>
+                            <Setter Property="EBorderCornerRadius" Value="2"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Margin" Value="2,0,5,1"/>
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="SliderBarValueBox" MinWidth="30"/>
                     </Grid.ColumnDefinitions>
-                    <local:EButton x:Name="confrimBtn" Style="{StaticResource ecp_action_ebuttonstyle}" Margin="0,0,2.5,0" Grid.Column="0" Content="Confrim"/>
-                    <local:EButton x:Name="cancelBtn" Style="{StaticResource ecp_action_ebuttonstyle}" Margin="2.5,0,0,0" Grid.Column="1" Content="Cancel"/>
+                    <controls:ETabControl x:Name="PART_SlidersTabControl" HorizontalHeaderAlignment="Stretch" Grid.ColumnSpan="2" SelectedIndex="0" Padding="0,2,0,0"
+                                          EBorderThickness="0" EBorderCornerRadius="0" NewInMiliseconds="400" OldOutMiliseconds="400" NewInWaitMiliseconds="0">
+                        <TabItem Header="RGB">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition SharedSizeGroup="SliderBarValueBox"/>
+                                </Grid.ColumnDefinitions>
+                                <controls:ESlider Style="{StaticResource ecp_eslider_style}" x:Name="PART_RedSilder" FillMiddle="{StaticResource RedGradientBrush}" Value="{Binding V1, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                <controls:ETextBox Style="{StaticResource ecp_etextbox_style}" x:Name="PART_RedBox" Text="{Binding Value, ElementName=PART_RedSilder, Mode=TwoWay}"/>
+                                <controls:ESlider Style="{StaticResource ecp_eslider_style}" x:Name="PART_GreenSlider" Grid.Row="1" FillMiddle="{StaticResource GreenGradientBrush}" Value="{Binding V2, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                <controls:ETextBox Style="{StaticResource ecp_etextbox_style}" x:Name="PART_GreenBox" Grid.Row="1" Text="{Binding Value, ElementName=PART_GreenSlider, Mode=TwoWay}"/>
+                                <controls:ESlider Style="{StaticResource ecp_eslider_style}" x:Name="PART_BlueSlider" Grid.Row="2" FillMiddle="{StaticResource BlueGradientBrush}" Value="{Binding V3, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                <controls:ETextBox Style="{StaticResource ecp_etextbox_style}" x:Name="PART_BlueBox" Grid.Row="2" Text="{Binding Value, ElementName=PART_BlueSlider, Mode=TwoWay}"/>
+                            </Grid>
+                        </TabItem>
+                        <TabItem Header="HSV">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition SharedSizeGroup="SliderBarValueBox"/>
+                                </Grid.ColumnDefinitions>
+                                <controls:ESlider Style="{StaticResource ecp_eslider_style}" x:Name="PART_HueSilder_HSV" Maximum="360" FillMiddle="{StaticResource ColorSpectrumBrush}" Value="{Binding V1, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                <controls:ETextBox Style="{StaticResource ecp_etextbox_style}" x:Name="PART_HueBox_HSV" Text="{Binding Value, ElementName=PART_HueSilder_HSV, Mode=TwoWay}"/>
+                                <controls:ESlider Style="{StaticResource ecp_eslider_style}" x:Name="PART_SaturationSlider_HSV" Grid.Row="1" Value="{Binding V2, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <controls:ESlider.FillMiddle>
+                                        <LinearGradientBrush>
+                                            <GradientStop Color="{Binding MinSaturationColor, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource CommonConverter}}" Offset="0"/>
+                                            <GradientStop Color="{Binding MaxHSVSaturationColor, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource CommonConverter}}" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </controls:ESlider.FillMiddle>
+                                </controls:ESlider>
+                                <controls:ETextBox Style="{StaticResource ecp_etextbox_style}" x:Name="PART_SaturationBox_HSV" Grid.Row="1" Text="{Binding Value, ElementName=PART_SaturationSlider_HSV, Mode=TwoWay}"/>
+                                <controls:ESlider Style="{StaticResource ecp_eslider_style}" x:Name="PART_ValueSlider_HSV" Grid.Row="2" Value="{Binding V3, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <controls:ESlider.FillMiddle>
+                                        <LinearGradientBrush>
+                                            <GradientStop Color="Black"/>
+                                            <GradientStop Color="{Binding MaxHSVValueColor, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource CommonConverter}}" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </controls:ESlider.FillMiddle>
+                                </controls:ESlider>
+                                <controls:ETextBox Style="{StaticResource ecp_etextbox_style}" x:Name="PART_ValueBox_HSV" Grid.Row="2" Text="{Binding Value, ElementName=PART_ValueSlider_HSV, Mode=TwoWay}"/>
+                            </Grid>
+                        </TabItem>
+                        <TabItem Header="HSL">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition SharedSizeGroup="SliderBarValueBox"/>
+                                </Grid.ColumnDefinitions>
+                                <controls:ESlider Style="{StaticResource ecp_eslider_style}" x:Name="PART_HueSilder_HSL" Maximum="359" FillMiddle="{StaticResource ColorSpectrumBrush}" Value="{Binding V1, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                <controls:ETextBox Style="{StaticResource ecp_etextbox_style}" x:Name="PART_HueBox_HSL" Text="{Binding Value, ElementName=PART_HueSilder_HSL, Mode=TwoWay}"/>
+                                <controls:ESlider Style="{StaticResource ecp_eslider_style}" x:Name="PART_SaturationSlider_HSL" Grid.Row="1" Value="{Binding V2, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <controls:ESlider.FillMiddle>
+                                        <LinearGradientBrush>
+                                            <GradientStop Color="{Binding MinSaturationColor, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource CommonConverter}}" Offset="0"/>
+                                            <GradientStop Color="{Binding MaxHSLSaturationColor, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource CommonConverter}}" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </controls:ESlider.FillMiddle>
+                                </controls:ESlider>
+                                <controls:ETextBox Style="{StaticResource ecp_etextbox_style}" x:Name="PART_SaturationBox_HSL" Grid.Row="1" Text="{Binding Value, ElementName=PART_SaturationSlider_HSL, Mode=TwoWay}"/>
+                                <controls:ESlider Style="{StaticResource ecp_eslider_style}" x:Name="PART_LightnessSlider_HSL" Grid.Row="2" Value="{Binding V3, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <controls:ESlider.FillMiddle>
+                                        <LinearGradientBrush>
+                                            <GradientStop Color="Black"/>
+                                            <GradientStop Color="{Binding CentreHSLLightnessColor, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource CommonConverter}}" Offset="0.5"/>
+                                            <GradientStop Color="White" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </controls:ESlider.FillMiddle>
+                                </controls:ESlider>
+                                <controls:ETextBox Style="{StaticResource ecp_etextbox_style}" x:Name="PART_LightnessBox_HSL" Grid.Row="2" Text="{Binding Value, ElementName=PART_LightnessSlider_HSL, Mode=TwoWay}"/>
+                            </Grid>
+                        </TabItem>
+                    </controls:ETabControl>
+                    <controls:ESlider Style="{StaticResource ecp_eslider_style}" x:Name="PART_AlphaSlider" Grid.Row="1" Value="{Binding A, RelativeSource={RelativeSource TemplatedParent}}" FillBack="{StaticResource TransparentSignBrush}">
+                        <controls:ESlider.FillMiddle>
+                            <LinearGradientBrush>
+                                <GradientStop Color="Transparent"/>
+                                <GradientStop Color="{Binding MaxAlphaColor, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource CommonConverter}}" Offset="1"/>
+                            </LinearGradientBrush>
+                        </controls:ESlider.FillMiddle>
+                    </controls:ESlider>
+                    <controls:ETextBox Style="{StaticResource ecp_etextbox_style}" x:Name="PART_AlphaBox" Grid.Row="1" Text="{Binding Value, ElementName=PART_AlphaSlider}"/>
+                    <Grid Grid.Row="2" Grid.ColumnSpan="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <controls:EToggleButton Height="20" Padding="5,0,3,0" ToggleSignSize="14" EBorderCornerRadius="2" EBorderThickness="0" Content="Preview" Margin="0,0,0,0" IsChecked="{Binding IsPreviewMode, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+                        <controls:ETextBox Grid.Column="2" Style="{StaticResource ecp_etextbox_style}" Width="Auto" Text="{Binding Hex, RelativeSource={RelativeSource TemplatedParent}}" Padding="2,0">
+                            <controls:ETextBox.Header>
+                                <TextBlock Text="Hexcode" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                            </controls:ETextBox.Header>
+                        </controls:ETextBox>
+                    </Grid>
+                </Grid>
+                <Grid x:Name="PART_HistoryColorsContainer" Grid.Row="2" Margin="0,0,0,0">
+                    <controls:EExpander x:Name="PART_HistoryColorsPanel" EBorderCornerRadius="2" IsExpanded="True" Margin="5,0" Header="History colors">
+                        <controls:EListBox x:Name="PART_HistoryColorsBox" ItemPadding="2" SelectedItemLineWidth="3" IndicatorPlacement="Down" ItemsSource="{x:Static controls:EColorPalette.HistoryColors}" ItemTemplate="{StaticResource HistoryColors_DataTemplate}">
+                            <controls:EListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </controls:EListBox.ItemsPanel>
+                        </controls:EListBox>
+                    </controls:EExpander>
+                </Grid>
+                <Grid x:Name="PART_ButtonContainer" Grid.Row="3" Margin="4,4,4,4">
+                    <Grid.Resources>
+                        <Style TargetType="controls:EButton">
+                            <Setter Property="EBorderCornerRadius" Value="2"/>
+                            <Setter Property="EBorderThickness" Value="1"/>
+                            <Setter Property="Width" Value="70"/>
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <controls:EButton x:Name="PART_CancelBtn" Content="Cancel" Grid.Column="1"/>
+                    <controls:EButton x:Name="PART_ConfrimBtn" Style="{StaticResource EButton_BackColorStyle}" Content="Confrim" Grid.Column="2"/>
                 </Grid>
             </Grid>
         </Border>
-    </Grid>
-</UserControl>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsHistoryColorsVisible" Value="False">
+                <Setter TargetName="PART_HistoryColorsContainer" Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+    <Style TargetType="{x:Type controls:EColorPalette}">
+        <Setter Property="MinWidth" Value="210"/>
+        <Setter Property="MinHeight" Value="250"/>
+        <Setter Property="MaxWidth" Value="350"/>
+        <Setter Property="MaxHeight" Value="450"/>
+        <Setter Property="EBorderThickness" Value="1"/>
+        <Setter Property="EBorderCornerRadius" Value="4"/>
+        <Setter Property="Template" Value="{StaticResource EColorPalette_BaseTemplate}"/>
+        <Style.Triggers>
+            <Trigger Property="IsHistoryColorsVisible" Value="True">
+                <Setter Property="MinHeight" Value="320"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+</ResourceDictionary>

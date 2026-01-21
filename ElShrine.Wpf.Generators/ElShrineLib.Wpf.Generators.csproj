@@ -9,12 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ElShrineLib.Wpf.Generators.Attributes" Version="1.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\ElShrineLib.Wpf.Generators.Attributes\ElShrineLib.Wpf.Generators.Attributes.csproj" />
   </ItemGroup>
 
 </Project>

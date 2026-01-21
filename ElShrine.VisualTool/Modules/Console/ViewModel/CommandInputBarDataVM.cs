@@ -15,14 +15,14 @@ namespace ElShrine.VisualTool.Modules.Console.ViewModel
             {
                 currentInput = value;
                 CursorIndex = value.Length;
-                NoticePropertyChanged(nameof(CurrentInput), nameof(CurrentIndex));
+                NotifyPropertyChanged(nameof(CurrentInput), nameof(CurrentIndex));
             }
         }
         private int currentIndex = -1;
         public int CurrentIndex { get => currentIndex; set
             {
                 currentIndex = value;
-                NoticePropertyChanged(nameof(CurrentIndex));
+                NotifyPropertyChanged(nameof(CurrentIndex));
                 CurrentInput = currentIndex == -1 ? ElShrine.Const.EmptyStr: HistoryInputs[currentIndex];
             } }
 
@@ -38,7 +38,7 @@ namespace ElShrine.VisualTool.Modules.Console.ViewModel
                 Command.ParseAndExcute(CurrentInput);
                 if (!HistoryInputs.Contains(CurrentInput)) HistoryInputs.Add(CurrentInput);
                 CurrentIndex = -1;
-                NoticePropertyChanged(nameof(HistoryInputs));
+                NotifyPropertyChanged(nameof(HistoryInputs));
                 ListBoxScrollRegister(tb);
             }
             

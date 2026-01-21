@@ -13,7 +13,7 @@ namespace ElShrine.VisualTool.Modules.Console.ViewModel
             set
             {
                 ignoreWarp = value;
-                NoticePropertyChanged(nameof(FullLine), nameof(InLineInformations));
+                NotifyPropertyChanged(nameof(FullLine), nameof(InLineInformations));
             }
         }
         public string FullLine => IgnoreWarp ? Model.ToString().Replace("\n", string.Empty) : Model.ToString();

@@ -1,4 +1,5 @@
-﻿using ElShrine.EGraphic;
+﻿using ElShrine.Graphics;
+using ElShrine.Modules;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -85,14 +86,14 @@ public static class ThemeProperties
     private static object? CoerceThemeBrushValue(DependencyObject _, object baseValue, ThemeProperty tp)
     {
         if (baseValue is Brush brush && brush is not null) return baseValue;
-        var theme = ThemeManager.GetInstance().CurrentTheme;
+        var theme = UIThemesManager.Instance.CurrentTheme;
         var color = tp switch
         {
             ThemeProperty.PrimaryBrush => theme.PrimaryColor,
             ThemeProperty.BackBrush => theme.BackColor,
             ThemeProperty.FontBrush => theme.FontColor,
             ThemeProperty.SecondaryBrush => theme.SecondaryColor,
-            _ => new ColorData(0x00000000)
+            _ => ColorData.FromData(0x00000000)
         };
         return new SolidColorBrush(color.ToMediaColor());
     }
@@ -147,7 +148,7 @@ public static class ThemeProperties
     private static object? CoerceThemeAnimParamValue(DependencyObject _, object baseValue, ThemeProperty tp)
     {
         if (baseValue is double d && !double.IsNaN(d)) return baseValue;
-        var theme = ThemeManager.GetInstance().CurrentTheme;
+        var theme = UIThemesManager.Instance.CurrentTheme;
         var value = tp switch
         {
             ThemeProperty.AnimaDurationIn => theme.AnimDurationIn,

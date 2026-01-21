@@ -1,4 +1,5 @@
 ﻿using ElShrine.Common;
+using ElShrine.Modules;
 using ElShrine.Wpf.UITheme;
 using System;
 using System.Threading;
@@ -16,8 +17,9 @@ namespace ElShrine.Wpf.Controls
     public partial class EImage : Control, IThemeControlBase
     {
         static EImage() => DefaultStyleKeyProperty.OverrideMetadata(typeof(EImage), new FrameworkPropertyMetadata(typeof(EImage)));
-        public EImage() => ThemeManager.RegisterCoerceThemeDPs(this);
-        public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => ThemeManager.CoerceValue(this);
+        public EImage() => UIThemesManager.RegisterCoerceThemeDPs(this);
+        public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => UIThemesManager.CoerceValue(this);
+        public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => StateListenersManager.Instance.RedoSetterTransitions(this);
 
         #region DPs
 
@@ -138,7 +140,7 @@ namespace ElShrine.Wpf.Controls
                 var overlay = imageControl.PART_LoadingOverlay;
                 overlay.Visibility = Visibility.Visible;
                 if (isLoading) overlay.Opacity = 0;
-                if (imageControl.PART_ProgressBar is not null) imageControl.PART_ProgressBar.IsIndeterminate = true;
+                imageControl.PART_ProgressBar?.IsIndeterminate = true;
                 var anim = new DoubleAnimation()
                 {
                     To = isLoading ? 1.0 : 0.0,
@@ -153,7 +155,7 @@ namespace ElShrine.Wpf.Controls
                     else
                     {
                         overlay.Visibility = Visibility.Collapsed;
-                        if (imageControl.PART_ProgressBar is not null) imageControl.PART_ProgressBar.IsIndeterminate = false;
+                        imageControl.PART_ProgressBar?.IsIndeterminate = false;
                     }
                 };
                 overlay.BeginAnimation(OpacityProperty, anim);
@@ -225,7 +227,7 @@ namespace ElShrine.Wpf.Controls
             var lct = ct ?? CancellationToken.None;
             if (string.IsNullOrWhiteSpace(url)) throw new ArgumentException("Url is null or empty.");
             lct.ThrowIfCancellationRequested();
-            var source = await ImageSourceManager.GetInstance().GetImageSourceAsync(url);
+            var source = await ImageSourceManager.Instance.GetImageSourceAsync(url);
             lct.ThrowIfCancellationRequested();
             return source ?? throw new Exception($"Failed to get image from \"{url}\".");
         }
@@ -249,11 +251,6 @@ namespace ElShrine.Wpf.Controls
             cts?.Dispose();
             cts = new CancellationTokenSource();
         }, null, "CancelGetImageBtnText", "Cancel");
-
-        public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e)
-        {
-            
-        }
 
         #region measure
         protected override Size MeasureOverride(Size availableSize)

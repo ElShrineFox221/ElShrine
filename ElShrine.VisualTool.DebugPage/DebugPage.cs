@@ -5,7 +5,7 @@ using VMC = ElShrine.Wpf.VMCommand;
 
 namespace ElShrine.VisualTool.DebugPage
 {
-    [WpfPageRootVM(Name = "Debug Page", Version = "0.3", Tags = ["Debug", "Test"], Description = "UI for controls, created a visual page for all testing control to do debug actions.", DataTemplateUri = "/ElShrine.VisualTool.DebugPage;component/DebugPage.xaml", DataTemplateName = "DebugPageTemplate")]
+    [WpfPageRootVM(Name = "Debug Page", Version = "0.3", Tags = ["Debug", "Test"], Description = "UI for controls, created a visual page for all testing control to do debug actions.", DataTemplateUri = "/ElShrine.VisualTool.DebugPage;component/DebugPage.xaml", DataTemplateName = "DebugPageTemplate", DefaultEnabled = true)]
     public class DebugPageVM : ViewModelBase, ISingleton<DebugPageVM>
     {
         private static DebugPageVM? Instance = null;

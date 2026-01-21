@@ -104,8 +104,8 @@
                 <ComboBoxItem>选项一</ComboBoxItem>
                 <ComboBoxItem>选项二4</ComboBoxItem>
             </controls:EComboBox>
-            <controls:EListBox Grid.Row="3" Grid.ColumnSpan="2" 
-                       Height="200" Margin="5" Padding="4" SelectionMode="Extended" Background="White">
+            <controls:EListBox Grid.Row="3" Grid.ColumnSpan="2"
+                       Height="200" Margin="5" SelectionMode="Extended">
                 <TextBlock Text="Test Selection - 0"/>
                 <TextBlock Text="Test Selection - 1"/>
                 <TextBlock Text="Test Selection - 2"/>
@@ -121,10 +121,10 @@
                 <TextBlock Text="Test Selection - 12"/>
                 <TextBlock Text="Test Selection - 13"/>
             </controls:EListBox>
-            <controls:EListBox Grid.Row="3" Grid.Column="2" Width="200" Height="200" BorderBrush="Red" SelectionBrush="Blue" Foreground="Green" Background="Yellow" FontBrush="Pink" ClickBrush="Cyan" HorizontalScrollBarVisibility="Visible" Visibility="Collapsed">
-                <Border BorderThickness="1" BorderBrush="Black" Width="400" Height="400"/>
-            </controls:EListBox>
-
+            <controls:ESlider x:Name="sliderH0" Grid.Row="9" Grid.ColumnSpan="2" TickFrequency="1" IsSnapToTickEnabled="True" Maximum="255" Margin="5"/>
+            <controls:ESlider Grid.Column="3" Grid.RowSpan="6" Orientation="Vertical" Margin="5"/>
+            <controls:ESlider Grid.Row="10" Grid.ColumnSpan="2" Margin="5" Style="{StaticResource ESlider_BackBrushedStyle}" FillBack="{StaticResource ColorGradientBrush}"/>
+            <controls:ESlider Grid.Column="4" Grid.RowSpan="6" Orientation="Vertical" Margin="5" Style="{StaticResource ESlider_BackBrushedStyle}" TickFrequency="1" IsSnapToTickEnabled="True" Maximum="255" FillBack="{StaticResource ColorGradientBrushV}"/>
             <controls:ETextBox Grid.Row="4" Grid.ColumnSpan="2" 
                        NoticeInfo="Input test text" SuggestionsSource="{Binding Suggestions}" Margin="5">
                 <controls:ETextBox.Header>
@@ -160,10 +160,7 @@
                     </Border>
                 </TabItem>
             </controls:ETabControl>
-            <controls:ESlider x:Name="sliderH0" Grid.Row="9" Grid.ColumnSpan="2" TickFrequency="1" IsSnapToTickEnabled="True" Maximum="255" IsClickShakable="True" Margin="5"/>
-            <controls:ESlider Grid.Column="3" Grid.RowSpan="6" IsClickShakable="True" Orientation="Vertical" Margin="5"/>
-            <controls:ESlider Grid.Row="10" Grid.ColumnSpan="2" IsClickShakable="True" Margin="5" Style="{StaticResource BackBrushed_ESliderStyle}" FillBack="{StaticResource ColorGradientBrush}"/>
-            <controls:ESlider Grid.Column="4" Grid.RowSpan="6" IsClickShakable="True" Orientation="Vertical" Margin="5" Style="{StaticResource BackBrushed_ESliderStyle}" TickFrequency="1" IsSnapToTickEnabled="True" Maximum="255" FillBack="{StaticResource ColorGradientBrushV}"/>
+            
             <controls:ETextBox Grid.Row="11" Text="{Binding Value, ElementName=sliderH0,Converter={StaticResource NumToStringConverter}}"/>
             <controls:EColorPalette x:Name="ecp" Grid.Column="5" Grid.RowSpan="7" ConstantUpdateResultColor="True" ConfrimButtonShown="False" HistorColorsShown="False"/>
             <Border Width="100" Height="100" Grid.Column="5" Grid.Row="7" BorderThickness="1" BorderBrush="Red" Background="{Binding ResultColor, ElementName=ecp, Converter={StaticResource ColorToSolidBrushConverter}}"/>

@@ -8,6 +8,8 @@
 	  <TargetFramework>net8.0-windows</TargetFramework>
 	  <RootNamespace>ElShrine</RootNamespace>
 	  <BaseOutputPath>..\bin</BaseOutputPath>
+	  <LangVersion>preview</LangVersion>
+	  <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />

@@ -1,11 +1,9 @@
-﻿using ElShrine.Common;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
-using static ElShrine.EConsole.ConsoleManager;
 
 namespace ElShrine.Wpf
 {
@@ -29,7 +27,7 @@ namespace ElShrine.Wpf
                 RunningTask = task;
                 task.ContinueWith(t =>
                 {
-                    if (t.Exception is not null) EConsole.ConsoleManager.ListErrorInfo(t.Exception);
+                    //LOG if (t.Exception is not null) EConsole.ConsoleManager.ListErrorInfo(t.Exception);
                     if (synchronizationContext != null) synchronizationContext.Post(_ => RunningTask = null, null);
                     else RunningTask = null;
                 }, TaskScheduler.Default);
@@ -70,23 +68,23 @@ namespace ElShrine.Wpf
             Task? runningTask = null;
             dispatcher.Invoke(() =>
             {
-                ListContentInfo("Execute action on ui dispatcher");
+                //LOG ListContentInfo("Execute action on ui dispatcher");
                 Execute(parameter);
                 runningTask = RunningTask;
             });
             if (runningTask is not null)
             {
-                ListContentInfo("Async action will blocks the thread...");
+                //LOG ListContentInfo("Async action will blocks the thread...");
                 try
                 {
                     runningTask.Wait();
                 }
                 finally
                 {
-                    ListContentInfo("Async action completed.");
+                    //LOG ListContentInfo("Async action completed.");
                 }
             }
-            else ListContentInfo("Sync action wont blocks the thread.");
+            //LOG else ListContentInfo("Sync action wont blocks the thread.");
         }
 
         public Action<object?>? ExecuteAction { get; init; }
@@ -108,7 +106,7 @@ namespace ElShrine.Wpf
                 {
                     runningTask = value;
                     CanExecuteChanged?.Invoke(this, new EventArgs());
-                    NoticePropertyChanged(nameof(RunningTask), nameof(IsRunning));
+                    NotifyPropertyChanged(nameof(RunningTask), nameof(IsRunning));
                 }
             }
         }

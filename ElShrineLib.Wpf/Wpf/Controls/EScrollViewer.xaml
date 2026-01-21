@@ -1,26 +1,16 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
-                    xmlns:extensions="clr-namespace:ElShrine.Wpf.Controls.Extensions">
+                    xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions">
     <Style TargetType="{x:Type controls:EScrollViewer}">
-        <Setter Property="Padding" Value="3"/>
-        <Setter Property="BorderCornerRadius" Value="5"/>
-        <Setter Property="VerticalScrollBarBtnVisibility" Value="{x:Static controls:ScrollBarBtnVisibility.All}"/>
-        <Setter Property="HorizontalScrollBarBtnVisibility" Value="{x:Static controls:ScrollBarBtnVisibility.All}"/>
-        <Setter Property="VerticalScrollBarWidth" Value="10"/>
-        <Setter Property="HorizontalScrollBarHeight" Value="10"/>
-        <Setter Property="BorderBrush" Value="{Binding CurrentTheme.BorderColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-        <Setter Property="SelectionBrush" Value="{Binding CurrentTheme.SelectionColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-        <Setter Property="ClickBrush" Value="{Binding CurrentTheme.ClickColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-        <Setter Property="Foreground" Value="{Binding CurrentTheme.ForeColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-        <Setter Property="Background" Value="{Binding CurrentTheme.BackColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-        <Setter Property="FontSize" Value="{Binding CurrentTheme.FontSizeNormal, Source={StaticResource ThemeProvider}}"/>
-        <Setter Property="FontBrush" Value="{Binding CurrentTheme.FontColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-        
+        <Setter Property="Padding" Value="0,0,3,3"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:EScrollViewer}">
-                    <Grid x:Name="controlRoot" Background="{TemplateBinding Background}">
+                    <Grid x:Name="PART_EScrollViewerRoot" Background="{TemplateBinding Background}">
+                        <Grid.OpacityMask>
+                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EScrollViewerRoot}"/>
+                        </Grid.OpacityMask>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
@@ -30,76 +20,20 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <ContentPresenter x:Name="cornerContentContainer" Grid.Row="1" Grid.Column="1" 
-                                          MaxHeight="{TemplateBinding HorizontalScrollBarHeight}" MaxWidth="{TemplateBinding VerticalScrollBarWidth}" Content="{TemplateBinding CornerContent}" Margin="{TemplateBinding Padding}"/>
+                                          MaxHeight="{TemplateBinding BarSize}" MaxWidth="{TemplateBinding BarSize}" Content="{TemplateBinding CornerContent}" Margin="{TemplateBinding Padding}"/>
                         <ScrollContentPresenter x:Name="PART_ScrollContentPresenter" Grid.Row="0" Grid.Column="0"
                                                 CanHorizontallyScroll="False" ContentTemplate="{TemplateBinding ContentTemplate}" CanVerticallyScroll="False" Content="{TemplateBinding Content}" CanContentScroll="{TemplateBinding CanContentScroll}" Margin="{TemplateBinding Padding}"/>
                         <controls:EScrollBar x:Name="PART_VerticalScrollBar" Grid.Row="0" Grid.Column="1"
-                                             AutomationProperties.AutomationId="VerticalScrollBar" Cursor="Arrow" Maximum="{TemplateBinding ScrollableHeight}" Minimum="0" Value="{Binding VerticalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" ViewportSize="{TemplateBinding ViewportHeight}" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" Height="auto" Width="{TemplateBinding VerticalScrollBarWidth}" Margin="{TemplateBinding VerticalScrollBarMargin}"
-                                             BorderBrush="{TemplateBinding BorderBrush}" SelectionBrush="{TemplateBinding SelectionBrush}" Background="{TemplateBinding Background}" BorderCornerRadius="{TemplateBinding BorderCornerRadius}"/>
+                                             AutomationProperties.AutomationId="VerticalScrollBar" Cursor="Arrow" 
+                                             Maximum="{TemplateBinding ScrollableHeight}" Minimum="0" Value="{Binding VerticalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" 
+                                             ViewportSize="{TemplateBinding ViewportHeight}" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" 
+                                             Height="auto" Width="{TemplateBinding BarSize}" Margin="{TemplateBinding VerticalScrollBarMargin}"/>
                         <controls:EScrollBar x:Name="PART_HorizontalScrollBar" Grid.Row="1" Grid.Column="0" 
-                                             AutomationProperties.AutomationId="HorizontalScrollBar" Cursor="Arrow" Maximum="{TemplateBinding ScrollableWidth}" Minimum="0" Orientation="Horizontal" Value="{Binding HorizontalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" ViewportSize="{TemplateBinding ViewportWidth}" Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}" Width="auto" Height="{TemplateBinding HorizontalScrollBarHeight}" Margin="{TemplateBinding HorizontalScrollBarMargin}"
-                                             BorderBrush="{TemplateBinding BorderBrush}" SelectionBrush="{TemplateBinding SelectionBrush}" Background="{TemplateBinding Background}" BorderCornerRadius="{TemplateBinding BorderCornerRadius}"/>
+                                             AutomationProperties.AutomationId="HorizontalScrollBar" Cursor="Arrow" 
+                                             Maximum="{TemplateBinding ScrollableWidth}" Minimum="0" Orientation="Horizontal" Value="{Binding HorizontalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" 
+                                             ViewportSize="{TemplateBinding ViewportWidth}" Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}" 
+                                             Width="auto" Height="{TemplateBinding BarSize}" Margin="{TemplateBinding HorizontalScrollBarMargin}"/>
                     </Grid>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsEnabled" Value="True">
-                            <Trigger.EnterActions>
-                                <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="controlRoot"
-Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
-                                            <DoubleAnimation.EasingFunction>
-                                                <SineEase/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="controlRoot" 
-Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0:0.16">
-                                            <DoubleAnimation.EasingFunction>
-                                                <SineEase/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
-                        </Trigger>
-                        <Trigger Property="VerticalScrollBarBtnVisibility" Value="All">
-                            <Setter TargetName="PART_VerticalScrollBar" Property="IsMoveButtonVisibile" Value="True"/>
-                            <Setter TargetName="PART_VerticalScrollBar" Property="IsStartEndButtonVisibile" Value="True"/>
-                        </Trigger>
-                        <Trigger Property="VerticalScrollBarBtnVisibility" Value="Page">
-                            <Setter TargetName="PART_VerticalScrollBar" Property="IsMoveButtonVisibile" Value="True"/>
-                            <Setter TargetName="PART_VerticalScrollBar" Property="IsStartEndButtonVisibile" Value="False"/>
-                        </Trigger>
-                        <Trigger Property="VerticalScrollBarBtnVisibility" Value="End">
-                            <Setter TargetName="PART_VerticalScrollBar" Property="IsMoveButtonVisibile" Value="False"/>
-                            <Setter TargetName="PART_VerticalScrollBar" Property="IsStartEndButtonVisibile" Value="True"/>
-                        </Trigger>
-                        <Trigger Property="VerticalScrollBarBtnVisibility" Value="None">
-                            <Setter TargetName="PART_VerticalScrollBar" Property="IsMoveButtonVisibile" Value="False"/>
-                            <Setter TargetName="PART_VerticalScrollBar" Property="IsStartEndButtonVisibile" Value="False"/>
-                        </Trigger>
-                        <Trigger Property="HorizontalScrollBarBtnVisibility" Value="All">
-                            <Setter TargetName="PART_HorizontalScrollBar" Property="IsMoveButtonVisibile" Value="True"/>
-                            <Setter TargetName="PART_HorizontalScrollBar" Property="IsStartEndButtonVisibile" Value="True"/>
-                        </Trigger>
-                        <Trigger Property="HorizontalScrollBarBtnVisibility" Value="Page">
-                            <Setter TargetName="PART_HorizontalScrollBar" Property="IsMoveButtonVisibile" Value="True"/>
-                            <Setter TargetName="PART_HorizontalScrollBar" Property="IsStartEndButtonVisibile" Value="False"/>
-                        </Trigger>
-                        <Trigger Property="HorizontalScrollBarBtnVisibility" Value="End">
-                            <Setter TargetName="PART_HorizontalScrollBar" Property="IsMoveButtonVisibile" Value="False"/>
-                            <Setter TargetName="PART_HorizontalScrollBar" Property="IsStartEndButtonVisibile" Value="True"/>
-                        </Trigger>
-                        <Trigger Property="HorizontalScrollBarBtnVisibility" Value="None">
-                            <Setter TargetName="PART_HorizontalScrollBar" Property="IsMoveButtonVisibile" Value="False"/>
-                            <Setter TargetName="PART_HorizontalScrollBar" Property="IsStartEndButtonVisibile" Value="False"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

@@ -18,7 +18,7 @@ namespace ElShrine.VisualTool
             set
             {
                 Model.Enabled = value;
-                NoticePropertyChanged(nameof(Enabled));
+                NotifyPropertyChanged(nameof(Enabled));
             }
         }
         public Type RootViewModelClass => Model.RootViewModelClass;

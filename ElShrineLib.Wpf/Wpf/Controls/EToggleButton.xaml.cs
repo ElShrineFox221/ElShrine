@@ -1,44 +1,16 @@
-﻿using ElShrine.Wpf.UITheme;
+﻿using ElShrine.Common;
+using ElShrine.Modules;
+using ElShrine.Wpf.UITheme;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Media;
 
 namespace ElShrine.Wpf.Controls
 {
-    public class EToggleButton : ToggleButton, IThemeControlOld
+    [GenerateDPCli]
+    public partial class EToggleButton : ToggleButton, IThemeControlBase
     {
-
         #region DPs
-
-        #region Theme
-        public CornerRadius BorderCornerRadius
-        {
-            get => (CornerRadius)GetValue(BorderCornerRadiusProperty);
-            set => SetValue(BorderCornerRadiusProperty, value);
-        }
-        public Brush FontBrush
-        {
-            get => (Brush)GetValue(FontBrushProperty);
-            set => SetValue(FontBrushProperty, value);
-        }
-        public Brush SelectionBrush
-        {
-            get => (Brush)GetValue(SelectionBrushProperty);
-            set => SetValue(SelectionBrushProperty, value);
-        }
-        public Brush ClickBrush
-        {
-            get => (Brush)GetValue(ClickBrushProperty);
-            set => SetValue(ClickBrushProperty, value);
-        }
-
-        public static readonly DependencyProperty BorderCornerRadiusProperty = DependencyProperty.Register(nameof(BorderCornerRadius), typeof(CornerRadius), typeof(EToggleButton), new(Theme.Default.CornerRadius));
-        public static readonly DependencyProperty FontBrushProperty = DependencyProperty.Register(nameof(FontBrush), typeof(Brush), typeof(EToggleButton), new(Theme.Default.FontColor.ToSolidBrush()));
-        public static readonly DependencyProperty SelectionBrushProperty = DependencyProperty.Register(nameof(SelectionBrush), typeof(Brush), typeof(EToggleButton), new(Theme.Default.SelectionColor.ToSolidBrush()));
-        public static readonly DependencyProperty ClickBrushProperty = DependencyProperty.Register(nameof(ClickBrush), typeof(Brush), typeof(EToggleButton), new(Theme.Default.ClickColor.ToSolidBrush()));
-        #endregion
-
         public double ToggleSignSize
         {
             get => (double)GetValue(ToggleSignSizeProperty);
@@ -60,6 +32,10 @@ namespace ElShrine.Wpf.Controls
         public static readonly DependencyProperty ContentPlacementProperty = DependencyProperty.Register(nameof(ContentPlacement), typeof(ExpandDirection), typeof(EToggleButton), new(ExpandDirection.Right));
         #endregion
 
+        public EToggleButton() => UIThemesManager.RegisterCoerceThemeDPs(this);
         static EToggleButton() => DefaultStyleKeyProperty.OverrideMetadata(typeof(EToggleButton), new FrameworkPropertyMetadata(typeof(EToggleButton)));
+
+        public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => UIThemesManager.CoerceValue(this);
+        public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => StateListenersManager.Instance.RedoSetterTransitions(this);
     }
 }

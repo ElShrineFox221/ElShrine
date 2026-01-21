@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodel ="clr-namespace:ElShrine.VisualTool"
         xmlns:controls="clr-namespace:ElShrine.Wpf.Controls;assembly=ElShrineLib.Wpf"
+                  xmlns:state="clr-namespace:ElShrine.Wpf.Controls.State;assembly=ElShrineLib.Wpf"
         d:DataContext="{d:DesignInstance Type=viewmodel:MainWindowViewModel}"
         mc:Ignorable="d"
         Title="MainWindow" Height="720" Width="1100" MinWidth="300" MinHeight="600" FontSize="12" EBorderCornerRadius="5" Padding="0" DragResizeEdgeWidth="8">
@@ -63,7 +64,24 @@
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>
-
+        <LinearGradientBrush x:Key="ColorGradientBrush" StartPoint="1,0" EndPoint="0,0">
+            <GradientStop Color="#ff0000"/>
+            <GradientStop Color="#ff00ff" Offset="0.207"/>
+            <GradientStop Color="#0000ff" Offset="0.334"/>
+            <GradientStop Color="#00ffff" Offset="0.501"/>
+            <GradientStop Color="#00ff00" Offset="0.668"/>
+            <GradientStop Color="#ffff00" Offset="0.835"/>
+            <GradientStop Color="#ff0000" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="ColorGradientBrushV" StartPoint="0,1" EndPoint="0,0">
+            <GradientStop Color="#ff0000"/>
+            <GradientStop Color="#ff00ff" Offset="0.207"/>
+            <GradientStop Color="#0000ff" Offset="0.334"/>
+            <GradientStop Color="#00ffff" Offset="0.501"/>
+            <GradientStop Color="#00ff00" Offset="0.668"/>
+            <GradientStop Color="#ffff00" Offset="0.835"/>
+            <GradientStop Color="#ff0000" Offset="1"/>
+        </LinearGradientBrush>
     </controls:EWindow.Resources>
     <Grid Margin="0">
         <Grid.RowDefinitions>
@@ -117,27 +135,42 @@ ItemsSource="{Binding ModuleManager.EnabledModules}" ItemTemplate="{StaticResour
         <Grid Grid.Column="1" Grid.RowSpan="2">
             <StackPanel Background="#FFFFFF">
                 <StackPanel Orientation="Vertical">
-                    <controls:EImage x:Name="testImage" MaxHeight="110" Stretch="Uniform" Margin="4" Visibility="Visible">
 
-                    </controls:EImage>
-                    <controls:EImage x:Name="testImage1" MaxHeight="24" Style="{StaticResource EImage_SimpleStyle}"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <controls:ETextBox x:Name="urlBox" NoticeInfo="URL"></controls:ETextBox>
-                    <controls:EButton x:Name="testSwitchEnabledBtn" Click="testSwitchEnabledBtn_Click" Content="SwitchEnabled"/>
-                    <controls:EButton x:Name="testConfrimBtn" Click="testConfrimBtn_Click" Content="Confrim"/>
-                    <controls:EButton x:Name="testProChangeBtn" Click="testProChangeBtn_Click" Content="ChangeValue"/>
-                    <controls:EButton x:Name="testProModeBtn" Style="{StaticResource EButton_BackColorStyle}" Click="testProModeBtn_Click" Content="Mode"/>
-                    <controls:EButton>
-                        <Grid Width="200">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-                            <controls:EButton Name="testEBTNN" Content="test ebtn n" Width="100"/>
-                        </Grid>
-                    </controls:EButton>
+
                 </StackPanel>
+                <controls:EToggleButton Name="testETBtn" Content="TEST"/>
+                <controls:ESlider x:Name="testEslider" Orientation="Horizontal">
+                    <state:StateListener.Rules>
+                        <state:RuleCollection>
+                            <state:Rule Context="{Binding RelativeSource={RelativeSource Self}}" StateMap="SelfValue"/>
+                            <state:Rule Context="{Binding ElementName=testEslider}" StateMap="SelfValue"/>
+                        </state:RuleCollection>
+                    </state:StateListener.Rules>
+                </controls:ESlider>
+                <controls:EListView Height="300" Margin="15" Loaded="EListView_Loaded">
+                    <controls:EListView.View>
+                        <GridView>
+                            <GridView.Columns>
+                                <GridViewColumn Header="Name">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate DataType="viewmodel:TestData">
+                                            <TextBlock Text="{Binding Data}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Name">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate DataType="viewmodel:TestData">
+                                            <TextBlock Text="{Binding V}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView.Columns>
+                        </GridView>
+                    </controls:EListView.View>
+                </controls:EListView>
             </StackPanel>
         </Grid>
     </Grid>

@@ -7,9 +7,11 @@
     <RootNamespace>ElShrine</RootNamespace>
     <BaseOutputPath>..\bin</BaseOutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ElShrineLib.Wpf.Generators.Attributes" Version="1.0.0" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
@@ -28,21 +30,13 @@
   <ItemGroup>
     <ProjectReference Include="..\ElShrineLib.Graphics\ElShrineLib.Graphics.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Wpf\Controls\EExpander.xaml.cs">
-      <Generator>MSBuild:Compile</Generator>
-    </Compile>
-  </ItemGroup>
 	
   <ItemGroup>
 	  <Analyzer Include="..\ElShrine.Wpf.Generators\bin\Release\netstandard2.0\ElShrineLib.Wpf.Generators.dll" />
   </ItemGroup>
 	
   <ItemGroup>
-    <Reference Include="ElShrineLib.Wpf.Generators.Attributes">
-      <HintPath>..\ElShrine.Wpf.Generators\bin\Release\netstandard2.0\ElShrineLib.Wpf.Generators.Attributes.dll</HintPath>
-    </Reference>
+    <Folder Include="Themes\" />
   </ItemGroup>
 
 </Project>
