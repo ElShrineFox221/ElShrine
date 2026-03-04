@@ -146,16 +146,14 @@ public sealed class LogProducer : IInitializable<LogProducer>, IDisposable
     private void OnEntryAdded(LogSession session, LogScope scope, LogEntry entry)
     {
         // Prepare metadata for raw logging
-        var data = new
-        {
-            EntryId = entry.Id,
-            ParentId = scope.Id,
+        var data = new LogEntryData(
+            entry.Id,
+            scope.Id,
             entry.Depth,
             entry.Timestamp,
             entry.IsEndOfScope,
-            Type = entry.EntryType,
-            Summary = entry.GetSummary()
-        };
+            entry.EntryType,
+            entry.GetSummary());
 
         var json = JsonSerializer.Serialize(data);
         if (_writers.TryGetValue(scope.Session.SessionId, out var writer))

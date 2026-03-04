@@ -5,10 +5,9 @@ namespace ElShrine.Modules.Log;
 
 public static class LogStructureRepairer
 {
-    private record RawLogModel(long EntryId, long ParentId, int Depth, long Timestamp, bool IsEndOfScope, string Type, string Summary);
-    private class ReconstructNode(RawLogModel data)
+    private class ReconstructNode(LogEntryData data)
     {
-        public RawLogModel Data = data;
+        public LogEntryData Data = data;
         public List<ReconstructNode> Children = [];
         public long? DurationMs { get; set; }
     }
@@ -27,15 +26,15 @@ public static class LogStructureRepairer
                 if (string.IsNullOrWhiteSpace(line)) continue;
                 try
                 {
-                    var data = JsonSerializer.Deserialize<RawLogModel>(line);
+                    var data = JsonSerializer.Deserialize<LogEntryData>(line);
                     if (data == null) continue;
 
                     var node = new ReconstructNode(data);
-                    nodes[data.EntryId] = node;
+                    nodes[data.Id] = node;
 
                     if (data.ParentId == 0) roots.Add(node);
                     else if (nodes.TryGetValue(data.ParentId, out var parent)) parent.Children.Add(node);
-                    else nodesToStructure[data.EntryId] = node;
+                    else nodesToStructure[data.Id] = node;
                 }
                 catch { /* 自动跳过损坏的 JSON 行 */ }
             }
@@ -43,7 +42,7 @@ public static class LogStructureRepairer
         if (roots.Count == 0)
         {
             var minDepth = nodesToStructure.Values.Min(n => n.Data.Depth);
-            var selecteds = nodesToStructure.Values.Where(n => n.Data.Depth == minDepth).Select(n => n.Data.EntryId);
+            var selecteds = nodesToStructure.Values.Where(n => n.Data.Depth == minDepth).Select(n => n.Data.Id);
             foreach (var entryId in selecteds)
             {
                 roots.Add(nodes[entryId]);
@@ -96,7 +95,7 @@ public static class LogStructureRepairer
         }
         if (data.Type == nameof(LogScope))
         {
-            var orderedChildren = node.Children.OrderBy(c => c.Data.EntryId).ToList();
+            var orderedChildren = node.Children.OrderBy(c => c.Data.Id).ToList();
             foreach (var child in orderedChildren)
                 RenderNode(sw, child, indentLevel + 1);
 
