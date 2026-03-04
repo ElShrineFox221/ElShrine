@@ -1,0 +1,11 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
+                    xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions">
+    <Style TargetType="controls:EPopup">
+        <Setter Property="IsOpen" Value="False"/>
+        <Setter Property="StaysOpen" Value="False"/>
+        <Setter Property="PopupAnimation" Value="Fade"/>
+        <Setter Property="AllowsTransparency" Value="True"/>
+    </Style>
+</ResourceDictionary>

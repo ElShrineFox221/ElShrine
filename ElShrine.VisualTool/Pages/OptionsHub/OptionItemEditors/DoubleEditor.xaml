@@ -1,0 +1,20 @@
+﻿<UserControl x:Class="ElShrine.VisualTool.Pages.OptionsHub.OptionItemEditors.DoubleEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                          xmlns:controls="clr-namespace:ElShrine.Wpf.Controls;assembly=ElShrineLib.Wpf"
+             xmlns:local="clr-namespace:ElShrine.VisualTool.Pages.OptionsHub.OptionItemEditors"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             local:OptionItemEditorManager.TarType="{x:Type system:Double}"
+             mc:Ignorable="d" 
+             d:DesignHeight="25" d:DesignWidth="100">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <controls:ENumInput Grid.Column="1" x:Name="PART_DoubleInput" MaxWidth="120" MinWidth="50"
+                            IsStepRepeatBtnVisible="False"/>
+    </Grid>
+</UserControl>

@@ -32,7 +32,7 @@ namespace ElShrine.Wpf.Controls
             typeof(UIElement),
             new FrameworkPropertyMetadata(
                 defaultValue: HeaderPlacement.Left,
-                flags: FrameworkPropertyMetadataOptions.AffectsParentArrange | FrameworkPropertyMetadataOptions.AffectsMeasure
+                flags: FrameworkPropertyMetadataOptions.Inherits | FrameworkPropertyMetadataOptions.AffectsParentArrange | FrameworkPropertyMetadataOptions.AffectsMeasure
         ));
         public static readonly DependencyProperty HeaderTemplateProperty = DependencyProperty.RegisterAttached(
             nameof(HeaderTemplateProperty).ToPropRegName(),
@@ -40,7 +40,7 @@ namespace ElShrine.Wpf.Controls
             typeof(UIElement),
             new FrameworkPropertyMetadata(
                 defaultValue: null,
-                flags: FrameworkPropertyMetadataOptions.AffectsParentArrange | FrameworkPropertyMetadataOptions.AffectsMeasure
+                flags: FrameworkPropertyMetadataOptions.Inherits | FrameworkPropertyMetadataOptions.AffectsParentArrange | FrameworkPropertyMetadataOptions.AffectsMeasure
         ));
         public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register(
             nameof(HeaderProperty).ToPropRegName(),
@@ -48,7 +48,7 @@ namespace ElShrine.Wpf.Controls
             typeof(UIElement),
             new FrameworkPropertyMetadata(
                 defaultValue: null,
-                flags: FrameworkPropertyMetadataOptions.AffectsParentArrange | FrameworkPropertyMetadataOptions.AffectsMeasure
+                flags: FrameworkPropertyMetadataOptions.Inherits | FrameworkPropertyMetadataOptions.AffectsParentArrange | FrameworkPropertyMetadataOptions.AffectsMeasure
         ));
         #endregion
     }

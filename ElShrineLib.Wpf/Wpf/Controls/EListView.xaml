@@ -1,0 +1,45 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
+                    xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    <Style TargetType="{x:Type controls:EListView}">
+        <Setter Property="Padding" Value="3,6,3,-1"/>
+        <Setter Property="IndicatorPlacement" Value="Left"/>
+        <Setter Property="SelectedItemLineWidth" Value="4"/>
+        <Setter Property="SelectedItemLineLengthRate" Value="0.8"/>
+        <Setter Property="ItemBorderCornerRadius" Value="2"/>
+        <Setter Property="ItemPadding" Value="4,3"/>
+        <Setter Property="ItemMargin" Value="2"/>
+        <Setter Property="VerticalScrollBarMargin" Value="0,0,0,3"/>
+        <Setter Property="VerticalContentAlignment" Value="Top"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="EBorderThickness" Value="1"/>
+        <Setter Property="EBorderCornerRadius" Value="2"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type controls:EListView}">
+                    <Border x:Name="PART_EListViewRoot" 
+                            Background="{TemplateBinding BackBrush}" BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}" Margin="0"
+                            ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EListView}}">
+                        <ext:StateListener.Rules>
+                            <ext:RuleCollection>
+                                <ext:Rule Target="{Binding ElementName=PART_EListViewRoot}" StateMap="MouseOut=>Border=PR;MouseIn=>Border=SE"/>
+                            </ext:RuleCollection>
+                        </ext:StateListener.Rules>
+                        <Border.OpacityMask>
+                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EListViewRoot}"/>
+                        </Border.OpacityMask>
+                        <controls:EScrollViewer x:Name="contentContainer" Margin="{TemplateBinding Padding}"
+                                                Focusable="false" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+                                                CornerContent="{TemplateBinding CornerContent}" 
+                                                EBorderCornerRadius="{TemplateBinding BarSize, Converter={StaticResource CommonModifyConverter}, ConverterParameter=LTRB_L0.5}">
+                            <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        </controls:EScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

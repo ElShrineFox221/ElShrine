@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-namespace ElShrine
+﻿namespace ElShrine
 {
     public static class CommonHelper
     {
@@ -100,6 +98,10 @@ namespace ElShrine
            => byte.Parse(Math.Round(d, 0).ToString());
         public static int ToInt32(this (byte b0, byte b1, byte b2, byte b3) bytes) 
             => (bytes.b0 << 24) | (bytes.b1 << 16) | (bytes.b2 << 8) | bytes.b3;
+        #endregion
+
+        #region Type & Class
+
         #endregion
     }
 }

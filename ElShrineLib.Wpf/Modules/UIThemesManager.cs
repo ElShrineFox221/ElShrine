@@ -22,6 +22,7 @@ namespace ElShrine.Modules
         {
             CurrentTheme.PropertyChanged += ThemePropChanged;
             CurrentThemeChanged?.Invoke(this, new(CurrentTheme, CurrentTheme));
+            themeByName[Theme.Default.ThemeName] = Theme.Default;
         }
 
         private readonly Dictionary<string, Theme> themeByName = new(StringComparer.OrdinalIgnoreCase);
@@ -34,6 +35,7 @@ namespace ElShrine.Modules
                 foreach (var theme in value) themeByName[theme.ThemeName] = theme;
             }
         }
+        public IReadOnlyList<Theme> AllThemes => Themes;
         public Theme CurrentTheme
         {
             get => field;
@@ -50,18 +52,22 @@ namespace ElShrine.Modules
             }
         } = Theme.Default;
         public event ValueChangedHandler<Theme>? CurrentThemeChanged;
+        public event EventHandler? ThemesChanged;
         private void ThemePropChanged(object? sender, PropertyChangedEventArgs e) => CurrentThemeChanged?.Invoke(this, new(CurrentTheme, CurrentTheme));
 
         public bool NewTheme(string themeName)
         {
             if (themeByName.ContainsKey(themeName)) return false;
-            else themeByName[themeName] = new Theme(themeName);
+            themeByName[themeName] = new Theme(themeName);
+            ThemesChanged?.Invoke(this, new());
             return true;
         }
         public bool RemoveTheme(string themeName)
         {
             if (themeName.EqualIgnoreCase(CurrentTheme.ThemeName)) return false;
-            return themeByName.Remove(themeName);
+            var r = themeByName.Remove(themeName);
+            if(r) ThemesChanged?.Invoke(this, new());
+            return r;
         }
         public void Save()
         {
@@ -70,7 +76,11 @@ namespace ElShrine.Modules
         public void Load()
         {
             var r = DataHandler.Read(Themes);
-            if (r.Success) Themes = r.Data!;
+            if (r.Success)
+            {
+                Themes = r.Data!;
+                ThemesChanged?.Invoke(this, new());
+            }
         }
 
         #region Registration

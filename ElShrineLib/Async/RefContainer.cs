@@ -1,7 +1,6 @@
-﻿namespace ElShrine.Async
+﻿namespace ElShrine.Async;
+
+public class RefContainer<TContent>(TContent? content = null) where TContent : class
 {
-    public class RefContainer<TContent>(TContent? content = null) where TContent : class
-    {
-        public TContent? Content { get; set; } = content;
-    }
+    public TContent? Content { get; set; } = content;
 }

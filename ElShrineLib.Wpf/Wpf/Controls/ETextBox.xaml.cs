@@ -148,11 +148,7 @@ namespace ElShrine.Wpf.Controls
                         return;
                 }
             }
-            else if (e.Key == Key.Enter)
-            {
-                GetBindingExpression(TextProperty)?.UpdateSource();
-                e.Handled = true;
-            }
+            else if (e.Key == Key.Enter) GetBindingExpression(TextProperty)?.UpdateSource();
 
             base.OnPreviewKeyDown(e);
             void moveSuggestionListSelection(int mount)

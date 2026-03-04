@@ -18,7 +18,7 @@ namespace ElShrine.VisualTool
             set
             {
                 Model.Enabled = value;
-                NotifyPropertyChanged(nameof(Enabled));
+                NotifyPropertiesChanged(nameof(Enabled));
             }
         }
         public Type RootViewModelClass => Model.RootViewModelClass;
@@ -27,7 +27,7 @@ namespace ElShrine.VisualTool
             get
             {
                 object? result;
-                if (RootViewModelClass.IsImplementOf(typeof(ISingleton))) result = ISingleton.GetInstance(RootViewModelClass);
+                if (RootViewModelClass.IsImplementOf(typeof(IInitializable<>))) result = Bootstrapper.GetInstance(RootViewModelClass);
                 else result = Activator.CreateInstance(RootViewModelClass);
                 if (result is not null && result is ViewModelBase vmb) return vmb;
                 else throw new($"Failed get viewmodel instance with type <{RootViewModelClass}>");

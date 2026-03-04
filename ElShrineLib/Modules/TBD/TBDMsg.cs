@@ -1,7 +1,6 @@
-﻿namespace ElShrine.Modules.TBD
+﻿namespace ElShrine.Modules.TBD;
+
+public static class TBDMsg
 {
-    public static class TBDMsg
-    {
-        public const string TBD_MSG = "TBD: To be deleted.";
-    }
+    public const string TBD_MSG = "TBD: To be deleted.";
 }

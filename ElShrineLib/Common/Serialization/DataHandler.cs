@@ -46,10 +46,10 @@ namespace ElShrine.Common.Serialization
             try
             {
                 ArgumentNullException.ThrowIfNull(data);
-                //Validate or build serializer
+                //ValidateType or build serializer
                 serializer ??= Activator.CreateInstance(DefaultSerializer) as SerializerBase;
                 var overrideExtendName = serializer?.GetFileExtendName() ?? throw new("Failed to get extension name.");
-                //Validate or initialize file details
+                //ValidateType or initialize file details
                 if (fileDetails is null || !fileDetails.IsValid)
                 {
                     var type = dataType;
@@ -67,7 +67,7 @@ namespace ElShrine.Common.Serialization
                 //Serialize
                 if (fileDetails != null && serializer != null)
                 {
-                    using FileStream fileStream = fileDetails.Open(FileMode.Create, FileAccess.Write);
+                    using FileStream fileStream = fileDetails.Open(FileMode.OpenOrCreate, FileAccess.Write);
                     {
                         serializer.Serialize(data, dataType, fileStream);
                     }
@@ -92,10 +92,10 @@ namespace ElShrine.Common.Serialization
             bool success = true; Exception? exceptionFailed = null;
             try
             {
-                //Validate or build serializer
+                //ValidateType or build serializer
                 serializer ??= Activator.CreateInstance(DefaultSerializer) as SerializerBase;
                 var overrideExtendName = serializer?.GetFileExtendName() ?? throw new("Failed to get extension name.");
-                //Validate or initialize file details
+                //ValidateType or initialize file details
                 if (fileDetails == null || !fileDetails.IsValid)
                 {
                     var type = dataType;

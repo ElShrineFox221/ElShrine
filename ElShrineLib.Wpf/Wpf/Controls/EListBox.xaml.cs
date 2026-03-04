@@ -1,6 +1,7 @@
 ﻿using ElShrine.Common;
 using ElShrine.Modules;
 using ElShrine.Wpf.UITheme;
+using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -10,6 +11,7 @@ namespace ElShrine.Wpf.Controls
     [GenerateDPCli]
     public partial class EListBox : ListBox, IThemeControlBase, IScrollBarControlBase, ISelectionRenderControlBase, IScrollBarControllerBase, IItemRenderControlBase
     {
+
         #region Implements
         static EListBox() => DefaultStyleKeyProperty.OverrideMetadata(typeof(EListBox), new FrameworkPropertyMetadata(typeof(EListBox)));
         public EListBox()
@@ -42,6 +44,5 @@ namespace ElShrine.Wpf.Controls
                 isDragging = false;
             }
         }
-        
     }
 }

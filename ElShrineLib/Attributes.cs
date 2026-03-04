@@ -1,20 +1,19 @@
-﻿using ElShrine.Modules;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace ElShrine
 {
     #region Validatable bases
     [AttributeUsage(AttributeTargets.All)]
-    public abstract class ValidatableAttribute() : Attribute()
+    public abstract class ValidatableBaseAttribute() : Attribute()
     {
         public string? ValidateFailedReason { get; protected set; } = null;
-        protected abstract bool Validate(object obj);
-        public bool DoValidate(object obj)
+        protected abstract bool Validate(Type attributedTargetType, object? extraInstance);
+        internal bool DoValidate(Type attributedTargetType, object? extraInstance)
         {
             var suc = false;
             try
             {
-                suc = Validate(obj);
+                suc = Validate(attributedTargetType, extraInstance);
             }
             catch (Exception e)
             {
@@ -24,32 +23,85 @@ namespace ElShrine
             return suc;
         }
     }
-    public abstract class ValidatableBase<T> : ValidatableAttribute where T : class
+    public abstract class ValidatableBaseAttribute<T>(bool inherit, bool nullable) : ValidatableBaseAttribute where T : class
     {
-        protected sealed override bool Validate(object target)
+        public bool Inherit = inherit;
+        public bool Nullable = nullable;
+        protected sealed override bool Validate(Type attributedTargetType, object? extraInstance)
         {
-            if (target is T t)
+            //Nullable
+            var nullableCheck = extraInstance is not null || Nullable;
+            if (!nullableCheck)
             {
-                return Validate(t);
+                ValidateFailedReason = $"Expected a instance of type {typeof(T).FullName} but received a null value.";
+                return false;
             }
-            ValidateFailedReason = $"Expected {typeof(T).Name} but received {target?.GetType().Name ?? "null"}.";
-            return false;
+            //
+            if (Inherit)
+            {
+                if (!typeof(T).IsBaseOrInterfaceOf(attributedTargetType))
+                {
+                    ValidateFailedReason = $"Expected {typeof(T).FullName}'s implement but received {attributedTargetType.FullName}.";
+                    return false;
+                }
+                if (extraInstance is not null) 
+                {
+                    if (extraInstance is not T t)
+                    {
+                        ValidateFailedReason = $"Expected {typeof(T).FullName}'s implement but received a {extraInstance.GetType().FullName} instance.";
+                        return false;
+                    }
+                    else return Validate(t);
+                }
+            }
+            else
+            {
+                if (typeof(T) != attributedTargetType)
+                {
+                    ValidateFailedReason = $"Expected {typeof(T).FullName} but received {attributedTargetType.FullName}.";
+                    return false;
+                }
+                if (extraInstance is not null)
+                {
+                    if (extraInstance is not T t || t.GetType() != typeof(T))
+                    {
+                        ValidateFailedReason = $"Expected {typeof(T).FullName} instance but received a {extraInstance.GetType().FullName} instance.";
+                        return false;
+                    }
+                    else return Validate(t);
+                }
+            }
+            return true;
         }
-        protected abstract bool Validate(T target);
+        protected abstract bool Validate(T extraInstance);
     }
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
-    public abstract class ValidatableClassAttribute() : ValidatableBase<Type>();
+    public abstract class ValidatableClassAttribute : ValidatableBaseAttribute
+    {
+        protected sealed override bool Validate(Type attributedTargetType, object? extraInstance)
+        {
+            if (extraInstance is not null)
+            {
+                ValidateFailedReason = $"Type validation expects null extraInstance, but got {extraInstance.GetType().FullName}.";
+                return false;
+            }
+            return ValidateType(attributedTargetType);
+        }
+        protected abstract bool ValidateType(Type typeToValidate);
+    }
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method)]
-    public abstract class ValidatableMemberAttribute() : ValidatableBase<MemberInfo>();
+    public abstract class ValidatableMemberAttribute() : ValidatableBaseAttribute<MemberInfo>(true, false);
     #endregion
 
     [AttributeUsage(AttributeTargets.Class)]
     public class SingletonAttribute() : ValidatableClassAttribute()
     {
         public BindingFlags ItemSearchFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance;
-        protected override bool Validate(Type t)
+
+        protected override bool ValidateType(Type typeToValidate)
         {
             var suc = false;
+            var t = typeToValidate;
             if (t.IsStaticClass() || typeof(IInitializable<>).IsBaseOrInterfaceOf(t)) suc = true;
             else ValidateFailedReason = $"Type <{t.FullName}> is not a static class or implement of interface {nameof(IInitializable<>)}<TIns>.";
             return suc;

@@ -5,6 +5,7 @@
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/ConverterResources.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EInWindowDialog.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EHeaderControl.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EArrowControl.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/ESelectedIndicator.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EButton.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EToggleButton.xaml"/>
@@ -19,20 +20,20 @@
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EListBox.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EExpander.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/ETextBox.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/ENumInput.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/ETabControl.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EComboBox.xaml"/>
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EColorPalette.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EPopupExpander.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EListViewItem.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EListView.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/ETreeView.xaml"/>
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/ETreeViewItem.xaml"/>
+
+        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EPopup.xaml"/>
         <!--
         <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EWindow.xaml"/>
         //
-
-        
-        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EListViewItem.xaml"/>
-        <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/Controls/EListView.xaml"/>
-
-        
-        
-        
         
        -->
         

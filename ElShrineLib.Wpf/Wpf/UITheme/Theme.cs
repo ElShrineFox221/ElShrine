@@ -16,7 +16,7 @@ namespace ElShrine.Wpf.UITheme
             set
             {
                 field = value;
-                NotifyPropertyChanged(nameof(PrimaryColor));
+                NotifyPropertiesChanged(nameof(PrimaryColor));
             }
         } = Color.LightSlateGray.ToColorData();
 
@@ -27,7 +27,7 @@ namespace ElShrine.Wpf.UITheme
             set
             {
                 field = value;
-                NotifyPropertyChanged(nameof(BackColor));
+                NotifyPropertiesChanged(nameof(BackColor));
             }
         } = Color.White.ToColorData();
 
@@ -38,7 +38,7 @@ namespace ElShrine.Wpf.UITheme
             set
             {
                 field = value;
-                NotifyPropertyChanged(nameof(SecondaryColor));
+                NotifyPropertiesChanged(nameof(SecondaryColor));
             }
         } = Color.Purple.ToColorData();
 
@@ -48,7 +48,7 @@ namespace ElShrine.Wpf.UITheme
             set
             {
                 field = value;
-                NotifyPropertyChanged(nameof(FontColor));
+                NotifyPropertiesChanged(nameof(FontColor));
             }
         } = Color.Black.ToColorData();
         #endregion
@@ -60,7 +60,7 @@ namespace ElShrine.Wpf.UITheme
             set
             {
                 field = value;
-                NotifyPropertyChanged(nameof(FontSizeLarge));
+                NotifyPropertiesChanged(nameof(FontSizeLarge));
             }
         } = 24;
         [DataMember] public int FontSizeMedium
@@ -69,7 +69,7 @@ namespace ElShrine.Wpf.UITheme
             set
             {
                 field = value;
-                NotifyPropertyChanged(nameof(FontSizeMedium));
+                NotifyPropertiesChanged(nameof(FontSizeMedium));
             }
         } = 16;
         [DataMember] public int FontSizeNormal
@@ -78,7 +78,7 @@ namespace ElShrine.Wpf.UITheme
             set
             {
                 field = value;
-                NotifyPropertyChanged(nameof(FontSizeNormal));
+                NotifyPropertiesChanged(nameof(FontSizeNormal));
             }
         } = 12;
         [DataMember] public int FontSizeSmall
@@ -87,7 +87,7 @@ namespace ElShrine.Wpf.UITheme
             set
             {
                 field = value;
-                NotifyPropertyChanged(nameof(FontSizeSmall));
+                NotifyPropertiesChanged(nameof(FontSizeSmall));
             }
         } = 10;
         #endregion
@@ -100,7 +100,7 @@ namespace ElShrine.Wpf.UITheme
             set
             {
                 field = value;
-                NotifyPropertyChanged(nameof(AnimDurationIn));
+                NotifyPropertiesChanged(nameof(AnimDurationIn));
             }
         } = ANIMA_DEFAULTDURA;
         [DataMember] public double AnimDurationOut
@@ -109,7 +109,7 @@ namespace ElShrine.Wpf.UITheme
             set
             {
                 field = value;
-                NotifyPropertyChanged(nameof(AnimDurationOut));
+                NotifyPropertiesChanged(nameof(AnimDurationOut));
             }
         } = ANIMA_DEFAULTDURA;
         #endregion

@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
+	<LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
@@ -10,6 +11,8 @@
     <RootNamespace>$(MSBuildProjectName)</RootNamespace>
     <BaseOutputPath>..\bin</BaseOutputPath>
     <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <StartupObject></StartupObject>
+	<PackageOutputPath>..\bin\Packages</PackageOutputPath>
   </PropertyGroup>
 
   <ItemGroup>

@@ -112,7 +112,7 @@ namespace ElShrine.Wpf.Controls.Extensions
             }
             if (listnerByRegister.TryGetValue(d, out var _listener)) StateListenersManager.Instance.Unregister(_listener);
             else listnerByRegister.Add(d, listener);
-            //Validate target and data source equality, warning if equals.
+            //ValidateType target and data source equality, warning if equals.
             var rulesDpo = GetRules(d);
             if(rulesDpo is RuleCollection rc)
             {

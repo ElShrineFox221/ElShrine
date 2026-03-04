@@ -19,6 +19,7 @@
             </Grid.RowDefinitions>
             <ContentControl x:Name="PART_Content" Grid.Column="1" Grid.Row="1"
                             Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                             HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
             <ContentControl x:Name="PART_Header" Grid.Column="0" Grid.Row="1"
                             Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}"

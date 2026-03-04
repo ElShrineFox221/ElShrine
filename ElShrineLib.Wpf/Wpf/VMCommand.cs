@@ -106,7 +106,7 @@ namespace ElShrine.Wpf
                 {
                     runningTask = value;
                     CanExecuteChanged?.Invoke(this, new EventArgs());
-                    NotifyPropertyChanged(nameof(RunningTask), nameof(IsRunning));
+                    NotifyPropertiesChanged(nameof(RunningTask), nameof(IsRunning));
                 }
             }
         }

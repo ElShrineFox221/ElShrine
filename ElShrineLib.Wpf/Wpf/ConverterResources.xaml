@@ -20,6 +20,15 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <Style x:Key="RepeatButton_EmptyStyle" TargetType="RepeatButton">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RepeatButton">
+                    <ContentPresenter Content="{TemplateBinding Content}"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
     <DataTemplate x:Key="EnumComboBoxDataTemplate">
         <TextBlock Text="{Binding Converter={StaticResource EnumTextLocalizeConverter}}"/>
     </DataTemplate>

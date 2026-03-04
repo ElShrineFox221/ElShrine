@@ -1,0 +1,137 @@
+﻿<UserControl x:Class="ElShrine.VisualTool.Pages.Console.PREVIEW"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:controls="clr-namespace:ElShrine.Wpf.Controls;assembly=ElShrineLib.Wpf"
+             xmlns:local="clr-namespace:ElShrine.VisualTool.Pages.Console"
+             xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions;assembly=ElShrineLib.Wpf"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=local:ConsoleVM,IsDesignTimeCreatable=True}"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <DataTemplate x:Key="LineItemTemplate" DataType="local:LineItemVM">
+            <TextBlock Visibility="{Binding Visibility}" Text="{Binding Text}" Foreground="{Binding ForeColor, Converter={StaticResource CommonConverter}}"/>
+        </DataTemplate>
+        <DataTemplate x:Key="CommandInputBarTemplate" DataType="local:CommandInputBarDataVM">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <controls:ETextBox x:Name="TextBox" Text="{Binding CurrentInput, Mode=TwoWay}" EBorderCornerRadius="0,0,2,2" NoticeInfo="Use prefix '-' to switch session, or prefix '@' to execute cmd command">
+                    <controls:ETextBox.InputBindings>
+                        <KeyBinding Command="{Binding ConfrimInput}" CommandParameter="{Binding ElementName=TextBox}" Key="Enter"/>
+                        <KeyBinding Command="{Binding GetNextInput}" CommandParameter="{Binding ElementName=TextBox}" Key="Down"/>
+                        <KeyBinding Command="{Binding GetLastInput}" CommandParameter="{Binding ElementName=TextBox}" Key="Up"/>
+                    </controls:ETextBox.InputBindings>
+                </controls:ETextBox>
+                <Grid Grid.Row="1" Margin="5,2,5,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <ContentControl Grid.Column="1" HorizontalAlignment="Right" Content="{Binding ProcessingNoticeVM}" ContentTemplate="{StaticResource LineItemTemplate}"/>
+                    <ContentControl Content="{Binding ErrorNoticeVM}" ContentTemplate="{StaticResource LineItemTemplate}"/>
+                </Grid>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Border Padding="5,5,5,5" BorderThickness="0" CornerRadius="0">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel.Resources>
+                        <Style x:Key="ToggleButtonStyle" TargetType="controls:EToggleButton" BasedOn="{StaticResource {x:Type controls:EToggleButton}}">
+                            <Setter Property="Padding" Value="3,0"/>
+                            <Setter Property="Margin" Value="1"/>
+                            <Setter Property="EBorderThickness" Value="0"/>
+                        </Style>
+                    </StackPanel.Resources>
+                    <controls:EToggleButton Style="{StaticResource ToggleButtonStyle}" Content="Show timestamp" IsChecked="{Binding Path=(local:ConsoleVM.IsTimestampVisible)}"/>
+                    <controls:EToggleButton Style="{StaticResource ToggleButtonStyle}" Content="Show thread ID" IsChecked="{Binding Path=(local:ConsoleVM.IsThreadIdVisible)}"/>
+                    <controls:EToggleButton Style="{StaticResource ToggleButtonStyle}" Content="Show time consumes" IsChecked="{Binding Path=(local:ConsoleVM.IsTimeconsumesVisible)}"/>
+                    <controls:EToggleButton Style="{StaticResource ToggleButtonStyle}" Content="Show result" IsChecked="{Binding Path=(local:ConsoleVM.IsResultInfoVisible)}"/>
+                </StackPanel>
+            </Grid>
+            <controls:ETabControl Grid.Row="1" ItemsSource="{Binding SessionByCombinedNameId}" SelectedItem="{Binding SelectedSession}" 
+                                  SelectedIndex="0" FontFamily="Cascadia Code" EBorderCornerRadius="2,2,0,0" FontSize="13">
+                <controls:ETabControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding CombinedNameId}"/>
+                    </DataTemplate>
+                </controls:ETabControl.ItemTemplate>
+                <controls:ETabControl.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <controls:ETreeView Grid.Row="3" ArrowMargin="1,0,1,0" ItemPadding="2" ItemsSource="{Binding RootLines}" Margin="2,1,1,1" HorizontalScrollBarVisibility="Auto" 
+                                                Grid.IsSharedSizeScope="True">
+                                <controls:ETreeView.Resources>
+                                    <Style TargetType="controls:ETreeViewItem">
+                                        <Setter Property="LeftColumnTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate DataType="local:ScopeVM">
+                                                    <Grid x:Name="LeftContentGrid" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                                                          ext:ControlUpdater.InvalidateArrangeSource="{Binding Path=(local:ConsoleVM.IsResultInfoVisible)}">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition x:Name="C0" Width="Auto"/>
+                                                            <ColumnDefinition x:Name="C1" Width="Auto"/>
+                                                            <ColumnDefinition x:Name="C2" Width="0" SharedSizeGroup="TimeconsumesCol"/>
+                                                            <ColumnDefinition x:Name="C3" Width="0" SharedSizeGroup="ResultCol"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <ContentControl Grid.Column="0" Content="{Binding BeginTimestampVM}" ContentTemplate="{StaticResource LineItemTemplate}"
+                                                                        Visibility="{Binding Path=(local:ConsoleVM.IsTimestampVisible), Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=collapsed}"/>
+                                                        <ContentControl Grid.Column="1" Content="{Binding SourceScopeThreadIdVM}" ContentTemplate="{StaticResource LineItemTemplate}"
+                                                                        Visibility="{Binding Path=(local:ConsoleVM.IsThreadIdVisible), Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=collapsed}"/>
+                                                        <ContentControl x:Name="CC2" Grid.Column="2" Content="{Binding TimeconsumesItemVM}" ContentTemplate="{StaticResource LineItemTemplate}" 
+                                                                        Visibility="{Binding Path=(local:ConsoleVM.IsTimeconsumesVisible), Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=collapsed}"/>
+                                                        <ContentControl x:Name="CC3" Grid.Column="3" Content="{Binding ResultItemVM}" ContentTemplate="{StaticResource LineItemTemplate}"
+                                                                        Visibility="{Binding Path=(local:ConsoleVM.IsResultInfoVisible), Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=collapsed}"
+                                                                        />
+                                                    </Grid>
+                                                    <DataTemplate.Triggers>
+                                                        <Trigger SourceName="CC2" Property="Visibility" Value="Visible">
+                                                            <Setter TargetName="C2" Property="Width" Value="Auto"/>
+                                                        </Trigger>
+                                                        <Trigger SourceName="CC3" Property="Visibility" Value="Visible">
+                                                            <Setter TargetName="C3" Property="Width" Value="Auto"/>
+                                                        </Trigger>
+                                                    </DataTemplate.Triggers>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Setter Property="IsExpanded" Value="{Binding IsAutoExpanded}"/>
+                                        <Setter Property="IsScopeEndLine" Value="{Binding IsEndLine}"/>
+                                    </Style>
+                                </controls:ETreeView.Resources>
+                                <controls:ETreeView.ItemTemplate>
+                                    <HierarchicalDataTemplate DataType="local:ScopeVM" ItemsSource="{Binding SubLines}">
+                                        <ItemsControl Grid.Column="1" ItemsSource="{Binding BeginLineItems}" ItemTemplate="{StaticResource LineItemTemplate}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Horizontal"/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                        </ItemsControl>
+                                    </HierarchicalDataTemplate>
+                                </controls:ETreeView.ItemTemplate>
+                            </controls:ETreeView>
+                        </Grid>
+                        
+                    </DataTemplate>
+                </controls:ETabControl.ContentTemplate>
+            </controls:ETabControl>
+            <ContentControl Grid.Row="2" Content="{Binding CommandInputBarData}" ContentTemplate="{StaticResource CommandInputBarTemplate}"/>
+        </Grid>
+    </Border>
+</UserControl>

@@ -6,6 +6,7 @@
 	  <LangVersion>13.0</LangVersion>
 	  <RootNamespace>ElShrine.Wpf</RootNamespace>
 	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	  <PackageOutputPath>..\bin\Packages</PackageOutputPath>
   </PropertyGroup>
 
 </Project>

@@ -19,7 +19,8 @@
                         <Grid.OpacityMask>
                             <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_ETextBoxRoot}"/>
                         </Grid.OpacityMask>
-                        <controls:EHeaderControl HeaderPlacement="{TemplateBinding HeaderPlacement}" Header="{TemplateBinding Header}" HeaderTemplate="{TemplateBinding HeaderTemplate}">
+                        <controls:EHeaderControl HeaderPlacement="{TemplateBinding HeaderPlacement}" Header="{TemplateBinding Header}" HeaderTemplate="{TemplateBinding HeaderTemplate}"
+                                                 HorizontalAlignment="{TemplateBinding HorizontalAlignment}" HorizontalContentAlignment="{TemplateBinding HorizontalAlignment}">
                             <Grid x:Name="PART_ContentContainer">
                                 <Border x:Name="PART_DecorationBorder" BorderThickness="{TemplateBinding EBorderThickness}" Padding="{TemplateBinding Padding}" CornerRadius="{TemplateBinding EBorderCornerRadius}">
                                     <Grid>

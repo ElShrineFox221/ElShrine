@@ -23,7 +23,7 @@ namespace ElShrine.Wpf.Controls
                 if (field != value)
                 {
                     field = value;
-                    NotifyPropertyChanged(nameof(ColorData), nameof(Color));
+                    NotifyPropertiesChanged(nameof(ColorData), nameof(Color));
                 }
             }
         } = colorData;
@@ -35,7 +35,7 @@ namespace ElShrine.Wpf.Controls
                 if (field != value)
                 {
                     field = value;
-                    NotifyPropertyChanged(nameof(Favorite));
+                    NotifyPropertiesChanged(nameof(Favorite));
                 }
             }
         } = favorite;
@@ -318,13 +318,17 @@ namespace ElShrine.Wpf.Controls
             NotifyPropertyChanged(nameof(InitialColor));
             //Selector
         }
+        public event EventHandler? Confirmed;
+        public event EventHandler? Canceled;
         public void Confrim()
         {
             ResultColor = CurrentColor;
+            Confirmed?.Invoke(this, EventArgs.Empty);
             AddHistoryColor(CurrentColor);
         }
         public void CancelClose()
         {
+            Canceled?.Invoke(this, EventArgs.Empty);
             return;
         }
         #endregion

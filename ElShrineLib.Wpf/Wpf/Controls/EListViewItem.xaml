@@ -1,0 +1,125 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
+                    xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    <ControlTemplate x:Key="EListViewItem_BaseTemplate" TargetType="controls:EListViewItem">
+        <Border x:Name="controlRoot" BorderThickness="1" CornerRadius="2">
+            <Grid x:Name="PART_EListViewItemRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EListViewItem}}">
+                <Grid.OpacityMask>
+                    <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EListViewItemRoot}"/>
+                </Grid.OpacityMask>
+                <Grid.RowDefinitions>
+                    <RowDefinition x:Name="R0" Height="*"/>
+                    <RowDefinition x:Name="R1" Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="C0" Width="*"/>
+                    <ColumnDefinition x:Name="C1" Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid x:Name="PART_IndicatorContainer" Grid.Column="0">
+                    <Line x:Name="PART_SelectionIndicator" X1="0" Y1="0" X2="0" Y2="1" Stretch="Fill"
+                      StrokeEndLineCap="Round" StrokeStartLineCap="Round"
+                      Opacity="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TransNorm}"
+                      StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=controls:EListBox}, Path=SelectedItemLineWidth}"/>
+                    <Grid.MaxHeight>
+                        <MultiBinding Converter="{StaticResource ExpressionConverter}" ConverterParameter="V0*V1*V2">
+                            <Binding RelativeSource="{RelativeSource TemplatedParent}" Path="TransNorm"/>
+                            <Binding Path="SelectedItemLineLengthRate" RelativeSource="{RelativeSource AncestorType=controls:EListBox}"/>
+                            <Binding ElementName="PART_ContentContainer" Path="ActualHeight"/>
+                        </MultiBinding>
+                    </Grid.MaxHeight>
+                </Grid>
+                <Border x:Name="PART_ContentContainer" Grid.Column="1"       
+                    BorderThickness="{Binding ItemBorderThickness, RelativeSource={RelativeSource AncestorType=controls:EListBox}}" 
+                    Margin="{Binding ItemMargin, RelativeSource={RelativeSource AncestorType=controls:EListBox}}" 
+                    Padding="{Binding ItemPadding, RelativeSource={RelativeSource AncestorType=controls:EListBox}}" 
+                    CornerRadius="{Binding ItemBorderCornerRadius, RelativeSource={RelativeSource AncestorType=controls:EListBox}}">
+                    <ContentControl Content="{TemplateBinding Content}" ContentTemplate="{Binding ItemTemplate, RelativeSource={RelativeSource AncestorType=controls:EListBox}}"/>
+                </Border>
+                <ext:StateListener.Rules>
+                    <ext:RuleCollection>
+                        <ext:Rule Target="{Binding ElementName=PART_ContentContainer}" StateMap="
+                              MouseOut+Unselected=>Back=BC, Border=PR;
+                              MouseIn+Unselected=>Back=Lerp(BC,SE,0.1), Border=SE;
+                              MouseOut+Selected=>Back=Lerp(BC,PR,0.2), Border=PR;
+                              MouseIn+Selected=>Back=Lerp(BC,SE,0.2), Border=SE;
+                              MouseDown=>Back=Lerp(BC,SE,0.4), Border=BC;"/>
+                        <ext:Rule Target="{Binding ElementName=PART_SelectionIndicator}" StateMap="MouseOut=>Stroke=PR; MouseIn=>Stroke=SE"/>
+                    </ext:RuleCollection>
+                </ext:StateListener.Rules>
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IndicatorPlacement" Value="Left">
+                <Setter TargetName="C0" Property="Width" Value="Auto"/>
+                <Setter TargetName="C1" Property="Width" Value="*"/>
+                <Setter TargetName="R0" Property="Height" Value="*"/>
+                <Setter TargetName="R1" Property="Height" Value="0"/>
+                <Setter TargetName="PART_IndicatorContainer" Property="Grid.Column" Value="0"/>
+                <Setter TargetName="PART_IndicatorContainer" Property="Grid.Row" Value="0"/>
+                <Setter TargetName="PART_ContentContainer" Property="Grid.Column" Value="1"/>
+                <Setter TargetName="PART_ContentContainer" Property="Grid.Row" Value="0"/>
+            </Trigger>
+            <Trigger Property="IndicatorPlacement" Value="Right">
+                <Setter TargetName="C0" Property="Width" Value="*"/>
+                <Setter TargetName="C1" Property="Width" Value="Auto"/>
+                <Setter TargetName="R0" Property="Height" Value="*"/>
+                <Setter TargetName="R1" Property="Height" Value="0"/>
+                <Setter TargetName="PART_IndicatorContainer" Property="Grid.Column" Value="1"/>
+                <Setter TargetName="PART_IndicatorContainer" Property="Grid.Row" Value="0"/>
+                <Setter TargetName="PART_ContentContainer" Property="Grid.Column" Value="0"/>
+                <Setter TargetName="PART_ContentContainer" Property="Grid.Row" Value="0"/>
+            </Trigger>
+            <Trigger Property="IndicatorPlacement" Value="Up">
+                <Setter TargetName="C0" Property="Width" Value="*"/>
+                <Setter TargetName="C1" Property="Width" Value="0"/>
+                <Setter TargetName="R0" Property="Height" Value="Auto"/>
+                <Setter TargetName="R1" Property="Height" Value="*"/>
+                <Setter TargetName="PART_IndicatorContainer" Property="Grid.Row" Value="0"/>
+                <Setter TargetName="PART_IndicatorContainer" Property="Grid.Column" Value="0"/>
+                <Setter TargetName="PART_ContentContainer" Property="Grid.Row" Value="1"/>
+                <Setter TargetName="PART_ContentContainer" Property="Grid.Column" Value="0"/>
+                <Setter TargetName="PART_SelectionIndicator" Property="X2" Value="1"/>
+                <Setter TargetName="PART_SelectionIndicator" Property="Y2" Value="0"/>
+                <Setter TargetName="PART_IndicatorContainer" Property="MaxHeight" Value="{x:Static system:Double.PositiveInfinity}"/>
+                <Setter TargetName="PART_IndicatorContainer" Property="MaxWidth">
+                    <Setter.Value>
+                        <MultiBinding Converter="{StaticResource ExpressionConverter}" ConverterParameter="V0*V1*V2">
+                            <Binding RelativeSource="{RelativeSource TemplatedParent}" Path="TransNorm"/>
+                            <Binding Path="SelectedItemLineLengthRate" RelativeSource="{RelativeSource AncestorType=controls:EListBox}"/>
+                            <Binding ElementName="PART_ContentContainer" Path="ActualWidth"/>
+                        </MultiBinding>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+
+            <Trigger Property="IndicatorPlacement" Value="Down">
+                <Setter TargetName="C0" Property="Width" Value="*"/>
+                <Setter TargetName="C1" Property="Width" Value="0"/>
+                <Setter TargetName="R0" Property="Height" Value="*"/>
+                <Setter TargetName="R1" Property="Height" Value="Auto"/>
+                <Setter TargetName="PART_IndicatorContainer" Property="Grid.Row" Value="1"/>
+                <Setter TargetName="PART_IndicatorContainer" Property="Grid.Column" Value="0"/>
+                <Setter TargetName="PART_ContentContainer" Property="Grid.Row" Value="0"/>
+                <Setter TargetName="PART_ContentContainer" Property="Grid.Column" Value="0"/>
+                <Setter TargetName="PART_SelectionIndicator" Property="X2" Value="1"/>
+                <Setter TargetName="PART_SelectionIndicator" Property="Y2" Value="0"/>
+                <Setter TargetName="PART_IndicatorContainer" Property="MaxHeight" Value="{x:Static system:Double.PositiveInfinity}"/>
+                <Setter TargetName="PART_IndicatorContainer" Property="MaxWidth">
+                    <Setter.Value>
+                        <MultiBinding Converter="{StaticResource ExpressionConverter}" ConverterParameter="V0*V1*V2">
+                            <Binding RelativeSource="{RelativeSource TemplatedParent}" Path="TransNorm"/>
+                            <Binding Path="SelectedItemLineLengthRate" RelativeSource="{RelativeSource AncestorType=controls:EListBox}"/>
+                            <Binding ElementName="PART_ContentContainer" Path="ActualWidth"/>
+                        </MultiBinding>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+    <Style TargetType="controls:EListViewItem">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template" Value="{StaticResource EListViewItem_BaseTemplate}"/>
+    </Style>
+</ResourceDictionary>

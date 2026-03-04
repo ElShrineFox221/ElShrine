@@ -231,7 +231,7 @@
                     </Grid>
                 </Grid>
                 <Grid x:Name="PART_HistoryColorsContainer" Grid.Row="2" Margin="0,0,0,0">
-                    <controls:EExpander x:Name="PART_HistoryColorsPanel" EBorderCornerRadius="2" IsExpanded="True" Margin="5,0" Header="History colors">
+                    <controls:EExpander x:Name="PART_HistoryColorsPanel" EBorderCornerRadius="2" IsExpanded="False" Margin="5,0" Header="History colors">
                         <controls:EListBox x:Name="PART_HistoryColorsBox" ItemPadding="2" SelectedItemLineWidth="3" IndicatorPlacement="Down" ItemsSource="{x:Static controls:EColorPalette.HistoryColors}" ItemTemplate="{StaticResource HistoryColors_DataTemplate}">
                             <controls:EListBox.ItemsPanel>
                                 <ItemsPanelTemplate>

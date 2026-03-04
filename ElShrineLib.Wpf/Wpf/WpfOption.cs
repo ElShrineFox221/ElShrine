@@ -7,8 +7,8 @@ namespace ElShrine.Wpf
     public static class WpfOption
     {
         #region Theme
+        [OptionItem]
         public static Theme SelectedTheme { get; set; } = Theme.Default;
-        [OptionItem] public static int SelectedThemeIndex { get; set; } = -1;
         #endregion
 
 

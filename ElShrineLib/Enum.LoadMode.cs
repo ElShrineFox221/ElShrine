@@ -103,7 +103,7 @@ namespace ElShrine
         }
 
         /// <summary>
-        /// Validate whether <paramref name="obj"/>'s instiatebility mode is subset of <paramref name="mode"/> or not.
+        /// ValidateType whether <paramref name="obj"/>'s instiatebility mode is subset of <paramref name="mode"/> or not.
         /// </summary>
         public static bool ModeInstiatebleMatched(this object obj, LoadMode mode)
         {
@@ -112,7 +112,7 @@ namespace ElShrine
             return requiredStatusMode == 0 || (requiredStatusMode & objStatusMode) == objStatusMode;
         }
         /// <summary>
-        /// Validate whether <paramref name="obj"/>'s accessibility mode is subset of <paramref name="mode"/> or not.
+        /// ValidateType whether <paramref name="obj"/>'s accessibility mode is subset of <paramref name="mode"/> or not.
         /// </summary>
         public static bool ModeAccessibleMatched(this object obj, LoadMode mode)
         {

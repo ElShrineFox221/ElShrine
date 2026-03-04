@@ -1,8 +1,7 @@
-﻿namespace ElShrine.Async
+﻿namespace ElShrine.Async;
+
+public interface IValidatable
 {
-    public interface IValidatable
-    {
-        public void InitializeValidator();
-        public bool IsValidated { get; }
-    }
+    public void InitializeValidator();
+    public bool IsValidated { get; }
 }

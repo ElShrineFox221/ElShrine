@@ -7,9 +7,17 @@
 	  <RunPostBuildEvent>Always</RunPostBuildEvent>
 	  <TargetFramework>net8.0-windows</TargetFramework>
 	  <RootNamespace>ElShrine</RootNamespace>
-	  <BaseOutputPath>..\bin</BaseOutputPath>
+	  <BaseOutputPath></BaseOutputPath>
 	  <LangVersion>preview</LangVersion>
-	  <OutputType>Library</OutputType>
+	  <OutputType>Exe</OutputType>
+	  <PackageOutputPath>..\bin\Packages</PackageOutputPath>
+	  <DebugType>embedded</DebugType>
+
+	  <EmbedAllSources>true</EmbedAllSources>
+
+	  <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+
+	  <StartupObject>ElShrine.Debug.DebugConsoleProgram</StartupObject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />

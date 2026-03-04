@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace ElShrine.Wpf
@@ -8,11 +9,11 @@ namespace ElShrine.Wpf
     {
         public event PropertyChangedEventHandler? PropertyChanged;
         protected virtual void NotifyPropertyChanged(object sender, string memberName) => PropertyChanged?.Invoke(sender, new PropertyChangedEventArgs(memberName));
-        public void NotifyPropertyChanged(params string[] memberNames)
+        public void NotifyPropertiesChanged(params string[] memberNames)
         {
             foreach (var member in memberNames) NotifyPropertyChanged(this, member);
         }
-
+        public void NotifyPropertyChanged([CallerMemberName] string memberName = "") => NotifyPropertyChanged(this, memberName);
         public ViewModelBase()
         {
             Initialize();

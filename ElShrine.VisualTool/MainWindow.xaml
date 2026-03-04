@@ -5,10 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodel ="clr-namespace:ElShrine.VisualTool"
         xmlns:controls="clr-namespace:ElShrine.Wpf.Controls;assembly=ElShrineLib.Wpf"
-                  xmlns:state="clr-namespace:ElShrine.Wpf.Controls.State;assembly=ElShrineLib.Wpf"
         d:DataContext="{d:DesignInstance Type=viewmodel:MainWindowViewModel}"
         mc:Ignorable="d"
-        Title="MainWindow" Height="720" Width="1100" MinWidth="300" MinHeight="600" FontSize="12" EBorderCornerRadius="5" Padding="0" DragResizeEdgeWidth="8">
+                  
+        Title="MainWindow" TitleBarHeight="25" 
+        Height="720" Width="1100" MinWidth="300" MinHeight="600" 
+        FontSize="12" FontFamily="Cascadia Code" 
+        EBorderCornerRadius="5" Padding="0" DragResizeEdgeWidth="8">
     <controls:EWindow.Resources>
         <DataTemplate x:Key="ModuleInfoDataTemplate" DataType="{x:Type viewmodel:WpfPageInfoVM}">
             <Grid>
@@ -83,24 +86,14 @@
             <GradientStop Color="#ff0000" Offset="1"/>
         </LinearGradientBrush>
     </controls:EWindow.Resources>
-    <Grid Margin="0">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="auto"/>
-        </Grid.ColumnDefinitions>
-
-        <controls:ETabControl Grid.Row="1" x:Name="ModulesTabControl" BorderThickness="1" ClipToBounds="False" HorizontalHeaderAlignment="Left" BorderCornerRadius="4"/>
-        <Canvas Grid.Row="0" Height="20">
-            <Grid Canvas.Right="20" >
-                <controls:EExpander ExpandDirection="Down" SlideDistance="200" BorderCornerRadius="5">
-                    <controls:EExpander.Header>
-                        <TextBlock Text="Modules Manager" HorizontalAlignment="Right"/>
-                    </controls:EExpander.Header>
-                    <Border Background="#F0F8FF" BorderBrush="#87CEFA" BorderThickness="2" CornerRadius="5" Padding="5">
+    <controls:EWindow.HeaderContent>
+        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+            <Grid>
+                <controls:EPopupExpander ExpandDirection="Down" EBorderThickness="0,0,0,1.5">
+                    <controls:EPopupExpander.Header>
+                        <TextBlock Text="Config Modules" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right"/>
+                    </controls:EPopupExpander.Header>
+                    <Border>
                         <Grid Grid.Column="0" Width="360">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="auto"/>
@@ -117,9 +110,9 @@
                                     <ColumnDefinition/>
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
-                                <Button Grid.Column="0" Content="Refresh" Command="{Binding Source={x:Static viewmodel:WpfPageManagerVM.Refresh}}"/>
-                                <Button Grid.Column="1" Content="Confrim" IsEnabled="{Binding Source={x:Static viewmodel:WpfPageManagerVM.IsDirty}}" Command="{Binding ModuleManager.Confrim}" CommandParameter="{Binding ElementName=ModulesTabControl}"/>
-                                <Button Grid.Column="2" Content="Cancel" IsEnabled="{Binding Source={x:Static viewmodel:WpfPageManagerVM.IsDirty}}" Command="{Binding Source={x:Static viewmodel:WpfPageManagerVM.Discard}}"/>
+                                <controls:EButton Grid.Column="0" Content="Refresh" Command="{Binding Source={x:Static viewmodel:WpfPageManagerVM.Refresh}}"/>
+                                <controls:EButton Grid.Column="1" Content="Confrim" IsEnabled="{Binding Source={x:Static viewmodel:WpfPageManagerVM.IsDirty}}" Command="{Binding ModuleManager.Confrim}" CommandParameter="{Binding ElementName=ModulesTabControl}"/>
+                                <controls:EButton Grid.Column="2" Content="Cancel" IsEnabled="{Binding Source={x:Static viewmodel:WpfPageManagerVM.IsDirty}}" Command="{Binding Source={x:Static viewmodel:WpfPageManagerVM.Discard}}"/>
                             </Grid>
                             <TextBlock Grid.Row="1" Text="Disabled Modules" FontSize="{Binding CurrentTheme.FontSizeMedium, Source={StaticResource ThemeProvider}}" HorizontalAlignment="Center"/>
                             <TextBlock Grid.Row="1" Grid.Column="1" Text="Enabled Modules" FontSize="{Binding CurrentTheme.FontSizeMedium, Source={StaticResource ThemeProvider}}" HorizontalAlignment="Center"/>
@@ -129,49 +122,24 @@ ItemsSource="{Binding ModuleManager.DisabledModules}" ItemTemplate="{StaticResou
 ItemsSource="{Binding ModuleManager.EnabledModules}" ItemTemplate="{StaticResource ModuleInfoDataTemplate}" IsDraggable="True" DragItemDropped="EnabledModulesListView_DragItemDropped"/>
                         </Grid>
                     </Border>
-                </controls:EExpander>
+                </controls:EPopupExpander>
             </Grid>
-        </Canvas>
-        <Grid Grid.Column="1" Grid.RowSpan="2">
-            <StackPanel Background="#FFFFFF">
-                <StackPanel Orientation="Vertical">
+        </StackPanel>
+    </controls:EWindow.HeaderContent>
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
 
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
+        <controls:ETabControl Grid.Row="1" x:Name="ModulesTabControl" EBorderThickness="1" ClipToBounds="False" HorizontalHeaderAlignment="Left" EBorderCornerRadius="4"/>
 
-                </StackPanel>
-                <controls:EToggleButton Name="testETBtn" Content="TEST"/>
-                <controls:ESlider x:Name="testEslider" Orientation="Horizontal">
-                    <state:StateListener.Rules>
-                        <state:RuleCollection>
-                            <state:Rule Context="{Binding RelativeSource={RelativeSource Self}}" StateMap="SelfValue"/>
-                            <state:Rule Context="{Binding ElementName=testEslider}" StateMap="SelfValue"/>
-                        </state:RuleCollection>
-                    </state:StateListener.Rules>
-                </controls:ESlider>
-                <controls:EListView Height="300" Margin="15" Loaded="EListView_Loaded">
-                    <controls:EListView.View>
-                        <GridView>
-                            <GridView.Columns>
-                                <GridViewColumn Header="Name">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate DataType="viewmodel:TestData">
-                                            <TextBlock Text="{Binding Data}"/>
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                                <GridViewColumn Header="Name">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate DataType="viewmodel:TestData">
-                                            <TextBlock Text="{Binding V}"/>
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                            </GridView.Columns>
-                        </GridView>
-                    </controls:EListView.View>
-                </controls:EListView>
-            </StackPanel>
-        </Grid>
+        <StackPanel Grid.Column="1" Grid.Row="1" VerticalAlignment="Center">
+
+        </StackPanel>
     </Grid>
 </controls:EWindow>

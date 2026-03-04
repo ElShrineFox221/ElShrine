@@ -80,7 +80,7 @@ namespace ElShrine.Common
         }
         public string Directory
         {
-            get => P.GetDirectoryName(path) ?? string.Empty;
+            get => P.GetDirectoryName(FullPath) ?? string.Empty;
             set
             {
                 if (fileOpened) throw new InvalidOperationException("Cannot modify path components while the file stream is open.");
@@ -100,6 +100,7 @@ namespace ElShrine.Common
             if (!IsValid) throw new InvalidOperationException("Cannot open file stream. The path is invalid.");
             if (fileOpened) throw new InvalidOperationException("File stream is already open. Call EnsureClose() first.");
             if (!D.Exists(Directory)) D.CreateDirectory(Directory);
+            var path = FullPath;
             stream = new FileStream(path, mode, access);
             fileOpened = true;
             return stream;

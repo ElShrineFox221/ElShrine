@@ -1,10 +1,10 @@
 ﻿namespace ElShrine.Common.Serialization
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class SerializeDirectoryAttribute(string directory) : ValidatableAttribute()
+    public class SerializeDirectoryAttribute(string directory) : ValidatableBaseAttribute()
     {
         public string Directory = directory;
-        protected override bool Validate(object obj)
+        protected override bool Validate(Type attributedTargetType, object? extraInstance)
         {
             var result = false;
             try

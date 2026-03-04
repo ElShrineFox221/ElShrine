@@ -1,13 +1,10 @@
-﻿using ElShrine.ECommand;
-using ElShrine.EFile;
-using ElShrine.EOption;
-using static ElShrine.EConsole.ConsoleManager;
+﻿using ElShrine.Common.Serialization;
+using ElShrine.Modules;
 
 namespace ElShrine.VisualTool
 {
-    [StartupClass]
-    [CommandCarrier(Name = "Module")]
-    public sealed class WpfPageManager : ISingleton<WpfPageManager>
+    //LOG [CommandCarrier(OverrideName = "Module")]
+    public sealed class WpfPageManager
     {
         //Refresh: reload assemblies and get pageInfos list, write list enabled prop by last saved moudules list(LSML);
         //Confrim: save and rebuilt LSNL;
@@ -48,13 +45,13 @@ namespace ElShrine.VisualTool
         
         private void RefreshPagesList()
         {
-            ListBeginInfo([new("Refreshing Pages List...")]);
+            //LOG ListBeginInfo([new("Refreshing Pages List...")]);
             try
             {
                 //get new pages list
-                var attributedPages = ClassesManager.GetClassesByAttribute<WpfPageRootVMAttribute>(true).ToList();
-                var pageInfos = attributedPages.Select(item => item.attrs[0].ToModuleInfo(item.type)).ToList();
-                ListContentInfo($"Loaded {pageInfos.Count} {"page".GetPural(pageInfos.Count)} from assemblies.");
+                var attributedPages = ClassesManager.Instance.GetClassesByAttribute<WpfPageRootVMAttribute>(true).ToList();
+                var pageInfos = attributedPages.Select(item => item.Value[0].ToModuleInfo(item.Key)).ToList();
+                //LOG ListContentInfo($"Loaded {pageInfos.Count} {"page".GetPural(pageInfos.Count)} from assemblies.");
                 //read saved list enabilities and indexes to cur;
                 int sucReadCount = 0;
                 var r = DataHandler.Read<PagesList>();
@@ -72,28 +69,28 @@ namespace ElShrine.VisualTool
                     }
                     pageInfos.Sort(PageCompare);
                 }
-                ListContentInfo($"Loaded saved status of {sucReadCount} {"page".GetPural(pageInfos.Count)}.");
+                //LOG ListContentInfo($"Loaded saved status of {sucReadCount} {"page".GetPural(pageInfos.Count)}.");
                 //replace cur pages.
                 AllPages.ReplaceAll(pageInfos);
                 //validate dirty
                 if (IsDirty)
                 {
-                    ListContentInfo($"Pages list changed. Rebuild tab pannel.");
+                    //LOG ListContentInfo($"Pages list changed. Rebuild tab pannel.");
                     ConfrimPagesListChanges();
                 }
                 else
                 {
-                    ListContentInfo($"Pages list has no changes.");
+                    //LOG ListContentInfo($"Pages list has no changes.");
                     PageListChanged?.Invoke(false);
                 }
             }
             catch(Exception e)
             {
-                ListErrorInfo(e);
-                ListEndInfo([GetCompleteItem(false)]);
+                //LOG ListErrorInfo(e);
+                //LOG ListEndInfo([GetCompleteItem(false)]);
                 throw;
             }
-            ListEndInfo([GetCompleteItem(true)]);
+            //LOG ListEndInfo([GetCompleteItem(true)]);
         }
         private void ConfrimPagesListChanges()
         {
@@ -101,7 +98,7 @@ namespace ElShrine.VisualTool
             LastSavedAllPages.ReplaceAll(AllPages.Select(m => m.Clone()));
             DataHandler.Write(AllPages);
             PageListChanged?.Invoke(true);
-            ListContentInfo($"Saved pages list with {LastSavedAllPages.Count} {"page".GetPural(LastSavedAllPages.Count)}.");
+            //LOG ListContentInfo($"Saved pages list with {LastSavedAllPages.Count} {"page".GetPural(LastSavedAllPages.Count)}.");
         }
         private void DiscardPagesListChanges()
         {

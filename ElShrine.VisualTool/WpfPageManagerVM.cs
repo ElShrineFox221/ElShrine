@@ -1,9 +1,7 @@
-﻿using ElShrine.EConsole;
-using ElShrine.Wpf;
+﻿using ElShrine.Wpf;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
-using static ElShrine.EConsole.ConsoleManager;
 using VMC = ElShrine.Wpf.VMCommand;
 
 namespace ElShrine.VisualTool
@@ -30,7 +28,7 @@ namespace ElShrine.VisualTool
         public static VMC Discard => new(parameter => WpfPageManager.Discard());
 
         #region VM props & methods
-        private void NoticeDirtyChanged() => NotifyPropertyChanged(nameof(IsDirty));
+        private void NoticeDirtyChanged() => NotifyPropertiesChanged(nameof(IsDirty));
         
         public void RefreshIndexes()
         {
@@ -93,14 +91,14 @@ namespace ElShrine.VisualTool
                         }
                         catch(Exception e)
                         {
-                            ListErrorInfo(e);
+                            //LOG ListErrorInfo(e);
                         }
                     }
                 }
-                NotifyPropertyChanged();
-                ListContentInfo($"Rebuild {EnabledModules.Count} tab {"item".GetPural(EnabledModules.Count)} with realoaded {"module".GetPural(EnabledModules.Count)}");
+                NotifyPropertiesChanged();
+                //LOG ListContentInfo($"Rebuild {EnabledModules.Count} tab {"item".GetPural(EnabledModules.Count)} with realoaded {"module".GetPural(EnabledModules.Count)}");
             }
-            else ListWarnInfo([GetWarningItem(), new(" Target tab controller is invalid.")]);
+            //LOG else ListWarnInfo([GetWarningItem(), new(" Target tab controller is invalid.")]);
         }
         #endregion
 

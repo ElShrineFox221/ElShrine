@@ -1,6 +1,6 @@
-﻿using ElShrine.Common.Interpreter;
-using ElShrine.Debug;
-using ElShrine.EConsole;
+﻿using ElShrine.Debug;
+using ElShrine.Modules;
+using ElShrine.VisualTool.Pages.Console;
 using ElShrine.Wpf;
 using ElShrine.Wpf.Controls;
 using System.Windows;
@@ -19,14 +19,11 @@ namespace ElShrine.VisualTool
             
             Loaded += (_, _) =>
             {
-                DebugConsoleProgram.Initilize();
+                Bootstrapper.ManualInitialize();
                 var mainWindow = EWindowViewModelBase.SetWindowViewModel<MainWindowViewModel>(this);
                 mainWindow.ModuleManager.TabsController = ModulesTabControl;
-                ConsoleManager.DefaultSub = true;
+
                 WpfPageManager.Refresh();
-                ConsoleManager.DefaultSub = false;
-                
-                ConsoleManager.SetController(new SystemConsoleController());
                 /*const string expr = "if(a==0)x = -test(0, 2, a) + b * (c / -d)";
                 var exprP = Interpreter.CreateInterpreter(new TokenRegistry(), new ParserRuleRegistry());
                 var exprNode = exprP.Parse(expr);

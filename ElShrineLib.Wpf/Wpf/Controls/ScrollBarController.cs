@@ -1,8 +1,28 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace ElShrine.Wpf.Controls
 {
+    [Flags]
+    public enum ScrollToEndMode
+    {
+        Disabled = 0,
+        EnabledFlag = 1,
+        AutoFlag = 2,
+        Auto = AutoFlag | EnabledFlag,
+        Always = EnabledFlag,
+        ToLeftOrTop = 4,
+        ToRightOrBottom = 8,
+        ToAll = ToLeftOrTop | ToRightOrBottom,
+
+        AutoToEnd = Auto | ToRightOrBottom,
+        AutoToStart = Auto | ToLeftOrTop,
+        AutoToAll = Auto | ToAll,
+        AlwaysToEnd = Always | ToRightOrBottom,
+        AlwaysToStart = Always | ToLeftOrTop,
+        AlwaysToAll = Always | ToAll,
+    }
     [GenerateDPCliDeclares(DefaultDPOwnerType = typeof(ScrollBarControllerProperties))]
     public interface IScrollBarControllerBase
     {
@@ -11,6 +31,8 @@ namespace ElShrine.Wpf.Controls
         ScrollBarVisibility HorizontalScrollBarVisibility { get; set; }
         Thickness VerticalScrollBarMargin { get; set; }
         Thickness HorizontalScrollBarMargin { get; set; }
+        ScrollToEndMode VerticalScrollToEnd { get; set;}
+        ScrollToEndMode HorizontalScrollToEnd { get; set;}
     }
     public static class ScrollBarControllerProperties
     {
@@ -53,6 +75,22 @@ namespace ElShrine.Wpf.Controls
             typeof(UIElement),
             new FrameworkPropertyMetadata(
                 defaultValue: new Thickness(0),
+                flags: FrameworkPropertyMetadataOptions.Inherits | FrameworkPropertyMetadataOptions.AffectsParentArrange | FrameworkPropertyMetadataOptions.AffectsMeasure
+        ));
+        public static readonly DependencyProperty VerticalScrollToEndProperty = DependencyProperty.RegisterAttached(
+            nameof(VerticalScrollToEndProperty).ToPropRegName(),
+            typeof(ScrollToEndMode),
+            typeof(UIElement),
+            new FrameworkPropertyMetadata(
+                defaultValue: ScrollToEndMode.Auto | ScrollToEndMode.ToRightOrBottom,
+                flags: FrameworkPropertyMetadataOptions.Inherits | FrameworkPropertyMetadataOptions.AffectsParentArrange | FrameworkPropertyMetadataOptions.AffectsMeasure
+        ));
+        public static readonly DependencyProperty HorizontalScrollToEndProperty = DependencyProperty.RegisterAttached(
+            nameof(HorizontalScrollToEndProperty).ToPropRegName(),
+            typeof(ScrollToEndMode),
+            typeof(UIElement),
+            new FrameworkPropertyMetadata(
+                defaultValue: ScrollToEndMode.Disabled,
                 flags: FrameworkPropertyMetadataOptions.Inherits | FrameworkPropertyMetadataOptions.AffectsParentArrange | FrameworkPropertyMetadataOptions.AffectsMeasure
         ));
         #endregion

@@ -34,9 +34,9 @@ namespace ElShrine.Modules
         public override IReadOnlyList<string> RelativeRoutedEventNames => relativeRoutedEventNames;
 
         private static readonly HashSet<string> registeredStateNames = [];
-        protected override bool Validate(Type target)
+        protected override bool ValidateType(Type typeToValidate)
         {
-            var names = Enum.GetNames(target);
+            var names = Enum.GetNames(typeToValidate);
             var suc = true;
             var failedName = string.Empty;
             foreach (var name in names)
@@ -48,7 +48,7 @@ namespace ElShrine.Modules
                     break;
                 }
             }
-            if (!suc) ValidateFailedReason = $"[StateGroup Error]: The state name({target.FullName}.{failedName}) already exists.";
+            if (!suc) ValidateFailedReason = $"[StateGroup Error]: The state name({typeToValidate.FullName}.{failedName}) already exists.";
             return suc;
         }
     }

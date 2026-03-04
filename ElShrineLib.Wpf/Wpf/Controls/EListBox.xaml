@@ -13,6 +13,7 @@
         <Setter Property="ItemMargin" Value="2"/>
         <Setter Property="VerticalScrollBarMargin" Value="0,0,0,3"/>
         <Setter Property="VerticalContentAlignment" Value="Top"/>
+        <Setter Property="HorizontalScrollBarMargin" Value="0,0,0,3"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="EBorderThickness" Value="1"/>
         <Setter Property="EBorderCornerRadius" Value="2"/>
@@ -31,9 +32,11 @@
                         <Border.OpacityMask>
                             <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EListBoxRoot}"/>
                         </Border.OpacityMask>
-                        <controls:EScrollViewer x:Name="contentContainer" Margin="{TemplateBinding Padding}"
+                        <controls:EScrollViewer x:Name="PART_ContentContainer" Margin="{TemplateBinding Padding}"
                                                 Focusable="false" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
                                                 CornerContent="{TemplateBinding CornerContent}" 
+                                                HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}"
+                                                VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}"
                                                 EBorderCornerRadius="{TemplateBinding BarSize, Converter={StaticResource CommonModifyConverter}, ConverterParameter=LTRB_L0.5}">
                             <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
                         </controls:EScrollViewer>

@@ -1,4 +1,4 @@
-﻿using ElShrine.EGraphic;
+﻿using ElShrine.Graphics;
 using System.Drawing;
 
 namespace ElShrine.VisualTool.ColorTransfer.Model
