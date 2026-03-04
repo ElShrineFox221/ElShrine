@@ -23,7 +23,7 @@ namespace ElShrine.VisualTool.Pages.Console
             BeginTimestampVM = new LineItemVM(LogItem.Normal(timestampText, isNewTimesteampLine ? LogItemStyle.Info : LogItemStyle.SubInfo));
             SourceScopeThreadIdVM = new LineItemVM(LogItem.Normal($"[T:{scopeAccessor.ThreadId:D3}]", LogItemStyle.NoticeCyan));
             //
-            BeginLineItems = [.. scopeAccessor.Info.Items.Select(i => new LineItemVM(i))];
+            BeginLineItems = [.. scopeAccessor.Info.LogItems.Select(i => new LineItemVM(i))];
             if (IsClosed) DoClose(this);
         }
         
@@ -69,7 +69,7 @@ namespace ElShrine.VisualTool.Pages.Console
                 TimeconsumesItemVM = new(LogItem.Normal($"->{consumedMillis}ms", LogItemStyle.SubInfo));
                 NotifyPropertiesChanged(nameof(TimeconsumesItemVM));
                 //
-                var scopePhVP = Parent.Model.GetScopeAccessor(endLine.BeginLineModel?.Id ?? long.MinValue);
+                var scopePhVP = Parent.Model.GetScope(endLine.BeginLineModel?.Id ?? long.MinValue);
                 if (scopePhVP is LogScopeAccessor scopePhV)
                 {
                     var item = scopePhV.Errors.Count > 0 ? LogItem.Normal($"[{"Error".GetPuralWithNum(scopePhV.Errors.Count)}]", LogItemStyle.Error) : LogItem.Normal("[Completed]", LogItemStyle.Success);

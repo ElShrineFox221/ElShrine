@@ -62,10 +62,10 @@ public static class Bootstrapper
         {
             session!.Error(ex);
         }
-        var snapShot = session!.GetCurrentScopeAccessor();
-        var items = snapShot.GetSummaryItems();
+        var scope = session!.GetCurrentScope();
+        var items = scope.GetSummaryItems();
         session.Log([..items, LogItem.Normal($"Modules initialized, {sw.GetStopwatchElapsed()}.")]);
-        if (snapShot.Errors.Count > 0) Exit();
+        if (scope.Errors.Count > 0) Exit();
     }
     static Bootstrapper() => ManualInitialize();
 
@@ -73,7 +73,7 @@ public static class Bootstrapper
     {
         var ins = (instances.GetOrAdd(typeof(TIns), k =>
         {
-            using var _ = session?.OpenScope($"Initializing {typeof(TIns).Name}...");
+            using var _ = session?.OpenScope(GetModuleInitializationContent(typeof(TIns)));
             return TIns.Initialize();
         }) as TIns)!;
         return ins;
@@ -83,12 +83,14 @@ public static class Bootstrapper
         if (!type.IsImplementOf(typeof(IInitializable<>))) return null;
         return instances.GetOrAdd(type, type =>
         {
-            using var _ = session?.OpenScope($"Initializing {type.Name}...");
+            using var _ = session?.OpenScope(GetModuleInitializationContent(type));
             var mi = type.GetMethod(nameof(IInitializable<>.Initialize), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             var ins = mi?.Invoke(null, []);
             return ins!;
         });
     }
+    private static LogItem[] GetModuleInitializationContent(Type type)
+        => [LogItem.Normal($"Initializing "), LogItem.Normal(type.Name, LogItemStyle.NoticeCyan), LogItem.Normal("...")];
 
     public static void Exit()
     {

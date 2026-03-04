@@ -14,7 +14,7 @@
 	  <DebugType>embedded</DebugType>
 
 	  <EmbedAllSources>true</EmbedAllSources>
-
+	  <GenerateDocumentationFile>false</GenerateDocumentationFile>
 	  <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 
 	  <StartupObject>ElShrine.Debug.DebugConsoleProgram</StartupObject>

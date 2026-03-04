@@ -18,12 +18,12 @@ public static class ModulesExtensions
     #region Normal
     public static void Log(this LogSession session, LogEntry entry)
         => session.LogEntry(entry);
-    public static void Log(this LogSession session, InlineInfo info)
+    public static void Log(this LogSession session, EntryContent info)
         => session.LogEntry(new InfoEntry(info));
     public static void Log(this LogSession session, string msg)
-        => session.Log((InlineInfo)msg);
+        => session.Log((EntryContent)msg);
     public static void Log(this LogSession session, params LogItem[] items)
-        => session.Log((InlineInfo)items);
+        => session.Log((EntryContent)items);
     #endregion
 
     #region Exception
@@ -39,9 +39,9 @@ public static class ModulesExtensions
 
     #region Scope
     public static LogItem[] GetSummaryItems(this LogSession session, EndConfiguration? config = null)
-        => session.GetCurrentScopeAccessor().GetSummaryItems(config);
+        => session.GetCurrentScope().GetSummaryItems(config);
     public static void ConfigEnd(this LogSession session, EndConfiguration? config = null)
-        => session.GetCurrentScopeAccessor().EndConfiguration = config;
+        => session.GetCurrentScope().EndConfig = config;
     public static void ConfigEnd(this LogSession session, string text, bool showSuc = true, bool showError = true)
         => session.ConfigEnd(new EndConfiguration(text, showSuc, showError));
     #endregion

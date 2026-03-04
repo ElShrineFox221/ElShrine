@@ -15,7 +15,7 @@ public class SystemConsoleLogger : ILogSessionListener
             PrintLine(entry);
     }
 
-    public void OnEntryAdded(LogScopeAccessor parentScopeAccessor, LogEntry entry)
+    public void OnEntryAdded(LogScope parentScope, LogEntry entry)
         => PrintLine(entry);
     private static void PrintLine(LogEntry entry)
     {
@@ -29,8 +29,8 @@ public class SystemConsoleLogger : ILogSessionListener
             }
             if (entry is InfoEntry info)
             {
-                var infos = info.GetInlineInfo();
-                foreach (var item in infos.Items)
+                var infos = info.Content;
+                foreach (var item in infos.LogItems)
                 {
                     PrintLogItem(item);
                 }
@@ -45,7 +45,7 @@ public class SystemConsoleLogger : ILogSessionListener
         Console.Write($"[{DateTimeOffset.FromUnixTimeMilliseconds(entry.Timestamp).LocalDateTime:HH:mm:ss.fff}] ");
         Console.ForegroundColor = ConsoleColor.DarkCyan;
         Console.Write($"[T:{entry.ThreadId:D3}] ");
-        var type = entry.GetEntryType();
+        var type = entry.EntryType;
         switch (type)
         {
             case "Error":
@@ -59,7 +59,7 @@ public class SystemConsoleLogger : ILogSessionListener
                 break;
             case "LogScope":
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write(" SYS ");
+                Console.Write(" BEG ");
                 break;
             case "Close":
             case "Shutdown":
@@ -67,8 +67,15 @@ public class SystemConsoleLogger : ILogSessionListener
                 Console.Write(" END ");
                 break;
             default: // Normal
+                if (entry.IsEndOfScope)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGreen;
+                    Console.Write(" END ");
+                    break;
+                }
                 Console.ForegroundColor = ConsoleColor.Gray;
                 Console.Write(" INF ");
+
                 break;
         }
         Console.ResetColor();
@@ -82,7 +89,7 @@ public class SystemConsoleLogger : ILogSessionListener
         var (fg, bg) = GetColors(item.Style, DrakMode);
         Console.ForegroundColor = fg;
         Console.BackgroundColor = bg;
-        Console.Write(item.Text);
+        Console.Write(item.ToString());
         Console.ResetColor();
     }
     private static (ConsoleColor Foreground, ConsoleColor Background) GetColors(LogItemStyle style, bool isDrak)

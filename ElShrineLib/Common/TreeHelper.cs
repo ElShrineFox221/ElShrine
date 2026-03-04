@@ -7,7 +7,7 @@ namespace ElShrine.Common
         #region State
         /// <summary>
         /// 获取当前节点的根节点（即没有父节点的祖先节点）。
-        /// 如果当前节点已经是根节点（Parent 为 null），则返回它自身。
+        /// 如果当前节点已经是根节点（ParentAccessor 为 null），则返回它自身。
         /// </summary>
         /// <typeparam name="TNode">实现 ITreeNode 的节点类型。</typeparam>
         /// <param name="node">当前节点。</param>
@@ -65,15 +65,15 @@ namespace ElShrine.Common
         /// 从当前节点（父/祖先）中移除指定的子节点（后代）。
         /// </summary>
         /// <remarks>
-        /// 移除操作通过将子节点的 Parent 属性设置为 null 来实现。
-        /// 实际从子节点集合中移除的逻辑必须由 TNode 的具体实现来保证（在 Parent 的设置器中）。
+        /// 移除操作通过将子节点的 ParentAccessor 属性设置为 null 来实现。
+        /// 实际从子节点集合中移除的逻辑必须由 TNode 的具体实现来保证（在 ParentAccessor 的设置器中）。
         /// </remarks>
         /// <typeparam name="TNode">实现 ITreeNode 的节点类型。</typeparam>
         /// <param name="node">当前父节点或祖先节点。</param>
         /// <param name="child">要移除的子节点或后代节点。</param>
         /// <param name="directlyOnly">
         /// 如果为 true，则只检查是否是直接子节点，如果不是则不会执行移除。
-        /// 如果为 false（默认），则检查是否是任意后代节点，只要是后代节点，即可通过设置 Parent = null 将其从旧父级移除。
+        /// 如果为 false（默认），则检查是否是任意后代节点，只要是后代节点，即可通过设置 ParentAccessor = null 将其从旧父级移除。
         /// 注意：如果移除的是非直接子节点，该方法只是断开了该子节点与其当前父节点的关系链。
         /// </param>
         /// <returns>如果子节点是当前节点的后代且成功断开链接，则返回 true；否则返回 false。</returns>
@@ -105,7 +105,7 @@ namespace ElShrine.Common
         /// </summary>
         /// <remarks>
         /// 遍历 GetChildren() 获得的子节点列表，并对每个子节点调用 Remove 方法。
-        /// 移除操作的实际执行依赖于 Remove 扩展方法和 TNode 内部 Parent 设置器的实现约定。
+        /// 移除操作的实际执行依赖于 Remove 扩展方法和 TNode 内部 ParentAccessor 设置器的实现约定。
         /// </remarks>
         /// <typeparam name="TNode">实现 ITreeNode 的节点类型。</typeparam>
         /// <param name="node">当前父节点。</param>
@@ -119,7 +119,7 @@ namespace ElShrine.Common
         /// </summary>
         /// <remarks>
         /// 此操作是原子的：如果子节点已经有父节点，会首先将其从旧父节点下移除。
-        /// 随后通过设置子节点的 Parent 属性来建立新的父子关系。
+        /// 随后通过设置子节点的 ParentAccessor 属性来建立新的父子关系。
         /// </remarks>
         /// <typeparam name="TNode">实现 ITreeNode 的节点类型。</typeparam>
         /// <param name="node">新的父节点。</param>

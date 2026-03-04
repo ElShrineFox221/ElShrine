@@ -2,16 +2,44 @@ using System.Collections.Concurrent;
 
 namespace ElShrine.Modules.Log;
 
+/// <summary>
+/// Exception thrown when the log scope nesting depth exceeds the defined <see cref="LogSession.MaxDepth"/>.
+/// </summary>
+/// <param name="max">The maximum allowed depth.</param>
+public class LogScopeTreeOverflowException(int max) : Exception($"Maximum scope depth reached: {max}");
+
+/// <summary>
+/// Represents a method that will handle the event when a new log entry is added to a session.
+/// </summary>
+/// <param name="session">The session where the update occurred.</param>
+/// <param name="parentScope">The scope that received the new entry.</param>
+/// <param name="newEntry">The log entry that was added.</param>
+public delegate void LogEntriesUpdatedHandler(LogSession session, LogScope parentScope, LogEntry newEntry);
+
+/// <summary>
+/// Manages a logging session, providing hierarchical scope management and entry dispatching.
+/// Uses <see cref="AsyncLocal{T}"/> to track the current scope across asynchronous execution flows.
+/// </summary>
 public sealed class LogSession : IDisposable
 {
+    /// <summary> Gets the unique name of this session. </summary>
     public readonly string SessionName;
+    /// <summary> Gets the unique numeric ID of this session. </summary>
     public readonly int SessionId;
+    /// <summary> Gets the maximum allowed nesting depth for scopes. </summary>
     public readonly int MaxDepth;
+
     private readonly AsyncLocal<LogScope> _currentScope;
     private readonly LogScope _rootScope;
     private readonly LogScopeAccessor _rootScopeAccessor;
     private readonly ConcurrentDictionary<long, LogScope> _scopes;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LogSession"/> class.
+    /// </summary>
+    /// <param name="sessionName">The display name of the session.</param>
+    /// <param name="sessionId">The unique ID for the session.</param>
+    /// <param name="maxDepth">The maximum scope depth (defaults to 255).</param>
     public LogSession(string sessionName, int sessionId, int maxDepth = 255)
     {
         SessionName = sessionName;
@@ -25,14 +53,24 @@ public sealed class LogSession : IDisposable
     }
 
     #region Operations
-    
+
+    /// <summary>
+    /// Gets the current active scope in the current async context, or the root scope if none is set.
+    /// </summary>
     private LogScope CurrentScope => _currentScope.Value ?? _rootScope;
 
-    public LogScopeAccessor? OpenScope(InlineInfo info, bool ignoreChildrenErrors = false)
+    /// <summary>
+    /// Opens a new nested log scope.
+    /// </summary>
+    /// <param name="info">The description content for the new scope.</param>
+    /// <param name="ignoreChildrenErrors">If true, errors from sub-scopes will not bubble up to this scope.</param>
+    /// <returns>A <see cref="LogScopeAccessor"/> to manage the new scope, or <c>null</c> if the max depth is reached.</returns>
+    public LogScopeAccessor? OpenScope(EntryContent info, bool ignoreChildrenErrors = false)
     {
         var scope = CurrentScope;
         if (scope.Depth > MaxDepth - 2)
         {
+            // Note: Assuming 'this.Error' is an extension method or part of the session's logging capability
             this.Error(new LogScopeTreeOverflowException(MaxDepth));
             return null;
         }
@@ -44,10 +82,16 @@ public sealed class LogSession : IDisposable
         return scopeAccessor;
     }
 
-    public LogScopeAccessor GetCurrentScopeAccessor() => new(CurrentScope);
-    public LogScopeAccessor? GetScopeAccessor(long id)
-        => _scopes.TryGetValue(id, out var scope) ? new LogScopeAccessor(scope) : null;
+    /// <summary> Gets the current active scope. </summary>
+    public LogScope GetCurrentScope() => CurrentScope;
 
+    /// <summary> Retrieves a specific scope by its ID. </summary>
+    public LogScope? GetScope(long id)
+        => _scopes.TryGetValue(id, out var scope) ? scope : null;
+
+    /// <summary>
+    /// Restores the current scope pointer to a parent scope. Used internally when a scope ends.
+    /// </summary>
     internal void RestoreScope(LogScope from, LogScope to)
     {
         if (CurrentScope == from) _currentScope.Value = to;
@@ -55,16 +99,30 @@ public sealed class LogSession : IDisposable
     #endregion
 
     #region Log
+    /// <summary> Occurs when a new entry is added to any scope within this session. </summary>
     internal event LogEntriesUpdatedHandler? SessionEntriesUpdated;
 
+    /// <summary>
+    /// Dispatches a log entry to the current active scope.
+    /// </summary>
+    /// <param name="entry">The entry to record.</param>
+    /// <returns><c>true</c> if the entry was successfully added; otherwise, <c>false</c>.</returns>
     public bool LogEntry(LogEntry entry)
     {
         var scope = CurrentScope;
         var r = scope.AddEntry(entry);
-        SessionEntriesUpdated?.Invoke(this, new(scope), entry);
+        SessionEntriesUpdated?.Invoke(this, scope, entry);
         return r;
     }
+
     #region Table
+    /// <summary>
+    /// Helper method to build a tabular data representation as an <see cref="InfoEntry"/>.
+    /// </summary>
+    /// <param name="title">The title log item for the table.</param>
+    /// <param name="entry">The output info entry containing the rendered table.</param>
+    /// <param name="extraPad">Additional padding spaces between columns.</param>
+    /// <param name="itemCols">A params array of column data, where each column is an array of <see cref="LogItem"/>.</param>
     public static void BuildTable(LogItem title, out InfoEntry? entry, int extraPad = 1, params LogItem[][] itemCols)
     {
         entry = null;
@@ -107,5 +165,8 @@ public sealed class LogSession : IDisposable
     #endregion
     #endregion
 
+    /// <summary>
+    /// Disposes the session by closing the root scope.
+    /// </summary>
     public void Dispose() => _rootScopeAccessor.Dispose();
 }

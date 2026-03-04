@@ -1,97 +1,119 @@
 ﻿namespace ElShrine.Modules.Log;
 
 /// <summary>
-/// 定义日志文本的颜色样式
+/// Defines the visual color styles for log text items.
 /// </summary>
 public enum LogItemStyle
 {
-    /// <summary> 默认信息（白色/常规） </summary>
+    /// <summary> Default information (typically white or standard text). </summary>
     Info,
-    /// <summary> 次要信息（灰色） </summary>
+    /// <summary> Secondary or auxiliary information (typically gray). </summary>
     SubInfo,
-    /// <summary> 警告（黄色） </summary>
+    /// <summary> Warning messages (typically yellow). </summary>
     Warning,
-    /// <summary> 错误（红色） </summary>
+    /// <summary> Error messages (typically red). </summary>
     Error,
-    /// <summary> 成功（绿色） </summary>
+    /// <summary> Success messages (typically green). </summary>
     Success,
-    /// <summary> 蓝色通知 </summary>
+    /// <summary> Blue notification style. </summary>
     NoticeBlue,
-    /// <summary> 紫色通知 </summary>
+    /// <summary> Purple notification style. </summary>
     NoticePurple,
-    /// <summary> 青色通知 </summary>
+    /// <summary> Cyan notification style. </summary>
     NoticeCyan,
-    /// <summary> 暗黄色通知 </summary>
+    /// <summary> Dark yellow notification style. </summary>
     NoticeDarkYellow,
-    /// <summary> 浅绿色通知 </summary>
+    /// <summary> Pale green notification style. </summary>
     NoticePaleGreen,
 }
 
 /// <summary>
-/// 定义日志文本的包装格式
+/// Defines the wrapping format or delimiters for log text.
 /// </summary>
 public enum LogItemFormat
 {
-    /// <summary> 纯文本: text </summary>
+    /// <summary> Plain text without any wrapping: text </summary>
     Normal = 0,
-    /// <summary> 方括号: [text] </summary>
+    /// <summary> Square brackets: [text] </summary>
     Header,
-    /// <summary> 圆括号: (text) </summary>
+    /// <summary> Parentheses: (text) </summary>
     Bracket,
-    /// <summary> 花括号: {text} </summary>
+    /// <summary> Curly braces: {text} </summary>
     BBracket,
-    /// <summary> 引号: "text" </summary>
+    /// <summary> Quotation marks: "text" </summary>
     Quote,
 }
 
 /// <summary>
-/// 表示一个日志条目单元，包含文本内容、样式、格式以及透明度状态
+/// Represents a single unit of a log entry, containing text content, style, format, and translucency state.
 /// </summary>
-/// <param name="Text">显示文本</param>
-/// <param name="Style">颜色样式</param>
-/// <param name="Format">包装格式</param>
-/// <param name="IsTranslucent">是否半透明显示</param>
+/// <param name="Text">The string content to be displayed.</param>
+/// <param name="Style">The color style used for rendering.</param>
+/// <param name="Format">The wrapping format used to enclose the text.</param>
+/// <param name="IsTranslucent">Indicates whether the item should be rendered with partial transparency.</param>
 public readonly record struct LogItem(string Text, LogItemStyle Style, LogItemFormat Format, bool IsTranslucent = false)
 {
     /// <summary>
-    /// 创建一个普通格式的日志条目
+    /// Creates a log item with no special formatting.
     /// </summary>
+    /// <param name="text">The log text.</param>
+    /// <param name="style">The color style. Defaults to <see cref="LogItemStyle.Info"/>.</param>
+    /// <param name="isTranslucent">Whether the text is translucent.</param>
+    /// <returns>A new <see cref="LogItem"/> with normal format.</returns>
     public static LogItem Normal(string text, LogItemStyle style = LogItemStyle.Info, bool isTranslucent = false)
         => new(text, style, LogItemFormat.Normal, isTranslucent);
 
     /// <summary>
-    /// 创建一个带方括号的标题条目: [text]
+    /// Creates a log item wrapped in square brackets: [text].
     /// </summary>
+    /// <param name="header">The header text.</param>
+    /// <param name="style">The color style.</param>
+    /// <param name="isTranslucent">Whether the text is translucent.</param>
+    /// <returns>A new <see cref="LogItem"/> with header format.</returns>
     public static LogItem Header(string header, LogItemStyle style = LogItemStyle.Info, bool isTranslucent = false)
         => new(header, style, LogItemFormat.Header, isTranslucent);
 
     /// <summary>
-    /// 创建一个带圆括号的条目: (text)
+    /// Creates a log item wrapped in parentheses: (text).
     /// </summary>
+    /// <param name="text">The log text.</param>
+    /// <param name="style">The color style.</param>
+    /// <param name="isTranslucent">Whether the text is translucent.</param>
+    /// <returns>A new <see cref="LogItem"/> with bracket format.</returns>
     public static LogItem Bracket(string text, LogItemStyle style = LogItemStyle.Info, bool isTranslucent = false)
         => new(text, style, LogItemFormat.Bracket, isTranslucent);
 
     /// <summary>
-    /// 创建一个带花括号的条目: {text}
+    /// Creates a log item wrapped in curly braces: {text}.
     /// </summary>
+    /// <param name="text">The log text.</param>
+    /// <param name="style">The color style.</param>
+    /// <param name="isTranslucent">Whether the text is translucent.</param>
+    /// <returns>A new <see cref="LogItem"/> with curly bracket format.</returns>
     public static LogItem CurlyBracket(string text, LogItemStyle style = LogItemStyle.Info, bool isTranslucent = false)
         => new(text, style, LogItemFormat.BBracket, isTranslucent);
 
     /// <summary>
-    /// 创建一个带引号的条目: "text"
+    /// Creates a log item wrapped in quotation marks: "text".
     /// </summary>
+    /// <param name="text">The log text.</param>
+    /// <param name="style">The color style.</param>
+    /// <param name="isTranslucent">Whether the text is translucent.</param>
+    /// <returns>A new <see cref="LogItem"/> with quote format.</returns>
     public static LogItem Quote(string text, LogItemStyle style = LogItemStyle.Info, bool isTranslucent = false)
         => new(text, style, LogItemFormat.Quote, isTranslucent);
 
     /// <summary>
-    /// 创建一个空内容的条目
+    /// Creates an empty log item with default settings.
     /// </summary>
+    /// <returns>An empty <see cref="LogItem"/>.</returns>
     public static LogItem Empty()
         => new(string.Empty, LogItemStyle.Info, LogItemFormat.Normal, false);
 
     /// <summary>
-    /// 根据定义的 <see cref="Format"/> 返回格式化后的字符串
+    /// Returns the formatted string based on the defined <see cref="Format"/>.
     /// </summary>
+    /// <returns>A string representation of the log item with its delimiters.</returns>
     public override string ToString()
     {
         return Format switch

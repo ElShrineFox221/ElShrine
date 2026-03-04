@@ -30,14 +30,6 @@
         }
         #endregion
 
-        #region String
-        public const char SPACE = ' ';
-        public const char COMMA = ',';
-        public const char DOT = '.';
-
-        
-        #endregion
-
         #region Numeric
         public static double StandardEase(double x)
             => (Math.Sin((x - 0.5f) * Math.PI) + 1f) / 2f;
