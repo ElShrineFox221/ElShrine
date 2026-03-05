@@ -9,14 +9,15 @@ public static class LogStructureRepairer
     {
         public LogEntryData Data = data;
         public List<ReconstructNode> Children = [];
-        public long? DurationMs { get; set; }
+        public long DurationMs { get; set; } = -1;
     }
-    public static void Reconstruct(string rawLogPath, string? outputPath = null)
+    private static readonly Comparison<ReconstructNode> _nodeComparer = static (a, b) => a.Data.Id.CompareTo(b.Data.Id);
+    public static void Reconstruct(string rawLogPath, string? outputPath = null, string? customTermination = null)
     {
         outputPath ??= rawLogPath.Replace(".raw.log", ".structured.log");
-        var nodes = new Dictionary<long, ReconstructNode>();
-        var nodesToStructure = new Dictionary<long, ReconstructNode>();
+        var allNodes = new Dictionary<long, ReconstructNode>();
         var roots = new List<ReconstructNode>();
+        var config = new LayoutConfig { TerminationText = customTermination ?? LayoutConfig.Default.TerminationText };
 
         using (var fs = new FileStream(rawLogPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         using (var sr = new StreamReader(fs))
@@ -27,60 +28,74 @@ public static class LogStructureRepairer
                 try
                 {
                     var data = JsonSerializer.Deserialize<LogEntryData>(line);
-                    if (data == null) continue;
-
+                    if (data is null) continue;
                     var node = new ReconstructNode(data);
-                    nodes[data.Id] = node;
-
-                    if (data.ParentId == 0) roots.Add(node);
-                    else if (nodes.TryGetValue(data.ParentId, out var parent)) parent.Children.Add(node);
-                    else nodesToStructure[data.Id] = node;
+                    allNodes[data.Id] = node;
                 }
                 catch { /* 自动跳过损坏的 JSON 行 */ }
             }
         }
-        if (roots.Count == 0)
+
+        foreach (var node in allNodes.Values)
         {
-            var minDepth = nodesToStructure.Values.Min(n => n.Data.Depth);
-            var selecteds = nodesToStructure.Values.Where(n => n.Data.Depth == minDepth).Select(n => n.Data.Id);
-            foreach (var entryId in selecteds)
+            if (node.Data.ParentId != 0 && allNodes.TryGetValue(node.Data.ParentId, out var parent))
+                parent.Children.Add(node);
+            else
+                roots.Add(node);
+        }
+        roots.Sort(_nodeComparer);
+        foreach (var node in allNodes.Values)
+        {
+            config.MaxTypeWidth = Math.Max(config.MaxTypeWidth, node.Data.Type.Length);
+            config.MaxThreadIdWidth = Math.Max(config.MaxThreadIdWidth, node.Data.ThreadId.ToString().Length);
+            if (node.Children.Count > 1)
+                node.Children.Sort(_nodeComparer);
+
+            if (node.Data.IsScope)
             {
-                roots.Add(nodes[entryId]);
-                nodesToStructure.Remove(entryId);
+                var endNode = node.Children.FirstOrDefault(c => c.Data.IsEndOfScope);
+                if (endNode != null)
+                {
+                    node.DurationMs = endNode.Data.Timestamp - node.Data.Timestamp;
+                    config.MaxDurWidth = Math.Max(config.MaxDurWidth, $"{node.DurationMs}ms".Length);
+                }
             }
         }
-
-        foreach (var node in nodes.Values.Where(n => n.Data.Type == nameof(LogScope)))
-        {
-            var endNode = node.Children.FirstOrDefault(c => c.Data.IsEndOfScope);
-            if (endNode != null)
-            {
-                node.DurationMs = endNode.Data.Timestamp - node.Data.Timestamp;
-            }
-        }
-
+        
         using var sw = new StreamWriter(outputPath, false, Encoding.UTF8);
         foreach (var root in roots)
         {
-            RenderNode(sw, root, 0);
+            RenderNode(sw, root, 0, config);
         }
     }
-    private static void RenderNode(StreamWriter sw, ReconstructNode node, int indentLevel)
+
+    private class LayoutConfig
+    {
+        public int MaxTypeWidth { get; set; } = 4;
+        public int MaxDurWidth { get; set; } = 4;
+        public int MaxThreadIdWidth { get; set; } = 3;
+        public string TerminationText { get; set; } = "[!] TERMINATED_OR_CRASHED";
+        public readonly static LayoutConfig Default = new();
+    }
+
+    private static void RenderNode(StreamWriter sw, ReconstructNode node, int indentLevel, LayoutConfig config)
     {
         var data = node.Data;
 
-        string timePart = DateTimeOffset.FromUnixTimeMilliseconds(data.Timestamp).ToLocalTime().ToString("HH:mm:ss.fff");
-        string typePart = data.Type.PadRight(12);
-        string durPart = node.DurationMs.HasValue ? $"{node.DurationMs.Value,7}ms" : new string(' ', 9);
+        var timePart = DateTimeOffset.FromUnixTimeMilliseconds(data.Timestamp).ToLocalTime().ToString(Const.FullTimeFormat);
+        var threadPart = $"[T:{data.ThreadId.ToString($"D{config.MaxThreadIdWidth}")}]";
+        var typePart = (data.IsEndOfScope ? "End" : data.Type).PadRight(config.MaxTypeWidth);
+        var durStr = node.DurationMs >= 0 ? $"{node.DurationMs}ms" : "";
+        var durPart = durStr.PadLeft(config.MaxDurWidth);
 
-        string header = $"[{timePart}] [{typePart}] [{durPart}] | ";
-        int headerWidth = header.Length;
+        var header = $"[{timePart}] {threadPart} [{typePart}] [{durPart}] | ";
+        var headerWidth = header.Length;
 
-        string indent = new(' ', indentLevel * 2);
-        string symbol = data.Type == "LogScope" ? "▼ " : (data.IsEndOfScope ? "└─ " : "├─ ");
-        int contentOffset = indent.Length + symbol.Length;
+        var indent = new string(' ', indentLevel * 2);
+        var symbol = data.Type == "LogScope" ? "▼ " : (data.IsEndOfScope ? "└─ " : "├─ ");
+        var contentOffset = indent.Length + symbol.Length;
 
-        string[] summaryLines = (data.Summary ?? "").Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
+        var summaryLines = (data.Summary ?? "").Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
 
         for (int i = 0; i < summaryLines.Length; i++)
         {
@@ -93,17 +108,14 @@ public static class LogStructureRepairer
                 sw.WriteLine(summaryLines[i]);
             }
         }
-        if (data.Type == nameof(LogScope))
+        if (data.IsScope)
         {
             var orderedChildren = node.Children.OrderBy(c => c.Data.Id).ToList();
             foreach (var child in orderedChildren)
-                RenderNode(sw, child, indentLevel + 1);
+                RenderNode(sw, child, indentLevel + 1, config);
 
             if (orderedChildren.Count > 0 && !orderedChildren.Any(c => c.Data.IsEndOfScope))
-            {
-                sw.Write(new string(' ', headerWidth));
-                sw.WriteLine($"{indent}  [!] TERMINATED_OR_CRASHED");
-            }
+                sw.WriteLine($"{new string(' ', headerWidth)}{indent}  {config.TerminationText}");
         }
     }
 }

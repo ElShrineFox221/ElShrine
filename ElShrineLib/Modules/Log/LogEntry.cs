@@ -64,7 +64,7 @@ public abstract class LogEntry : IEntryAccessor
     /// Gets the display name for the entry type. 
     /// The result is cached and has the "Entry" suffix removed (e.g., "InfoEntry" becomes "Info").
     /// </summary>
-    public string EntryType => field ??= GetEntryType(GetType());
+    public virtual string EntryType => field ??= GetEntryType(GetType());
 
     /// <inheritdoc/>
     public abstract EntryContent Content { get; }

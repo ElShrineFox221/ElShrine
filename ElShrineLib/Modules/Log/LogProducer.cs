@@ -6,6 +6,7 @@ using System.Threading.Channels;
 namespace ElShrine.Modules.Log;
 
 public delegate void LogEntriesUpdatedHandler(LogSession session, LogScope parentScope, LogEntry newEntry);
+public delegate void LogSessionCreatedHandler(LogSession session);
 /// <summary>
 /// The core engine of the logging module, responsible for session management, 
 /// asynchronous log dispatching, file persistence, and _listener coordination.
@@ -67,11 +68,14 @@ public sealed class LogProducer : IInitializable<LogProducer>, IDisposable
     /// <param name="name">The unique name of the session.</param>
     /// <returns>A <see cref="LogSession"/> instance.</returns>
     public LogSession GetOrCreateSession(string name)
-        => _sessions.GetOrAdd(name, name =>
+    {
+        var isNewSession = false;
+        var session = _sessions.GetOrAdd(name, name =>
         {
             var id = Interlocked.Increment(ref _nextSessionId);
             var ses = new LogSession(name, id);
-
+            SessionCreated?.Invoke(ses);
+            isNewSession = true;
             // Setup raw JSON log file persistence
             var path = Path.Combine(LogFullPath, $"{name}.raw.log");
             var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read, 4096, FileOptions.WriteThrough);
@@ -81,6 +85,11 @@ public sealed class LogProducer : IInitializable<LogProducer>, IDisposable
             ses.SessionEntriesUpdated += (ps, e) => OnEntryAdded(ses, ps, e);
             return ses;
         });
+        if (isNewSession)
+            SessionCreated?.Invoke(session);
+        return session;
+    }
+    public event LogSessionCreatedHandler? SessionCreated;
     #endregion
 
     #region Update Dispatching
@@ -145,8 +154,10 @@ public sealed class LogProducer : IInitializable<LogProducer>, IDisposable
         var data = new LogEntryData(
             entry.Id,
             scope.Id,
+            entry.ThreadId,
             entry.Depth,
             entry.Timestamp,
+            entry is LogScope,
             entry.IsEndOfScope,
             entry.EntryType,
             entry.GetSummary());

@@ -57,6 +57,9 @@ public sealed class LogScope : InfoEntry, IScopeAccessor
     /// <inheritdoc/>
     public LogSession Session { get; }
 
+    public const string ScopeEntryType = "Scope";
+    public override string EntryType => ScopeEntryType;
+
     private readonly ConcurrentQueue<LogEntry> _entries = new();
 
     /// <inheritdoc/>
