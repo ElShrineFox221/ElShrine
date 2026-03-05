@@ -9,12 +9,9 @@ namespace ElShrine.Modules.Log;
 public class LogScopeTreeOverflowException(int max) : Exception($"Maximum scope depth reached: {max}");
 
 /// <summary>
-/// Represents a method that will handle the event when a new log entry is added to a session.
+/// Encapsulates a method that handles entry updates within a specific session context.
 /// </summary>
-/// <param name="session">The session where the update occurred.</param>
-/// <param name="parentScope">The scope that received the new entry.</param>
-/// <param name="newEntry">The log entry that was added.</param>
-public delegate void LogEntriesUpdatedHandler(LogSession session, LogScope parentScope, LogEntry newEntry);
+public delegate void SessionEntriesUpdatedHandler(LogScope parentScope, LogEntry newEntry);
 
 /// <summary>
 /// Manages a logging session, providing hierarchical scope management and entry dispatching.
@@ -33,6 +30,9 @@ public sealed class LogSession : IDisposable
     private readonly LogScope _rootScope;
     private readonly LogScopeAccessor _rootScopeAccessor;
     private readonly ConcurrentDictionary<long, LogScope> _scopes;
+
+    /// <summary> Gets the root scope of this session. </summary>
+    public LogScope RootScope => _rootScope;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LogSession"/> class.
@@ -100,18 +100,18 @@ public sealed class LogSession : IDisposable
 
     #region Log
     /// <summary> Occurs when a new entry is added to any scope within this session. </summary>
-    internal event LogEntriesUpdatedHandler? SessionEntriesUpdated;
+    public event SessionEntriesUpdatedHandler? SessionEntriesUpdated;
 
     /// <summary>
-    /// Dispatches a log entry to the current active scope.
+    /// Records a log entry into the current active scope and triggers session-level updates.
     /// </summary>
-    /// <param name="entry">The entry to record.</param>
+    /// <param name="entry">The entry to be recorded.</param>
     /// <returns><c>true</c> if the entry was successfully added; otherwise, <c>false</c>.</returns>
     public bool LogEntry(LogEntry entry)
     {
         var scope = CurrentScope;
         var r = scope.AddEntry(entry);
-        SessionEntriesUpdated?.Invoke(this, scope, entry);
+        SessionEntriesUpdated?.Invoke(scope, entry);
         return r;
     }
 
