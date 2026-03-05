@@ -3,119 +3,129 @@ using ElShrine.Wpf;
 using System.Collections.ObjectModel;
 using System.Text;
 
-namespace ElShrine.VisualTool.Pages.Console
+namespace ElShrine.VisualTool.Pages.Console;
+
+public class EntryVM : ViewModelBase<IEntryAccessor>
 {
-    public class ScopeVM : ViewModelBase
+    public SessionVM Parent { get; init; }
+    public bool IsEndLine { get; init; }
+    public LineItemVM[] LineContent { get; init; }
+    public long Timestamp { get; init;}
+    public int ThreadId { get; init; }
+    public LineItemVM TimestampVM { get; init; }
+    public LineItemVM ThreadIdVM { get; init; }
+
+    public EntryVM(SessionVM session, IEntryAccessor accessor) : base(accessor)
     {
-        public ScopeVM(IEntryAccessor? sa, bool isNewTimesteampLine, SessionVM parent)
+        ConsoleVM.Instance.LineVMRefs.Add(new(this));
+        Parent = session;
+        IsEndLine = accessor.IsEndOfScope;
+        LineContent = [.. accessor.Content.LogItems.Select(i => new LineItemVM(i))];
+        Timestamp = accessor.Timestamp;
+        ThreadId = accessor.ThreadId;
+
+        var timestampText = DateTimeOffset.FromUnixTimeMilliseconds(Timestamp).ToLocalTime().ToString(Const.FullTimeFormat);
+        TimestampVM = new LineItemVM(LogItem.Normal(timestampText, LogItemStyle.Info));
+        ThreadIdVM = new LineItemVM(LogItem.Normal($"[T:{ThreadId:D3}]", LogItemStyle.NoticeCyan));
+    }
+
+    public virtual string ToTextInfo(int baseDepth = 0)
+    {
+        var sb = new StringBuilder();
+        var text = new string(' ', baseDepth * 3) + Model.Content.ToString();
+        if (!IsThreadIdVisible) text = ThreadIdVM.Text + text;
+        if (!IsTimestampVisible) text = TimestampVM.Text + text;
+        sb.AppendLine(text);
+        return sb.ToString();
+    }
+    protected static bool IsTimestampVisible => ConsoleVM.IsTimestampVisible;
+    protected static bool IsThreadIdVisible => ConsoleVM.IsThreadIdVisible;
+    protected static bool IsTimeconsumesVisible => ConsoleVM.IsTimeconsumesVisible;
+    protected static bool IsResultInfoVisible => ConsoleVM.IsResultInfoVisible;
+    protected override void NotifyPropertyChanged(object sender, string memberName)
+    {
+        base.NotifyPropertyChanged(sender, memberName);
+
+        switch (memberName)
         {
-            ConsoleVM.Instance.LineVMRefs.Add(new(this));
-            Parent = parent;
-            if (sa is not LogScopeAccessor scopeAccessor) return;
-            IsNewTimesteampLine = isNewTimesteampLine;
-            IsClosed = scopeAccessor.IsClosed;
-            IsAutoExpanded = !IsClosed;
-            BeginLineModel = scopeAccessor;
+            case nameof(LineItemVM.ForeColor):
+                foreach (var item in LineContent) item.NotifyPropertiesChanged(nameof(LineItemVM.ForeColor));
+                break;
+        }
+    }
+}
+
+public sealed class ScopeVM : EntryVM, IHandleChildAppend<EntryVM>
+{
+    public ScopeVM(SessionVM session, IScopeAccessor accessor) : base(session, accessor)
+    {
+        Model = accessor;
+        Parent = session;
+        IsClosed = accessor.IsClosed;
+        IsAutoExpanded = !IsClosed;
+        SubLines = [];
+        if (IsClosed) DoClose(this);
+    }
+
+    #region Scope Info
+    public new IScopeAccessor Model { get; }
+    public bool IsClosed { get; private set; }
+    public ObservableCollection<EntryVM> SubLines { get; }
+    public EntryVM? EndEntry { get; private set; }
+
+    public LineItemVM? TimeconsumesItemVM { get; private set; }
+    public LineItemVM? ResultItemVM { get; private set; }
+
+    public void AppendChild(EntryVM entry)
+    {
+        if (IsClosed) return;
+        if (entry.IsEndLine) DoClose(entry);
+        SubLines.Add(entry);
+    }
+    private void DoClose(EntryVM endEntry)
+    {
+        IsClosed = true;
+        EndEntry = endEntry;
+        if (this != endEntry)
+        {
+            var consumedMillis = endEntry.Timestamp - Timestamp;
+            TimeconsumesItemVM = new(LogItem.Normal($"->{consumedMillis}ms", LogItemStyle.SubInfo));
+            NotifyPropertiesChanged(nameof(TimeconsumesItemVM));
             //
-            BeginTimestamp = scopeAccessor.Timestamp;
-            SourceScopeThreadId = scopeAccessor.ThreadId;
-            var timestampText = DateTimeOffset.FromUnixTimeMilliseconds(scopeAccessor.Timestamp).ToLocalTime().ToString(Const.FullTimeFormat);
-            BeginTimestampVM = new LineItemVM(LogItem.Normal(timestampText, isNewTimesteampLine ? LogItemStyle.Info : LogItemStyle.SubInfo));
-            SourceScopeThreadIdVM = new LineItemVM(LogItem.Normal($"[T:{scopeAccessor.ThreadId:D3}]", LogItemStyle.NoticeCyan));
-            //
-            BeginLineItems = [.. scopeAccessor.Info.LogItems.Select(i => new LineItemVM(i))];
-            if (IsClosed) DoClose(this);
+            var item = Model.Errors.Count > 0 ? 
+                LogItem.Normal($"[{"Error".GetPuralWithNum(Model.Errors.Count)}]", LogItemStyle.Error) : 
+                LogItem.Normal("[Completed]", LogItemStyle.Success);
+            ResultItemVM = new(item);
+            NotifyPropertiesChanged(nameof(ResultItemVM));
         }
-        
+        NotifyPropertiesChanged(nameof(IsClosed));
+    }
+    #endregion
 
-        #region Main Info
-        public SessionVM Parent { get; init; }
-        public bool IsNewTimesteampLine { get; init; }
-        public bool IsClosed { get; protected set; }
-        public bool IsEndLine => BeginLineModel?.IsEndOfScope ?? false;
-        public bool IsAutoExpanded
+    #region User interface extend
+    public bool IsAutoExpanded
+    {
+        get => field;
+        set
         {
-            get => field;
-            set
+            if (field == value) return;
+            field = value;
+            foreach(var subLine in SubLines)
             {
-                if (field == value) return;
-                field = value;
-                foreach(var subLine in SubLines) subLine.IsAutoExpanded = value;
-                NotifyPropertiesChanged(nameof(IsAutoExpanded));
+                if (subLine is ScopeVM scopeVM) scopeVM.IsAutoExpanded = value;
             }
+            NotifyPropertiesChanged(nameof(IsAutoExpanded));
         }
+    }
+    #endregion
 
-        public LogScopeAccessor? BeginLineModel { get; init; }
-
-        public long BeginTimestamp { get; init; }
-        public int SourceScopeThreadId { get; init; }
-        public LineItemVM? BeginTimestampVM { get; init; }
-        public LineItemVM? SourceScopeThreadIdVM { get; init; }
-        public LineItemVM[] BeginLineItems { get; init; } = [];
-
-        public void AppendLine(ScopeVM line)
+    public sealed override string ToTextInfo(int baseDepth)
+    {
+        var thisText = base.ToTextInfo(baseDepth);
+        foreach (var item in SubLines)
         {
-            if (IsClosed) return;
-            if (line.IsEndLine) DoClose(line);
-            SubLines.Add(line);
+            thisText += item.ToTextInfo(baseDepth + 1);
         }
-        private void DoClose(ScopeVM endLine)
-        {
-            IsClosed = true;
-            //EndLineModel = endLine.BeginLineModel;
-            if(this != endLine)
-            {
-                var consumedMillis = endLine.BeginTimestamp - BeginTimestamp;
-                TimeconsumesItemVM = new(LogItem.Normal($"->{consumedMillis}ms", LogItemStyle.SubInfo));
-                NotifyPropertiesChanged(nameof(TimeconsumesItemVM));
-                //
-                var scopePhVP = Parent.Model.GetScope(endLine.BeginLineModel?.Id ?? long.MinValue);
-                if (scopePhVP is LogScopeAccessor scopePhV)
-                {
-                    var item = scopePhV.Errors.Count > 0 ? LogItem.Normal($"[{"Error".GetPuralWithNum(scopePhV.Errors.Count)}]", LogItemStyle.Error) : LogItem.Normal("[Completed]", LogItemStyle.Success);
-                    ResultItemVM = new(item);
-                    NotifyPropertiesChanged(nameof(ResultItemVM));
-                }
-            }
-            NotifyPropertiesChanged(nameof(IsClosed));
-        }
-        #endregion
-
-        #region End Info
-        public LogEntry? EndLineModel { get; protected set; }
-
-        public LineItemVM? TimeconsumesItemVM { get; protected set; }
-        public LineItemVM? ResultItemVM { get; protected set; } 
-        #endregion
-
-        #region Sub Lines
-        public ObservableCollection<ScopeVM> SubLines { get; } = [];
-        #endregion
-
-        public string ToTextInfo()
-        {
-            var sb = new StringBuilder();
-            var text = new string(' ', (BeginLineModel?.Depth ?? 0) * 3) + BeginLineModel?.Info.ToString();
-            if (!IsThreadIdVisible) text = SourceScopeThreadIdVM?.Text + text;
-            if (!IsTimestampVisible) text = BeginTimestampVM?.Text + text;
-            sb.AppendLine(text);
-            foreach (var item in SubLines) sb.AppendLine(item.ToTextInfo());
-            return sb.ToString();
-        }
-        private static bool IsTimestampVisible => ConsoleVM.IsTimestampVisible;
-        private static bool IsThreadIdVisible => ConsoleVM.IsThreadIdVisible;
-        private static bool IsTimeconsumesVisible => ConsoleVM.IsTimeconsumesVisible;
-        private static bool IsResultInfoVisible => ConsoleVM.IsResultInfoVisible;
-        protected override void NotifyPropertyChanged(object sender, string memberName)
-        {
-            base.NotifyPropertyChanged(sender, memberName);
-            
-            switch (memberName)
-            {
-                case nameof(LineItemVM.ForeColor):
-                    foreach (var item in BeginLineItems) item.NotifyPropertiesChanged(nameof(LineItemVM.ForeColor));
-                    break;
-            }
-        }
+        return thisText;
     }
 }
