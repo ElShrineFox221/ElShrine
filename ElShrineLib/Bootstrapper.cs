@@ -1,4 +1,5 @@
-﻿using ElShrine.Modules;
+﻿using ElShrine.Commands;
+using ElShrine.Modules;
 using ElShrine.Modules.Log;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -98,6 +99,7 @@ public static class Bootstrapper
         {
             if(instance is IDisposable ins) ins.Dispose();
         }
+        LogCommands.Reconstruct();
         Environment.Exit(0);
     }
 }

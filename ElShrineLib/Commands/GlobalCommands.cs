@@ -10,7 +10,8 @@ namespace ElShrine.Commands;
 [CommandCarrier]
 public static class GlobalCommands
 {
-    private static LogSession Session => LogProducer.Instance.CoreSession;
+    private static LogProducer Log => field ??= LogProducer.Instance;
+    private static LogSession Session => field ??= LogProducer.Instance.CoreSession;
     private static void AddColsRow<T>(List<T>[] cols, Func<T> defaultFactory, params T?[] rowItems)
     {
         for (var i = 0; i < cols.Length; i++)
@@ -90,20 +91,23 @@ public static class GlobalCommands
 
     #region Exit
     [Command]
-    public async static Task Exit(bool force)
+    public static void Exit(bool force)
     {
         if (!force)
         {
             Session.Warning(new ProcessException("The process will be closed in 3 seconds if there are no more waiting tasks."));
-            await Task.Delay(3000);
-        }
-        while (true)
-        {
-            //LOG if (!force && !Session.NoLinesToConsume) await Task.Yield();
-            Bootstrapper.Exit();
+            Task.Run(async () =>
+            {
+                await Task.Delay(3000);
+                while (true)
+                {
+                    if (!force && !Log.UpdateTemporaryCompleted) await Task.Yield();
+                    Bootstrapper.Exit();
+                }
+            });
         }
     }
-    [Command] public async static Task Exit() => await Exit(false);
+    [Command] public static void Exit() => Exit(false);
     #endregion
 
     [Command]
