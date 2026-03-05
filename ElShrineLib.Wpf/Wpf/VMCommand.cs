@@ -27,7 +27,7 @@ namespace ElShrine.Wpf
                 RunningTask = task;
                 task.ContinueWith(t =>
                 {
-                    //LOG if (t.Exception is not null) EConsole.ConsoleManager.ListErrorInfo(t.Exception);
+                    if (t.Exception is not null) WpfLog.UISession.Error(t.Exception); ;
                     if (synchronizationContext != null) synchronizationContext.Post(_ => RunningTask = null, null);
                     else RunningTask = null;
                 }, TaskScheduler.Default);
@@ -68,23 +68,23 @@ namespace ElShrine.Wpf
             Task? runningTask = null;
             dispatcher.Invoke(() =>
             {
-                //LOG ListContentInfo("Execute action on ui dispatcher");
+                WpfLog.UISession.Log("Execute action on ui dispatcher");
                 Execute(parameter);
                 runningTask = RunningTask;
             });
             if (runningTask is not null)
             {
-                //LOG ListContentInfo("Async action will blocks the thread...");
+                WpfLog.UISession.Log("Async action will blocks the thread...");
                 try
                 {
                     runningTask.Wait();
                 }
                 finally
                 {
-                    //LOG ListContentInfo("Async action completed.");
+                    WpfLog.UISession.Log("Async action completed.");
                 }
             }
-            //LOG else ListContentInfo("Sync action wont blocks the thread.");
+            else WpfLog.UISession.Log("Sync action wont blocks the thread.");
         }
 
         public Action<object?>? ExecuteAction { get; init; }
