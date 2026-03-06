@@ -19,10 +19,4 @@
     <ProjectReference Include="..\ElShrineLib.Wpf\ElShrineLib.Wpf.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="ElShrineLib.Wpf.Generators.Attributes">
-      <HintPath>..\ElShrine.Wpf.Generators\bin\Release\netstandard2.0\ElShrineLib.Wpf.Generators.Attributes.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

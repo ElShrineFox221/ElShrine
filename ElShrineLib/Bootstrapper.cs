@@ -122,3 +122,146 @@ public sealed class InitializationInfoAttribute : ValidatableClassAttribute
         return suc;
     }
 }
+
+
+public interface IModuleRegister
+{
+    void RegisterModule<TService, TImplementation>(TImplementation? instance = null)
+        where TImplementation : class, TService
+        where TService : notnull;
+}
+public static class MBootstrapper
+{
+    private sealed class ModuleServiceBuilder : IServiceProvider, IModuleRegister
+    {
+        private readonly ConcurrentDictionary<Type, object> _instancesCached = [];
+        private readonly ConcurrentDictionary<Type, Type> _servicesRegistered = [];
+        public static ModuleServiceBuilder Build(Action<IModuleRegister>? builderConfig = null)
+        {
+            var builder = new ModuleServiceBuilder();
+            builder.RegisterDefaultModules();
+            builderConfig?.Invoke(builder);
+            return builder;
+        }
+        private void RegisterDefaultModules()
+        {
+            throw new NotImplementedException();
+        }
+
+        #region IServiceProvider implementations
+        public object? GetService(Type serviceType)
+        {
+            if (_instancesCached.TryGetValue(serviceType, out var instance))
+                return instance;
+            if (!_servicesRegistered.TryGetValue(serviceType, out var registeredType))
+                return null;
+            instance = CreateInstance(registeredType);
+            if (instance is not null)
+                _instancesCached.TryAdd(serviceType, instance);
+            return instance;
+        }
+        private object? CreateInstance(Type type)
+        {
+            var resolvingStack = new Stack<Type>();
+            return CreateInstanceInternal(type, resolvingStack);
+        }
+        private object? CreateInstanceInternal(Type type, Stack<Type> resolvingStack)
+        {
+            resolvingStack.Push(type);
+            try
+            {
+                var constructors = type.GetConstructors().OrderByDescending(c => c.GetParameters().Length);
+                foreach (var ctor in constructors)
+                {
+                    var parameters = ctor.GetParameters();
+                    var args = new object?[parameters.Length];
+                    bool canConstruct = true;
+                    for (int i = 0; i < parameters.Length; i++)
+                    {
+                        var parameter = parameters[i];
+                        if (parameter.HasDefaultValue)
+                        {
+                            args[i] = parameter.DefaultValue;
+                            continue;
+                        }
+                        var paramType = parameters[i].ParameterType;
+                        args[i] = ResolveType(paramType, resolvingStack);
+                        if (args[i] == null && !parameters[i].IsOptional)
+                        {
+                            canConstruct = false;
+                            break;
+                        }
+                    }
+
+                    if (canConstruct)
+                    {
+                        // 尝试创建实例
+                        try
+                        {
+                            return ctor.Invoke(args);
+                        }
+                        catch
+                        {
+                            // 构造失败，继续尝试下一个构造函数
+                            continue;
+                        }
+                    }
+                }
+                // 所有构造函数均无法解析
+                return null;
+            }
+            finally
+            {
+                resolvingStack.Pop();
+            }
+            object? ResolveType(Type type, Stack<Type> resolvingStack)
+            {
+                if (_instancesCached.TryGetValue(type, out var instance))
+                    return instance;
+                if (!_servicesRegistered.TryGetValue(type, out var implementationType))
+                    return null; // 未注册
+                if (resolvingStack.Contains(implementationType))
+                    throw new InvalidOperationException($"Circular dependency detected for type '{implementationType.Name}'.");
+                instance = CreateInstanceInternal(implementationType, resolvingStack);
+                if (instance is not null)
+                    _instancesCached.TryAdd(type, instance);
+                return instance;
+            }
+        }
+        #endregion
+
+        #region IModuleRegister implementations
+        public void RegisterModule<TService, TImplementation>(TImplementation? instance = null)
+            where TImplementation : class, TService
+            where TService : notnull
+        {
+            var serviceType = typeof(TService);
+            _instancesCached.Remove(serviceType, out _);
+            if (instance is null)
+            {
+                var implementationType = typeof(TImplementation);
+                if(implementationType.IsAbstract)
+                    throw new InvalidOperationException($"Cannot register abstract type {implementationType.Name}.");
+                _servicesRegistered[serviceType] = implementationType;
+            }
+            else
+                _instancesCached[serviceType] = instance;
+        }
+        #endregion
+    }
+
+    private static IServiceProvider? _serviceProvider;
+
+    public static void Initialize(Action<IModuleRegister>? builderConfig = null)
+        => _serviceProvider ??= ModuleServiceBuilder.Build(builderConfig);
+    public static void Initialize(IServiceProvider externalProvider)
+        => _serviceProvider ??= externalProvider;
+
+    public static TService Resolve<TService>() where TService : class
+    {
+        if (_serviceProvider is null) Initialize();
+        var service = _serviceProvider?.GetService(typeof(TService));
+        return service as TService 
+            ?? throw new InvalidOperationException($"Service {typeof(TService).Name} not registered or failed resolve in service provider {_serviceProvider}.");
+    }
+}
