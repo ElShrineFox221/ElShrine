@@ -30,24 +30,20 @@ public sealed class CommandItem : ICataItem
     public object? OwnerInstance { get; init; }
 }
 
-
-[InitializationInfo(PreInstantiate = true, Priority = Bootstrapper.PRIO_COMMANDS)]
-public sealed class CommandsManager : IInitializable<CommandsManager>
+public sealed class CommandsManager
 {
-    #region Singleton
-    private static readonly Lazy<CommandsManager> instanceLazy = new(() => new());
-    public static CommandsManager Instance => Bootstrapper.GetInstance<CommandsManager>();
-    public static CommandsManager Initialize() => instanceLazy.Value;
-    #endregion
-
     public const string GlobalCommandCarrierName = "Global";
-    private static LogSession Session => LogProducer.Instance.CoreSession;
-    private CommandsManager()
+
+    private readonly ClassesManager _cm;
+    private readonly ILogger _logger;
+    public CommandsManager(ClassesManager cm, ILoggerManager log)
     {
+        _cm = cm;
+        _logger = log.Main;
         //Register a recollecting delegate
-        ClassesManager.Instance.AssembliesUpdated += RecollectCommands;
+        _cm.AssembliesUpdated += RecollectCommands;
         //Instant recollect
-        RecollectCommands([.. ClassesManager.Instance.Assemblies]);
+        RecollectCommands([.. _cm.Assemblies]);
     }
 
     private readonly List<CommandItem> commands = [];
@@ -55,9 +51,9 @@ public sealed class CommandsManager : IInitializable<CommandsManager>
     private CataItemIndexer<CommandItem> commandQueryIndex = new([]);
     private void RecollectCommands(Assembly[] range)
     {
-        using var _ = Session.OpenScope("Recollecting commands...");
-        var discoveredClasses = ClassesManager.Instance.GetClassesByAttribute<CommandCarrierAttribute>(inherit: false, range);
-        Session.Log($"{GetCommandCarrierText(discoveredClasses.Count())} found.");
+        using var _ = _logger.OpenScope("Recollecting commands...");
+        var discoveredClasses = _cm.GetClassesByAttribute<CommandCarrierAttribute>(inherit: false, range);
+        _logger.Log($"{GetCommandCarrierText(discoveredClasses.Count())} found.");
         foreach (var (carrierClass, carrierClassAttrs) in discoveredClasses)
         {
             if (!commandCarrierClasses.Contains(carrierClass)) commandCarrierClasses.Add(carrierClass);
@@ -87,10 +83,10 @@ public sealed class CommandsManager : IInitializable<CommandsManager>
                 commands.Add(ci);
             }
         }
-        Session.Log($"Recollected {GetCommandAllText()}.");
+        _logger.Log($"Recollected {GetCommandAllText()}.");
         commandQueryIndex = new(commands);
-        Session.Log($"Rebuilt commands indexes.");
-        Session.ConfigEnd($"Successfully recollected commands.");
+        _logger.Log($"Rebuilt commands indexes.");
+        _logger.ConfigEnd($"Successfully recollected commands.");
     }
 
     public static string GetCommandCarrierText(int count) => $"{"command carrier".GetPuralWithNum(count)}";

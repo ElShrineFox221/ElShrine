@@ -8,14 +8,7 @@ public class SystemConsoleLogger : ILogSessionListener
     private const bool DrakMode = true;
     private static readonly object _consoleLock = new();
 
-    public void InitializeEntries(IReadOnlyDictionary<long, LogEntry> entriesExist)
-    {
-        var l = entriesExist.Select(kv => kv.Value).OrderBy(e => e.Timestamp);
-        foreach (var entry in l)
-            PrintLine(entry);
-    }
-
-    public void OnEntryAdded(LogScope parentScope, LogEntry entry)
+    public void OnEntryAdded(LogScopeAccessor parentScope, LogEntry entry)
         => PrintLine(entry);
     private static void PrintLine(LogEntry entry)
     {

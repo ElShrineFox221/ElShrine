@@ -1,32 +1,18 @@
 using System.Collections.Concurrent;
-using System.Text;
-using System.Text.Json;
 using System.Threading.Channels;
 
 namespace ElShrine.Modules.Log;
 
-public delegate void LogEntriesUpdatedHandler(LogSession session, LogScope parentScope, LogEntry newEntry);
-public delegate void LogSessionCreatedHandler(LogSession session);
-/// <summary>
-/// The core engine of the logging module, responsible for session management, 
-/// asynchronous log dispatching, file persistence, and _listener coordination.
-/// </summary>
-[InitializationInfo(PreInstantiate = true, Priority = Bootstrapper.PRIO_LOGPRODUCER)]
-public sealed class LogProducer : IInitializable<LogProducer>, IDisposable
+public sealed class LogProducer : ILoggerManager, IDisposable
 {
-    #region Singleton
-    private readonly static Lazy<LogProducer> instanceLazy = new(() => new());
-
-    /// <summary> Gets the singleton instance of the <see cref="LogProducer"/> via the Bootstrapper. </summary>
-    public static LogProducer Instance => Bootstrapper.GetInstance<LogProducer>();
-
-    /// <summary> Initializes the singleton instance. </summary>
-    /// <returns>The initialized <see cref="LogProducer"/> instance.</returns>
-    public static LogProducer Initialize() => instanceLazy.Value;
+    #region Services
+    private readonly ILogWriter _writer;
     #endregion
 
-    private LogProducer()
+    public LogProducer(ILogWriter writer)
     {
+        _writer = writer;
+
         // Initialize the asynchronous dispatch channel (Single consumer, unbounded)
         _dispatchChannel = Channel.CreateUnbounded<DispatchTask>(new UnboundedChannelOptions
         {
@@ -35,72 +21,57 @@ public sealed class LogProducer : IInitializable<LogProducer>, IDisposable
         });
         Task.Run(StartDispatchLoop);
 
-        // Path setup: App/Logs/Log[timestamp]/
-        LogBasePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs");
-        LogPath = $"Log[{Bootstrapper.InitializeTimeText}]";
-        LogFullPath = Path.Combine(LogBasePath, LogPath);
-        Directory.CreateDirectory(LogFullPath);
+        
 
         // Create the default core session
-        CoreSession = GetOrCreateSession(nameof(CoreSession));
+        Main = GetOrCreateLogger(nameof(Main));
     }
 
     #region Sessions Management
     private int _nextSessionId = 0;
     private readonly ConcurrentDictionary<string, LogSession> _sessions = new();
-    private readonly ConcurrentDictionary<int, StreamWriter> _writers = new();
 
     /// <summary> Gets the default core logging session. </summary>
-    public LogSession CoreSession { get; init; }
-
-    /// <summary> Gets the base directory path for all logs. </summary>
-    public string LogBasePath { get; init; }
-
-    /// <summary> Gets the relative folder name for the current execution's logs. </summary>
-    public string LogPath { get; init; }
-
-    /// <summary> Gets the absolute path where log files are stored. </summary>
-    public string LogFullPath { get; init; }
+    public ILogger Main { get; init; }
 
     /// <summary>
     /// Retrieves an existing session by name or creates a new one, initializing its file writer.
     /// </summary>
     /// <param name="name">The unique name of the session.</param>
     /// <returns>A <see cref="LogSession"/> instance.</returns>
-    public LogSession GetOrCreateSession(string name)
+    public ILogger GetOrCreateLogger(string name)
     {
         var isNewSession = false;
         var session = _sessions.GetOrAdd(name, name =>
         {
             var id = Interlocked.Increment(ref _nextSessionId);
             var ses = new LogSession(name, id);
-            SessionCreated?.Invoke(ses);
+            LoggerCreated?.Invoke(ses);
             isNewSession = true;
-            // Setup raw JSON log file persistence
-            var path = Path.Combine(LogFullPath, $"{name}.raw.log");
-            var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read, 4096, FileOptions.WriteThrough);
-            var _writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
-
-            _writers[id] = _writer;
-            ses.SessionEntriesUpdated += (ps, e) => OnEntryAdded(ses, ps, e);
+            
+            ses.SessionEntriesUpdated += (ps, e) =>
+            {
+                _dispatchChannel.Writer.TryWrite(new DispatchTask(ses, ps, e));
+                _writer.OnEntryAdded(ses, ps, e);
+            };
             return ses;
         });
         if (isNewSession)
-            SessionCreated?.Invoke(session);
+            LoggerCreated?.Invoke(session);
         return session;
     }
-    public event LogSessionCreatedHandler? SessionCreated;
+    public event LoggerCreatedHandler? LoggerCreated;
     #endregion
 
     #region Update Dispatching
     /// <summary> Represents a unit of work for the background dispatch loop. </summary>
-    private record DispatchTask(LogSession Session, LogScope Scope, LogEntry Entry);
+    private record DispatchTask(LogSession Session, LogScopeAccessor ScopeAccessor, LogEntry Entry);
 
     private readonly Channel<DispatchTask> _dispatchChannel;
     private readonly CancellationTokenSource _cts = new();
 
     /// <summary> Gets a value indicating whether all pending log updates have been processed. </summary>
-    public bool UpdateTemporaryCompleted { get; private set; }
+    public bool TemporarilyNoEntriesToUpdate { get; private set; }
 
     /// <summary>
     /// Background loop that consumes the dispatch channel and notifies listeners.
@@ -116,7 +87,7 @@ public sealed class LogProducer : IInitializable<LogProducer>, IDisposable
                 lock (_listeners)
                 {
                     foreach (var listener in _listeners)
-                        listener.Key.OnEntryAdded(task.Session, task.Scope, task.Entry);
+                        listener.Key.OnEntryAdded(task.Session, task.ScopeAccessor, task.Entry);
                 }
 
                 // Notify session-specific listeners
@@ -124,61 +95,29 @@ public sealed class LogProducer : IInitializable<LogProducer>, IDisposable
                 {
                     if (_sessionListenerMap.TryGetValue(task.Session, out var listener))
                     {
-                        listener.OnEntryAdded(task.Scope, task.Entry);
+                        listener.OnEntryAdded(task.ScopeAccessor, task.Entry);
                     }
                 }
 
                 // Trigger the general update event
-                EntriesUpdated?.Invoke(task.Session, task.Scope, task.Entry);
+                LogEntryAdded?.Invoke(task.Session, task.ScopeAccessor, task.Entry);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Log dispatch error: {ex.Message}");
             }
         }
-        UpdateTemporaryCompleted = reader.Count == 0;
+        TemporarilyNoEntriesToUpdate = reader.Count == 0;
     }
     #endregion
 
-    #region Entries Update Management
+    #region Listeners reg & unreg
     /// <summary> Occurs when a log scopeEntry has been processed and dispatched. </summary>
-    public event LogEntriesUpdatedHandler? EntriesUpdated;
-
-    /// <summary>
-    /// Callback triggered by <see cref="LogSession"/> when a new scopeEntry is added. 
-    /// Handles JSON serialization, file writing, and enqueues the dispatch task.
-    /// </summary>
-    private void OnEntryAdded(LogSession session, LogScope scope, LogEntry entry)
-    {
-        // Prepare metadata for raw logging
-        var data = new LogEntryData(
-            entry.Id,
-            scope.Id,
-            entry.ThreadId,
-            entry.Depth,
-            entry.Timestamp,
-            entry is LogScope,
-            entry.IsEndOfScope,
-            entry.EntryType,
-            entry.GetSummary());
-
-        var json = JsonSerializer.Serialize(data);
-        if (_writers.TryGetValue(scope.Session.SessionId, out var writer))
-        {
-            lock (writer)
-            {
-                writer.WriteLine(json);
-            }
-        }
-
-        // Queue for asynchronous _listener notification
-        _dispatchChannel.Writer.TryWrite(new DispatchTask(session, scope, entry));
-    }
-
+    public event LogEntryAddedHandler? LogEntryAdded;
     #region Stream Listener
     private readonly ConcurrentDictionary<ILogListener, IDisposable> _listeners = [];
     private readonly ConcurrentDictionary<ILogSessionListener, IDisposable> _sessionListeners = [];
-    private readonly ConcurrentDictionary<LogSession, ILogSessionListener> _sessionListenerMap = [];
+    private readonly ConcurrentDictionary<ILogger, ILogSessionListener> _sessionListenerMap = [];
     private sealed class DispoableObject(Action action) : IDisposable
     {
         public void Dispose()
@@ -189,20 +128,20 @@ public sealed class LogProducer : IInitializable<LogProducer>, IDisposable
     /// The listener will only receive new entries added after the registration completes.
     /// </summary>
     /// <returns>An <see cref="IDisposable"/> that unregisters the listener when disposed.</returns>
-    public IDisposable RegisterListener(ILogListener listener)
+    public IDisposable RegisterListener(ILogListener globalListener)
     {
         lock (_listeners)
         {
-            if (!_listeners.TryGetValue(listener, out var reg))
+            if (!_listeners.TryGetValue(globalListener, out var reg))
             {
                 var dobj = new DispoableObject(() =>
                 {
                     lock (_listeners)
                     {
-                        _listeners.Remove(listener, out _);
+                        _listeners.Remove(globalListener, out _);
                     }
                 });
-                _listeners[listener] = reg = dobj;
+                _listeners[globalListener] = reg = dobj;
             }
             return reg;  
         }
@@ -211,45 +150,35 @@ public sealed class LogProducer : IInitializable<LogProducer>, IDisposable
     /// Removes a stateless global listener and stops further notifications.
     /// </summary>
     /// <returns><c>true</c> if successfully unregistered; otherwise, <c>false</c>.</returns>
-    public bool UnregisterListener(ILogListener listener)
-    {
-        lock (_listeners)
-        {
-            if (_listeners.Remove(listener, out var reg))
-            {
-                reg.Dispose();
-                return true;
-            }
-            return false;
-        }
-    }
+    public bool UnregisterListener(ILogListener globalListener)
+        => UnregisterListenerInternal(globalListener);
 
     /// <summary>
     /// Registers a stateless listener for a specific session.
     /// </summary>
     /// <returns>An <see cref="IDisposable"/> that unregisters the listener when disposed.</returns>
-    public IDisposable RegisterListener(LogSession session, ILogSessionListener listener)
+    public IDisposable RegisterListener(ILogger session, ILogSessionListener sessionListener)
     {
         lock (_sessionListeners)
         {
-            if (!_sessionListeners.TryGetValue(listener, out var reg))
+            if (!_sessionListeners.TryGetValue(sessionListener, out var reg))
             {
                 lock (_sessionListenerMap)
                 {
-                    _sessionListenerMap[session] = listener;
+                    _sessionListenerMap[session] = sessionListener;
                 }
                 var dobj = new DispoableObject(() =>
                 {
                     lock (_sessionListeners)
                     {
-                        _sessionListeners.Remove(listener, out _);
+                        _sessionListeners.Remove(sessionListener, out _);
                     }
                     lock (_sessionListenerMap)
                     {
                         _sessionListenerMap.Remove(session, out _);
                     }
                 });
-                _sessionListeners[listener] = reg = dobj;
+                _sessionListeners[sessionListener] = reg = dobj;
             }
             return reg;
         }
@@ -258,18 +187,8 @@ public sealed class LogProducer : IInitializable<LogProducer>, IDisposable
     /// Removes a stateless session-specific listener.
     /// </summary>
     /// <returns><c>true</c> if successfully unregistered; otherwise, <c>false</c>.</returns>
-    public bool UnregisterListener(ILogSessionListener listener)
-    {
-        lock (_sessionListeners)
-        {
-            if (_sessionListeners.Remove(listener, out var reg))
-            {
-                reg.Dispose();
-                return true;
-            }
-            return false;
-        }
-    }
+    public bool UnregisterListener(ILogSessionListener sessionListener)
+        => UnregisterListenerInternal(sessionListener);
     #endregion
 
     #region Session Stateful Listener
@@ -277,17 +196,17 @@ public sealed class LogProducer : IInitializable<LogProducer>, IDisposable
         where TScopeNode : class, IHandleChildAppend<TEntryNode>, TEntryNode
         where TEntryNode : class
     {
-        public StatefulRegistration(LogProducer log, LogSession session, ISessionStatefulLogListener<TScopeNode, TEntryNode> listener)
+        public StatefulRegistration(LogProducer log, ILogger session, ISessionStatefulLogListener<TScopeNode, TEntryNode> listener)
         {
             _session = session;
             _listener = listener;
             _log = log;
 
-            _log.EntriesUpdated += OnUpdate;
+            _log.LogEntryAdded += OnUpdate;
             Task.Run(() =>
             {
                 // do traversal
-                foreach (var newEntry in ParseScopeChildren(session.RootScope))
+                foreach (var newEntry in ParseScopeChildren(session.RootScopeAccessor))
                     _listener.RootNodes.Add(newEntry);
                 // empty the cache
                 while (_tempCache.TryDequeue(out var kv))
@@ -296,30 +215,30 @@ public sealed class LogProducer : IInitializable<LogProducer>, IDisposable
             });
         }
         private readonly LogProducer _log;
-        private readonly LogSession _session;
+        private readonly ILogger _session;
         private readonly ISessionStatefulLogListener<TScopeNode, TEntryNode> _listener;
         private bool _isSyncing = true;
         private readonly ConcurrentDictionary<IScopeAccessor, TScopeNode> _scopes = [];
-        private readonly ConcurrentQueue<(LogScope scope, LogEntry entry)> _tempCache = [];
-        private TEntryNode ConvertToNewEntryNode(IEntryAccessor accessor, out bool isScopeNode)
+        private readonly ConcurrentQueue<(IScopeAccessor scope, IEntry entry)> _tempCache = [];
+        private TEntryNode ConvertToNewEntryNode(IEntry entry, out bool isScopeNode)
         {
             isScopeNode = false;
-            if (accessor is not IScopeAccessor scopeAccessor)
-                return _listener.BuildEntry(accessor);
+            if (entry is not IScopeAccessor scopeAccessor)
+                return _listener.BuildEntry(entry);
             isScopeNode = true;
             var scope = _listener.BuildScope(scopeAccessor);
             _scopes[scopeAccessor] = scope;
             return scope;
         }
-        private void OnUpdate(LogSession session, LogScope scope, LogEntry entry)
+        private void OnUpdate(ILogger session, IScopeAccessor scopeAccessor, IEntry entry)
         {
             if (session != _session) return;
             if (_isSyncing)
-                _tempCache.Enqueue((scope, entry));
+                _tempCache.Enqueue((scopeAccessor, entry));
             else
             {
                 var newEntry = ConvertToNewEntryNode(entry, out _);
-                if (_scopes.TryGetValue(scope, out var scopeNode)) 
+                if (_scopes.TryGetValue(scopeAccessor, out var scopeNode)) 
                     scopeNode.AppendChild(newEntry);
                 else
                     _listener.RootNodes.Add(newEntry);
@@ -340,7 +259,7 @@ public sealed class LogProducer : IInitializable<LogProducer>, IDisposable
         }
         public void Dispose()
         {
-            _log.EntriesUpdated -= OnUpdate;
+            _log.LogEntryAdded -= OnUpdate;
             lock (_log._registeredStatefuleListeners)
             {
                 _log._registeredStatefuleListeners.Remove(_listener, out _);
@@ -352,16 +271,16 @@ public sealed class LogProducer : IInitializable<LogProducer>, IDisposable
     /// Registers a stateful listener that captures historical logs and transitions to real-time updates.
     /// </summary>
     /// <returns>A handle to unregister the listener.</returns>
-    public IDisposable RegisterListener<TScopeNode, TEntryNode>(LogSession session, ISessionStatefulLogListener<TScopeNode, TEntryNode> listener)
+    public IDisposable RegisterListener<TScopeNode, TEntryNode>(ILogger session, ISessionStatefulLogListener<TScopeNode, TEntryNode> statefulListener)
         where TScopeNode : class, IHandleChildAppend<TEntryNode>, TEntryNode
         where TEntryNode : class
     {
         lock (_registeredStatefuleListeners)
         {
-            if (!_registeredStatefuleListeners.TryGetValue(listener, out var reg))
+            if (!_registeredStatefuleListeners.TryGetValue(statefulListener, out var reg))
             {
-                reg = new StatefulRegistration<TScopeNode, TEntryNode>(this, session, listener);
-                _registeredStatefuleListeners[listener] = reg;
+                reg = new StatefulRegistration<TScopeNode, TEntryNode>(this, session, statefulListener);
+                _registeredStatefuleListeners[statefulListener] = reg;
             }
             return reg;
         }
@@ -370,36 +289,54 @@ public sealed class LogProducer : IInitializable<LogProducer>, IDisposable
     /// Removes a stateful listener and cleans up its synchronization resources.
     /// </summary>
     /// <returns><c>true</c> if successfully unregistered; otherwise, <c>false</c>.</returns>
-    public bool UnregisterListener<TScopeNode, TEntryNode>(ISessionStatefulLogListener<TScopeNode, TEntryNode> listener)
+    public bool UnregisterListener<TScopeNode, TEntryNode>(ISessionStatefulLogListener<TScopeNode, TEntryNode> statefulListener)
         where TScopeNode : class, IHandleChildAppend<TEntryNode>, TEntryNode
         where TEntryNode : class
+        => UnregisterListenerInternal(statefulListener);
+    #endregion
+    private bool UnregisterListenerInternal(object listener)
     {
+        var suc = false;
+        if(listener is ILogListener globalListener)
+        {
+            lock (_listeners)
+            {
+                if (_listeners.Remove(globalListener, out var reg))
+                {
+                    reg.Dispose();
+                    suc |= true;
+                }
+            }
+        }
+        if(listener is ILogSessionListener sessionListener)
+        {
+            lock (_sessionListeners)
+            {
+                if (_sessionListeners.Remove(sessionListener, out var reg))
+                {
+                    reg.Dispose();
+                    suc |= true;
+                }
+            }
+        }
         lock (_registeredStatefuleListeners)
         {
             if (_registeredStatefuleListeners.Remove(listener, out var reg))
             {
                 reg.Dispose();
-                return true;
+                suc |= true;
             }
-            return false;
         }
+
+        return false;
     }
     #endregion
 
-    #endregion
-
-    /// <summary>
-    /// Disposes all sessions and closes file writers.
-    /// </summary>
     public void Dispose()
     {
         _cts.Cancel();
         foreach (var ses in _sessions.Values)
             ses.Dispose();
-        foreach (var writer in _writers.Values)
-        {
-            try { writer.Dispose(); } catch { }
-        }
-        _writers.Clear();
+        _writer.Dispose();
     }
 }

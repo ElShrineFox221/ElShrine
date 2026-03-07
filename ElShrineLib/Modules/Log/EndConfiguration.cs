@@ -3,9 +3,9 @@
 /// <summary>
 /// A delegate that defines how to build additional log content when a scope ends.
 /// </summary>
-/// <param name="accessor">The read-only accessor of the closing scope.</param>
+/// <param name="scope">The read-only scope of the closing scope.</param>
 /// <returns>The constructed <see cref="EntryContent"/> to be displayed.</returns>
-public delegate EntryContent EndItemsBuilder(IScopeAccessor accessor);
+public delegate EntryContent EndItemsBuilder(IScopeAccessor scope);
 
 /// <summary>
 /// Configures the visual feedback and summary items displayed when a <see cref="LogScope"/> is concluded.

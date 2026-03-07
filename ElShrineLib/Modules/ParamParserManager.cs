@@ -40,34 +40,31 @@ public abstract class ParamParser<T> : ParamParserBase
 }
 #endregion
 
-[InitializationInfo(PreInstantiate = true, Priority = Bootstrapper.PRIO_PARAMPARSERS)]
-public sealed class ParamParserManager : IInitializable<ParamParserManager>
+public sealed class ParamParserManager
 {
-    #region Singleton
-    private static readonly Lazy<ParamParserManager> instanceLazy = new(() => new());
-    public static ParamParserManager Instance => Bootstrapper.GetInstance<ParamParserManager>();
-    public static ParamParserManager Initialize() => instanceLazy.Value;
-    #endregion
-
-    private static LogSession Session => LogProducer.Instance.CoreSession;
-    private ParamParserManager()
+    private readonly ClassesManager _cm;
+    private readonly ILogger _logger;
+    public ParamParserManager(ClassesManager cm, ILoggerManager log)
     {
-        using var _ = Session.OpenScope("Initializing param parsers manager...");
+        _cm = cm;
+        _logger = log.Main;
+
+        using var _ = _logger.OpenScope("Initializing param parsers manager...");
         var sw = Stopwatch.StartNew();
         //Register a recalculation delegate
-        ClassesManager.Instance.AssembliesUpdated += Recollect;
+        _cm.AssembliesUpdated += Recollect;
         //Instant recalculate
-        Recollect([.. ClassesManager.Instance.Assemblies]);
-        Session.ConfigEnd($"Param parsers manager initialized, {sw.GetStopwatchElapsed()}");
+        Recollect([.. _cm.Assemblies]);
+        _logger.ConfigEnd($"Param parsers manager initialized, {sw.GetStopwatchElapsed()}");
     }
 
     private readonly Dictionary<Type, ParamParserBase> paramParsers = [];
     private void Recollect(Assembly[] range)
     {
-        using var _ = Session.OpenScope("Recollecting param parsers...");
-        var implements = ClassesManager.Instance.GetImplements(typeof(ParamParserBase), range)
+        using var _ = _logger.OpenScope("Recollecting param parsers...");
+        var implements = _cm.GetImplements(typeof(ParamParserBase), range)
             .Where(t => !t.IsAbstract && t.IsClass).ToList();
-        Session.Log($"{GetParamParserText(implements.Count)} found.");
+        _logger.Log($"{GetParamParserText(implements.Count)} found.");
         foreach (var type in implements)
         {
             try
@@ -78,18 +75,18 @@ public sealed class ParamParserManager : IInitializable<ParamParserManager>
                     if (paramParsers.TryGetValue(key, out var exist) && exist.Priority >= parser.Priority)
                     {
                         var e = new ParamParserException($"{key}: {parser.GetType().FullName} is ignored because {exist.GetType().FullName} has higher priority.");
-                        Session.Warning(e);
+                        _logger.Warning(e);
                     }
                     else paramParsers[key] = parser;
                 }
             }
             catch (Exception ex)
             {
-                Session.Error(ex);
+                _logger.Error(ex);
             }
         }
-        Session.Log($"Recollected {GetParamParserText(paramParsers.Count)}.");
-        Session.ConfigEnd($"Recollected option items.");
+        _logger.Log($"Recollected {GetParamParserText(paramParsers.Count)}.");
+        _logger.ConfigEnd($"Recollected option items.");
     }
     private static string GetParamParserText(int count)
         => $"{"param parser".GetPuralWithNum(count)}";

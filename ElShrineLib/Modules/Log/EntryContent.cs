@@ -31,4 +31,53 @@ public sealed record EntryContent(LogItem[] LogItems)
     /// </summary>
     /// <returns>The combined string representation of all items.</returns>
     public override string ToString() => LogItems.BuildString(split: string.Empty);
+
+    #region Table
+    /// <summary>
+    /// Helper method to build a tabular data representation as an <see cref="InfoEntry"/>.
+    /// </summary>
+    /// <param name="title">The title log item for the table.</param>
+    /// <param name="entry">The output info entry containing the rendered table.</param>
+    /// <param name="extraPad">Additional padding spaces between columns.</param>
+    /// <param name="itemCols">A params array of column data, where each column is an array of <see cref="LogItem"/>.</param>
+    public static void BuildTable(LogItem title, out EntryContent? entry, int extraPad = 1, params LogItem[][] itemCols)
+    {
+        entry = null;
+        if (itemCols.Length == 0) return;
+
+        var rowCount = itemCols.Max(c => c?.Length ?? 0);
+        if (rowCount == 0) return;
+
+        var colWidths = new int[itemCols.Length];
+        for (var i = 0; i < itemCols.Length; i++)
+            colWidths[i] = (itemCols[i]?.Max(i => i.ToString().Length) ?? 0) + extraPad;
+
+        title = LogItem.Normal($"{title}\n", title.Style);
+        var tableItems = new List<LogItem>();
+        for (int i = 0; i < rowCount; i++)
+        {
+            for (int j = 0; j < itemCols.Length; j++)
+            {
+                var col = itemCols[j];
+                var targetWidth = colWidths[j];
+                var isRowLastItem = j == itemCols.Length - 1;
+                if (i < col.Length)
+                {
+                    var originalItem = col[i];
+                    var text = originalItem.ToString().PadRight(targetWidth);
+                    if (isRowLastItem) text += '\n';
+                    var item = LogItem.Normal(text, originalItem.Style);
+                    tableItems.Add(item);
+                }
+                else
+                {
+                    var text = new string(' ', targetWidth);
+                    if (isRowLastItem) text += '\n';
+                    tableItems.Add(LogItem.Normal(text));
+                }
+            }
+        }
+        entry = new([title, .. tableItems]);
+    }
+    #endregion
 }

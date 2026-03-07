@@ -10,8 +10,7 @@ namespace ElShrine.Commands;
 [CommandCarrier]
 public static class GlobalCommands
 {
-    private static LogProducer Log => field ??= LogProducer.Instance;
-    private static LogSession Session => field ??= LogProducer.Instance.CoreSession;
+    private static ILogger Logger => field ??= MBootstrapper.Resolve<ILoggerManager>().Main;
     private static void AddColsRow<T>(List<T>[] cols, Func<T> defaultFactory, params T?[] rowItems)
     {
         for (var i = 0; i < cols.Length; i++)
@@ -37,7 +36,7 @@ public static class GlobalCommands
             LogItem.Normal("Parameters", LogItemStyle.NoticeDarkYellow),
             LogItem.Normal("Description", LogItemStyle.NoticeDarkYellow),
             LogItem.Normal("Implementation", LogItemStyle.NoticeDarkYellow));
-        var allItems = CommandsManager.Instance.GetAll();
+        var allItems = MBootstrapper.Resolve<CommandsManager>().GetAll();
         if (groupedByCata)
         {
             var sortedGroups = allItems.GroupBy(static ci => ci.VirtualCataName)
@@ -82,31 +81,16 @@ public static class GlobalCommands
                     LogItem.Normal(ci.ToFullName(), LogItemStyle.SubInfo));
             }
         }
-        LogSession.BuildTable(LogItem.Empty(), out var entry, 4, [.. cataCol], [.. itemCol], [.. paramCol], [.. descCol], [.. implCol]);
-        if (entry is not null) Session.Log(entry);
-        Session.Log($"There are {"command".GetPuralWithNum(total)} in total:");
+        EntryContent.BuildTable(LogItem.Empty(), out var entry, 4, [.. cataCol], [.. itemCol], [.. paramCol], [.. descCol], [.. implCol]);
+        if (entry is not null) Logger.Log(entry);
+        Logger.Log($"There are {"command".GetPuralWithNum(total)} in total:");
     }
     [Command] public static void Help() => Help(true);
     #endregion
 
     #region Exit
     [Command]
-    public static void Exit(bool force)
-    {
-        if (!force)
-        {
-            Session.Warning(new ProcessException("The process will be closed in 3 seconds if there are no more waiting tasks."));
-            Task.Run(async () =>
-            {
-                await Task.Delay(3000);
-                while (true)
-                {
-                    if (!force && !Log.UpdateTemporaryCompleted) await Task.Yield();
-                    Bootstrapper.Exit();
-                }
-            });
-        }
-    }
+    public static void Exit(bool force) => MBootstrapper.Exit(force);
     [Command] public static void Exit() => Exit(false);
     #endregion
 
@@ -134,17 +118,17 @@ public static class GlobalCommands
                 }
                 catch (Exception ex)
                 {
-                    Session.Warning($"Failed to open file: {ex.Message}");
+                    Logger.Warning($"Failed to open file: {ex.Message}");
                 }
             }
         }
         if (Directory.Exists(path))
         {
             Process.Start(Const.ExplorerName, $"\"{path}\"");
-            Session.Log("Directory located.");
+            Logger.Log("Directory located.");
             suc = true;
         }
-        if (!suc) Session.Warning("Exist no directory or file.");
+        if (!suc) Logger.Warning("Exist no directory or file.");
     }
     [Command]
     public static void Del(string path)
@@ -170,12 +154,12 @@ public static class GlobalCommands
             }
             catch (Exception ex)
             {
-                Session.Warning($"Delete action failed: {ex.Message}");
+                Logger.Warning($"Delete action failed: {ex.Message}");
                 return;
             }
         }
-        if (suc) Session.Log("Completed delete.");
-        else Session.Warning("Found no directory or file with the path.");
+        if (suc) Logger.Log("Completed delete.");
+        else Logger.Warning("Found no directory or file with the path.");
     }
     [Command]
     public static void ClearDir(string dir) => ClearDir(dir, []);
@@ -191,7 +175,7 @@ public static class GlobalCommands
             int fileDelCount = 0, dirDelCount = 0;
             int fileIgnCount = 0, dirIgnCount = 0;
             int totalFound = entries.Length;
-            Session.Log($"{totalFound} {"item".GetPural(totalFound)} found in directory.");
+            Logger.Log($"{totalFound} {"item".GetPural(totalFound)} found in directory.");
             var sign = CommonOption.DirectlyDel;
             try
             {
@@ -231,10 +215,10 @@ public static class GlobalCommands
                 {
                     msg += $" Ignored: {fileIgnCount} file(s), {dirIgnCount} folder(s).";
                 }
-                Session.Log(msg);
+                Logger.Log(msg);
             }
         }
         else failedReason = "Directory does not exist.";
-        if (failedReason is not null) Session.Warning($"Failed delete. {failedReason}");
+        if (failedReason is not null) Logger.Warning($"Failed delete. {failedReason}");
     }
 }

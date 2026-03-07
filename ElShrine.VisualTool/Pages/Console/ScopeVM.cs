@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ElShrine.VisualTool.Pages.Console;
 
-public class EntryVM : ViewModelBase<IEntryAccessor>
+public class EntryVM : ViewModelBase<IEntry>
 {
     public SessionVM Parent { get; init; }
     public bool IsEndLine { get; init; }
@@ -15,14 +15,14 @@ public class EntryVM : ViewModelBase<IEntryAccessor>
     public LineItemVM TimestampVM { get; init; }
     public LineItemVM ThreadIdVM { get; init; }
 
-    public EntryVM(SessionVM session, IEntryAccessor accessor) : base(accessor)
+    public EntryVM(SessionVM session, IEntry entry) : base(entry)
     {
         ConsoleVM.Instance.LineVMRefs.Add(new(this));
         Parent = session;
-        IsEndLine = accessor.IsEndOfScope;
-        LineContent = [.. accessor.Content.LogItems.Select(i => new LineItemVM(i))];
-        Timestamp = accessor.Timestamp;
-        ThreadId = accessor.ThreadId;
+        IsEndLine = entry.IsEndOfScope;
+        LineContent = [.. entry.Content.LogItems.Select(i => new LineItemVM(i))];
+        Timestamp = entry.Timestamp;
+        ThreadId = entry.ThreadId;
 
         var timestampText = DateTimeOffset.FromUnixTimeMilliseconds(Timestamp).ToLocalTime().ToString(Const.FullTimeFormat);
         TimestampVM = new LineItemVM(LogItem.Normal(timestampText, LogItemStyle.Info));

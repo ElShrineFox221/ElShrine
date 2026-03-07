@@ -5,7 +5,7 @@ namespace ElShrine.Commands;
 [CommandCarrier]
 public static class OptionCommands
 {
-    private static readonly OptionsManager OptionsManager = OptionsManager.Instance;
+    private static readonly OptionsManager OptionsManager = MBootstrapper.Resolve<OptionsManager>();
     [Command]
     public static void Save() => OptionsManager.Save();
     [Command]

@@ -7,7 +7,7 @@ public static class LocalizationCommandsCarrier
 {
     public const string Name = "Localization";
     #region Commands
-    [Command] public static void Reload() => LocalizationManager.Instance.ReloadLocalization();
-    [Command] public static void Save() => LocalizationManager.Instance.SaveUntranslatedKeys();
+    [Command] public static void Reload() => MBootstrapper.Resolve<LocalizationManager>().ReloadLocalization();
+    [Command] public static void Save() => MBootstrapper.Resolve<LocalizationManager>().SaveUntranslatedKeys();
     #endregion
 }

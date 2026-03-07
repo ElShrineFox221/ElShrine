@@ -8,42 +8,43 @@ namespace ElShrine;
 public static class ModulesExtensions
 {
     #region LocalizationExtensions;
+    private static LocalizationManager _lm => MBootstrapper.Resolve<LocalizationManager>();
     public static string Translate(this string key, string? defaultS = null, params object?[] args)
-            => LocalizationManager.Instance.Translate(key, defaultS, args);
+            => _lm.Translate(key, defaultS, args);
     #endregion
 
     #region LogExtensions;
     #region Common
 
     #region Normal
-    public static void Log(this LogSession session, LogEntry entry)
-        => session.LogEntry(entry);
-    public static void Log(this LogSession session, EntryContent info)
-        => session.LogEntry(new InfoEntry(info));
-    public static void Log(this LogSession session, string msg)
-        => session.Log((EntryContent)msg);
-    public static void Log(this LogSession session, params LogItem[] items)
-        => session.Log((EntryContent)items);
+    public static void Log(this ILogger logger, LogEntry entry)
+        => logger.LogEntry(entry);
+    public static void Log(this ILogger logger, EntryContent info)
+        => logger.LogEntry(new InfoEntry(info));
+    public static void Log(this ILogger logger, string msg)
+        => logger.Log((EntryContent)msg);
+    public static void Log(this ILogger logger, params LogItem[] items)
+        => logger.Log((EntryContent)items);
     #endregion
 
     #region Exception
-    public static void Error(this LogSession session, Exception e, bool showTrace = true)
-        => session.LogEntry(new ErrorEntry(e, showTrace));
-    public static void Error(this LogSession session, string msg)
-        => session.Error(new Exception(msg));
-    public static void Warning(this LogSession session, Exception e, bool showTrace = false)
-        => session.LogEntry(new WarningEntry(e, showTrace));
-    public static void Warning(this LogSession session, string msg)
-        => session.Warning(new Exception(msg));
+    public static void Error(this ILogger logger, Exception e, bool showTrace = true)
+        => logger.LogEntry(new ErrorEntry(e, showTrace));
+    public static void Error(this ILogger logger, string msg)
+        => logger.Error(new Exception(msg));
+    public static void Warning(this ILogger logger, Exception e, bool showTrace = false)
+        => logger.LogEntry(new WarningEntry(e, showTrace));
+    public static void Warning(this ILogger logger, string msg)
+        => logger.Warning(new Exception(msg));
     #endregion
 
     #region Scope
-    public static LogItem[] GetSummaryItems(this LogSession session, EndConfiguration? config = null)
-        => session.GetCurrentScope().GetSummaryItems(config);
-    public static void ConfigEnd(this LogSession session, EndConfiguration? config = null)
-        => session.GetCurrentScope().EndConfig = config;
-    public static void ConfigEnd(this LogSession session, string text, bool showSuc = true, bool showError = true)
-        => session.ConfigEnd(new EndConfiguration(text, showSuc, showError));
+    public static LogItem[] GetSummaryItems(this ILogger logger, EndConfiguration? config = null)
+        => logger.GetCurrentScopeAccessor().GetSummaryItems(config);
+    public static void ConfigEnd(this ILogger logger, EndConfiguration? config = null)
+        => logger.GetCurrentScopeAccessor().EndConfig = config;
+    public static void ConfigEnd(this ILogger logger, string text, bool showSuc = true, bool showError = true)
+        => logger.ConfigEnd(new EndConfiguration(text, showSuc, showError));
     #endregion
 
     #endregion

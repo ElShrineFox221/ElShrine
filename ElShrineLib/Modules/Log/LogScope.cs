@@ -6,13 +6,13 @@ namespace ElShrine.Modules.Log;
 /// Defines an interface for read-only access to a log scope, including entry collection,
 /// error management, and lifecycle state.
 /// </summary>
-public interface IScopeAccessor : IEntryAccessor
+public interface IScopeAccessor : IEntry, IDisposable
 {
     /// <summary> Gets the parent scope, or null if this is a root scope. </summary>
     LogScope? Parent { get; }
 
     /// <summary> Gets the session this scope belongs to. </summary>
-    LogSession Session { get; }
+    ILogger Session { get; }
 
     /// <summary> Gets the collection of log entries recorded within this scope. </summary>
     IReadOnlyCollection<LogEntry> Entries { get; }
@@ -22,6 +22,8 @@ public interface IScopeAccessor : IEntryAccessor
 
     /// <summary> Gets a value indicating whether the scope and all its children are fully closed. </summary>
     bool IsClosed { get; }
+
+    EndConfiguration? EndConfig { get; set; }
 
     /// <summary>
     /// Generates summary log items based on the scope's execution result (e.g., success/failure status).
@@ -44,7 +46,6 @@ public interface IScopeAccessor : IEntryAccessor
     /// <param name="predicate">A function to evaluate and potentially handle the error.</param>
     void HandleErrors<TException>(Func<TException, ErrorRecord, bool> predicate) where TException : Exception;
 }
-
 /// <summary>
 /// Represents a hierarchical log scope that manages a collection of entries and handles error bubbling.
 /// Inherits from <see cref="InfoEntry"/> to allow the scope itself to be treated as a log entry.
@@ -55,7 +56,7 @@ public sealed class LogScope : InfoEntry, IScopeAccessor
     public LogScope? Parent { get; }
 
     /// <inheritdoc/>
-    public LogSession Session { get; }
+    public ILogger Session { get; }
 
     public const string ScopeEntryType = "Scope";
     public override string EntryType => ScopeEntryType;
@@ -68,7 +69,7 @@ public sealed class LogScope : InfoEntry, IScopeAccessor
     /// <summary> Number of active (not yet closed) child scopes. </summary>
     private int _activeChildrenCount = 0;
 
-    internal LogScope(LogSession session, LogScope? parent, EntryContent info, bool ignoreChildrenErrors) : base(info)
+    public LogScope(ILogger session, LogScope? parent, EntryContent info, bool ignoreChildrenErrors) : base(info)
     {
         Parent = parent;
         Session = session;
@@ -166,7 +167,7 @@ public sealed class LogScope : InfoEntry, IScopeAccessor
             Session.LogEntry(endEntry);
             IsEnded = true;
 
-            if (Parent is not null) Session.RestoreScope(this, Parent);
+            Session.OnScopeEnded(this);
             if (_isWaitingEndForClose) Close();
         }
     }
@@ -233,28 +234,28 @@ public sealed class LogScope : InfoEntry, IScopeAccessor
                 this.errors.TryAdd(error.Exception, error);
         }
     }
+
+
     #endregion
+    public void Dispose()
+    {
+        End();
+    }
 }
 
 /// <summary>
 /// A disposable wrapper for <see cref="LogScope"/> that facilitates the 'using' pattern.
 /// Ensures that <see cref="LogScope.End"/> is called when the scope goes out of context.
 /// </summary>
-public readonly struct LogScopeAccessor : IScopeAccessor, IDisposable
+public readonly struct LogScopeAccessor(LogScope sourceScope, bool isScopeOwner = false) : IScopeAccessor
 {
     /// <summary> The underlying scope being accessed. </summary>
-    public readonly LogScope scope;
+    public readonly LogScope scope = sourceScope;
 
-    private readonly bool _isScopeOwner;
+    private readonly bool _isScopeOwner = isScopeOwner;
 
     /// <summary> Gets an accessor for the parent scope. </summary>
     public LogScopeAccessor? ParentAccessor => scope.Parent is null ? null : new(scope.Parent);
-
-    internal LogScopeAccessor(LogScope sourceScope, bool isScopeOwner = false)
-    {
-        scope = sourceScope;
-        _isScopeOwner = isScopeOwner;
-    }
 
     #region entry's methods & properties
     /// <inheritdoc/>
@@ -264,7 +265,7 @@ public readonly struct LogScopeAccessor : IScopeAccessor, IDisposable
     /// <inheritdoc/>
     public int ThreadId => scope.ThreadId;
     /// <inheritdoc/>
-    public int Depth => scope.Depth;
+    public int Depth { get => scope.Depth; set => scope.Depth = value; }
     /// <inheritdoc/>
     public bool IsEndOfScope => false;
     /// <inheritdoc/>
@@ -277,7 +278,7 @@ public readonly struct LogScopeAccessor : IScopeAccessor, IDisposable
 
     #region scope's methods & properties
     /// <inheritdoc/>
-    public LogSession Session => scope.Session;
+    public ILogger Session => scope.Session;
     /// <inheritdoc/>
     public LogScope? Parent => scope.Parent;
     /// <inheritdoc/>
@@ -288,7 +289,7 @@ public readonly struct LogScopeAccessor : IScopeAccessor, IDisposable
     public IReadOnlyCollection<LogEntry> Entries => scope.Entries;
 
     /// <summary> Gets or sets the configuration used when the scope ends. </summary>
-    public EndConfiguration? EndConfiguration { get => scope.EndConfig; set => scope.EndConfig = value; }
+    public EndConfiguration? EndConfig { get => scope.EndConfig; set => scope.EndConfig = value; }
 
     /// <inheritdoc/>
     public LogItem[] GetSummaryItems(EndConfiguration? config = null)

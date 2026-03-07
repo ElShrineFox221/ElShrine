@@ -9,7 +9,7 @@
 	  <RootNamespace>ElShrine</RootNamespace>
 	  <BaseOutputPath></BaseOutputPath>
 	  <LangVersion>preview</LangVersion>
-	  <OutputType>Library</OutputType>
+	  <OutputType>Exe</OutputType>
 	  <PackageOutputPath>..\bin\Packages</PackageOutputPath>
 	  <DebugType>embedded</DebugType>
 

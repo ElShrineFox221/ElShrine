@@ -10,7 +10,7 @@ public record ErrorRecord
     /// <summary>
     /// Gets the accessor for the scope where this error was originally recorded.
     /// </summary>
-    public LogScopeAccessor SourceScope { get; init; }
+    public IScopeAccessor SourceScope { get; init; }
 
     /// <summary>
     /// Gets the exception associated with this error record.

@@ -41,14 +41,10 @@ public enum Language
     Malay = 31,
     Max = 32
 }
-[InitializationInfo(PreInstantiate = true, Priority = int.MaxValue)]
-public sealed class LocalizationManager : IInitializable<LocalizationManager>
+
+public sealed class LocalizationManager
 {
-    #region Singleton
-    private static readonly Lazy<LocalizationManager> instanceLazy = new(() => new());
-    public static LocalizationManager Instance => Bootstrapper.GetInstance<LocalizationManager>();
-    public static LocalizationManager Initialize() => instanceLazy.Value;
-    #endregion
+    private readonly ILogger _logger;
 
     private Language language = Language.SimplifiedChinese;
     public Language Language
@@ -74,9 +70,9 @@ public sealed class LocalizationManager : IInitializable<LocalizationManager>
         }
     }
     public event ValueChangedHandler<Language>? LanguageChanged;
-    private static LogSession Session => LogProducer.Instance.CoreSession;
-    private LocalizationManager()
+    public LocalizationManager(ILoggerManager log)
     {
+        _logger = log.Main;
         ReloadLocalization();
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
@@ -103,7 +99,7 @@ public sealed class LocalizationManager : IInitializable<LocalizationManager>
             }
             catch (Exception e)
             {
-                Session.Error(e);
+                _logger.Error(e);
             }
         }
         if (languageChanged) LanguageChanged?.Invoke(this, new(Language, Language));
@@ -132,7 +128,7 @@ public sealed class LocalizationManager : IInitializable<LocalizationManager>
             }
             catch (Exception e)
             {
-                Session.Error(e);
+                _logger.Error(e);
             }
         }
     }
@@ -151,7 +147,7 @@ public sealed class LocalizationManager : IInitializable<LocalizationManager>
                 var got2 = localizationKVByLanguages.TryGetValue(Language.None, out var noneDic);
                 if(!got2 || noneDic is null) localizationKVByLanguages.Add(Language.None, noneDic = []);
                 noneDic[key] = value;
-                Session.Warning(new LocalizationException($"Untranslated key: \'{key}\', default as: \'{value}\'"));
+                _logger.Warning(new LocalizationException($"Untranslated key: \'{key}\', default as: \'{value}\'"));
             }
         }
         value = string.Format(value, args);

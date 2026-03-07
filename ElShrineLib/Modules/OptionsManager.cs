@@ -95,26 +95,22 @@ public sealed class OptionItem : ICataItem
     }
 }
 
-[InitializationInfo(PreInstantiate = true, Priority = Bootstrapper.PRIO_OPTIONS)]
-public sealed class OptionsManager : IInitializable<OptionsManager>
+public sealed class OptionsManager
 {
-    #region Singleton
-    private static readonly Lazy<OptionsManager> instanceLazy = new(() => new());
-    public static OptionsManager Instance => Bootstrapper.GetInstance<OptionsManager>();
-    public static OptionsManager Initialize() => instanceLazy.Value;
-    #endregion
-
     public const string GlobalOptionName = "Global";
     public const string OptionFileName = "Options";
-    private static LogSession Session => LogProducer.Instance.CoreSession;
-    private OptionsManager()
+    private readonly ClassesManager _cm;
+    private readonly ILogger _logger;
+    public OptionsManager(ClassesManager cm, ILoggerManager log)
     {
+        _cm = cm;
+        _logger = log.Main;
         //Register a recalculation delegate
-        ClassesManager.Instance.AssembliesUpdated += RecollectOptionItems;
+        _cm.AssembliesUpdated += RecollectOptionItems;
         //Instant recalculate
-        RecollectOptionItems([.. ClassesManager.Instance.Assemblies]);
+        RecollectOptionItems([.. _cm.Assemblies]);
         //Do initial load
-        Session.Log("Try initial loading.");
+        _logger.Log("Try initial loading.");
         Load();
     }
 
@@ -124,11 +120,11 @@ public sealed class OptionsManager : IInitializable<OptionsManager>
     private CataItemIndexer<OptionItem> optionItemQueryIndex = new([]);
     private void RecollectOptionItems(Assembly[] range)
     {
-        using var _ = Session.OpenScope("Recollecting option items...");
-        var optionClasses = ClassesManager.Instance.GetClassesByAttribute<OptionAttribute>(inherit: false, range);
+        using var _ = _logger.OpenScope("Recollecting option items...");
+        var optionClasses = _cm.GetClassesByAttribute<OptionAttribute>(inherit: false, range);
         this.optionClasses.Clear();
         this.optionClasses.AddRange(optionClasses.Select(oc => oc.Key));
-        Session.Log($"{GetOptionItemsText(optionClasses.Count())} found.");
+        _logger.Log($"{GetOptionItemsText(optionClasses.Count())} found.");
         foreach (var (optionClass, optionClassAttrs) in optionClasses)
         {
             var attr = optionClassAttrs[0];
@@ -164,10 +160,10 @@ public sealed class OptionsManager : IInitializable<OptionsManager>
             }
         }
         optionDataSet.RefreshData(optionItems);
-        Session.Log($"Recollected {GetOptionAllText()}.");
+        _logger.Log($"Recollected {GetOptionAllText()}.");
         optionItemQueryIndex = new(optionItems);
-        Session.Log($"Rebuilt options indexes.");
-        Session.ConfigEnd($"Recollected option items.");
+        _logger.Log($"Rebuilt options indexes.");
+        _logger.ConfigEnd($"Recollected option items.");
     }
     private static string GetOptionsText(int count) => $"{"option".GetPuralWithNum(count)}";
     private static string GetOptionItemsText(int count) => $"{"item".GetPuralWithNum(count)}";
@@ -180,23 +176,23 @@ public sealed class OptionsManager : IInitializable<OptionsManager>
     #region IO operations
     public void Save()
     {
-        using var scope = Session.OpenScope("Saving options...");
-        Session.Log($"Processing {GetOptionAllText()}...");
+        using var scope = _logger.OpenScope("Saving options...");
+        _logger.Log($"Processing {GetOptionAllText()}...");
         //
         var r = DataHandler.Write(optionDataSet, new FileDetails(OptionFileName));
         //
-        if (!r.Success) Session.Error(r.FailedSource!); 
-        Session.ConfigEnd(r.Success ? $"Successfully saved {GetOptionAllText()}." : "Failed to save options.");
+        if (!r.Success) _logger.Error(r.FailedSource!); 
+        _logger.ConfigEnd(r.Success ? $"Successfully saved {GetOptionAllText()}." : "Failed to save options.");
     }
     public void Load()
     {
-        using var scope = Session.OpenScope("Loading options...");
+        using var scope = _logger.OpenScope("Loading options...");
         var r = DataHandler.Read<OptionDataSet>(null, new FileDetails(OptionFileName));
         string endMsg;
         if (!r.Success)
         {
-            Session.Warning(r.FailedSource!);
-            Session.Log("The option files issues can be override by execute options saving.");
+            _logger.Warning(r.FailedSource!);
+            _logger.Log("The option files issues can be override by execute options saving.");
             endMsg = "Failed to load options.";
         }
         else
@@ -214,13 +210,13 @@ public sealed class OptionsManager : IInitializable<OptionsManager>
                     }
                     catch (Exception ex)
                     {
-                        Session.Warning(ex);
+                        _logger.Warning(ex);
                     }
                 }
             }
             endMsg = $"Loaded {GetOptionItemsText(sucReadCount)} from option file.";
         }
-        Session.ConfigEnd(endMsg);
+        _logger.ConfigEnd(endMsg);
     }
     #endregion
 

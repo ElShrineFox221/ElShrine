@@ -37,7 +37,7 @@ public sealed class CommandInvoker
     public bool IsRouteValid => !string.IsNullOrWhiteSpace(RoutedStr);
     public ICommandResult? ExecutionResult { get; private set; } = null;
     public bool Executed => ExecutionResult is not null;
-    private static LogProducer Log => field ??= LogProducer.Instance;
+    private static ILoggerManager Log => field ??= MBootstrapper.Resolve<ILoggerManager>();
 
     #region builders
     public static CommandInvoker Build(string str) => new(str);
@@ -134,7 +134,7 @@ public sealed class CommandInvoker
             return;
         }
         //
-        var matches = CommandsManager.Instance.Get(cataName, itemName);
+        var matches = MBootstrapper.Resolve<CommandsManager>().Get(cataName, itemName);
         if (matches.Count == 0)
         {
             error = new($"{ParseFailed}: Unknown command: {cataName}.{itemName}");
@@ -154,7 +154,7 @@ public sealed class CommandInvoker
             {
                 for (int i = 0; i < parameters.Length; i++)
                 {
-                    if (!ParamParserManager.Instance.TryConvert(args[i], parameters[i].ParameterType, out parsedParams[i]))
+                    if (!MBootstrapper.Resolve<ParamParserManager>().TryConvert(args[i], parameters[i].ParameterType, out parsedParams[i]))
                     {
                         localSuc = false;
                         break;
@@ -182,7 +182,7 @@ public sealed class CommandInvoker
     
     private async Task<ICommandResult> ExecuteInternalAsync(bool notPrintLines, long timeoutMilliseconds, string sessionName)
     {
-        var session = sessionName.IsNotEmpty() ? Log.GetOrCreateSession(sessionName) : Log.CoreSession;
+        var session = sessionName.IsNotEmpty() ? Log.GetOrCreateLogger(sessionName) : Log.Main;
         object? resultValue = null;
         if (error is not null)
         {

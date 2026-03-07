@@ -23,7 +23,7 @@ public static class Bootstrapper
 
     private readonly static ConcurrentDictionary<Type, object> instances = [];
     private static ClassesManager? classesManager;
-    private static LogSession? session;
+    private static ILogger? session;
     private static BeatTimer? timer;
     public readonly static DateTime InitializedTime = DateTime.Now;
     public readonly static string InitializeTimeText = InitializedTime.ToLocalTime().ToString(Const.FullDateTimeFormat).Replace(':', '\'');
@@ -35,18 +35,6 @@ public static class Bootstrapper
         var sw = Stopwatch.StartNew();
         try
         {
-            //initialize core services
-            timer = GetInstance<BeatTimer>();
-            //initialize logs producer
-            session = GetInstance<LogProducer>().CoreSession;
-            //initialize classes manager
-            classesManager = GetInstance<ClassesManager>();
-            //initialize options manager
-            GetInstance<OptionsManager>();
-            //initialize param parsers manager
-            GetInstance<ParamParserManager>();
-            //initialize commands manager
-            GetInstance<CommandsManager>();
             //initialize modules
             var modules = classesManager.GetClassesByAttribute<InitializationInfoAttribute>(false)
                 .Where(m => m.Value[0].PreInstantiate).OrderBy(m => m.Value[0].Priority);
@@ -63,7 +51,7 @@ public static class Bootstrapper
         {
             session!.Error(ex);
         }
-        var scope = session!.GetCurrentScope();
+        var scope = session!.GetCurrentScopeAccessor();
         var items = scope.GetSummaryItems();
         session.Log([..items, LogItem.Normal($"Modules initialized, {sw.GetStopwatchElapsed()}.")]);
         if (scope.Errors.Count > 0) Exit();
@@ -129,6 +117,8 @@ public interface IModuleRegister
     void RegisterModule<TService, TImplementation>(TImplementation? instance = null)
         where TImplementation : class, TService
         where TService : notnull;
+    void RegisterModule<TService>(TService? instance = null) 
+        where TService : class;
 }
 public static class MBootstrapper
 {
@@ -145,7 +135,14 @@ public static class MBootstrapper
         }
         private void RegisterDefaultModules()
         {
-            throw new NotImplementedException();
+            RegisterModule<BeatTimer>();
+            RegisterModule<ILogWriter, LogWriter>();
+            RegisterModule<ILoggerManager, LogProducer>();
+            RegisterModule<ClassesManager>();
+            RegisterModule<OptionsManager>();
+            RegisterModule<ParamParserManager>();
+            RegisterModule<CommandsManager>();
+            RegisterModule<LocalizationManager>();
         }
 
         #region IServiceProvider implementations
@@ -198,9 +195,9 @@ public static class MBootstrapper
                         // 尝试创建实例
                         try
                         {
-                            return ctor.Invoke(args);
+                            return Activator.CreateInstance(type, args);
                         }
-                        catch
+                        catch(Exception e)
                         {
                             // 构造失败，继续尝试下一个构造函数
                             continue;
@@ -247,21 +244,81 @@ public static class MBootstrapper
             else
                 _instancesCached[serviceType] = instance;
         }
+        public void RegisterModule<TService>(TService? instance = null)
+            where TService : class
+        {
+            RegisterModule<TService, TService>(instance);
+        }
         #endregion
     }
 
     private static IServiceProvider? _serviceProvider;
+    private static BeatTimer? _beatTimer;
+    private static ILoggerManager? _loggerManager;
+    private static ILogger? _logger;
+    private static ClassesManager? _classesManager;
+    private static OptionsManager? _optionsManager;
+    private static ParamParserManager? _paramParserManager;
+    private static CommandsManager? _commandsManager;
+    private static LocalizationManager? _localizationManager;
 
     public static void Initialize(Action<IModuleRegister>? builderConfig = null)
-        => _serviceProvider ??= ModuleServiceBuilder.Build(builderConfig);
+    {
+        _serviceProvider ??= ModuleServiceBuilder.Build(builderConfig);
+        FinalizeInitialization();
+    }
     public static void Initialize(IServiceProvider externalProvider)
-        => _serviceProvider ??= externalProvider;
-
+    {
+        _serviceProvider ??= externalProvider;
+        FinalizeInitialization();
+    }
+    private static void FinalizeInitialization()
+    {
+        _beatTimer = Resolve<BeatTimer>();
+        _loggerManager = Resolve<ILoggerManager>(); 
+        _logger = _loggerManager.Main;
+        _classesManager = Resolve<ClassesManager>();
+        _optionsManager = Resolve<OptionsManager>();
+        _paramParserManager = Resolve<ParamParserManager>();
+        _commandsManager = Resolve<CommandsManager>();
+        _localizationManager = Resolve<LocalizationManager>();
+    }
     public static TService Resolve<TService>() where TService : class
     {
         if (_serviceProvider is null) Initialize();
         var service = _serviceProvider?.GetService(typeof(TService));
-        return service as TService 
+        var r = service as TService 
             ?? throw new InvalidOperationException($"Service {typeof(TService).Name} not registered or failed resolve in service provider {_serviceProvider}.");
+        _cachedServices.RemoveWhere(static i => !i.TryGetTarget(out _));
+        if (!_cachedServices.Any(i => i.TryGetTarget(out var v) && v == service))
+            _cachedServices.Add(new WeakReference<object>(service!));
+        return r;
     }
+
+    #region Manage instances
+    private readonly static HashSet<WeakReference<object>> _cachedServices = [];
+    public static void Exit(bool force)
+    {
+        if (!force && _logger is not null)
+        {
+            _logger.Warning(new ProcessException("The process will be closed in 3 seconds if there are no more waiting tasks."));
+            Task.Run(async () =>
+            {
+                await Task.Delay(3000);
+                while (true)
+                {
+                    if (!force && !_loggerManager!.TemporarilyNoEntriesToUpdate) 
+                        await Task.Yield();
+                    foreach (var item in _cachedServices)
+                    {
+                        if (item.TryGetTarget(out var obj) && obj is IDisposable disposable)
+                            disposable.Dispose();
+                    }
+                    LogCommands.Reconstruct();
+                    Environment.Exit(0);
+                }
+            });
+        }
+    }
+    #endregion
 }

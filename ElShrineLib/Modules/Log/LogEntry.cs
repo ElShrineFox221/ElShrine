@@ -3,7 +3,7 @@ namespace ElShrine.Modules.Log;
 /// <summary>
 /// Provides a read-only interface for accessing core properties of a log entry.
 /// </summary>
-public interface IEntryAccessor
+public interface IEntry
 {
     /// <summary> Gets the unique identifier (auto-incrementing ID) of the entry. </summary>
     public long Id { get; }
@@ -20,7 +20,7 @@ public interface IEntryAccessor
     public int ThreadId { get; }
 
     /// <summary> Gets the nesting depth of the scope (used for UI indentation or hierarchical representation). </summary>
-    public int Depth { get; }
+    public int Depth { get; set; }
 
     /// <summary> Gets a value indicating whether this entry marks the end of its current scope. </summary>
     public bool IsEndOfScope { get; }
@@ -37,11 +37,10 @@ public interface IEntryAccessor
     /// <returns>A short string describing the entry content.</returns>
     public string GetSummary();
 }
-
 /// <summary>
 /// An abstract base class for log entries, encapsulating common metadata such as ID, timestamp, and thread context.
 /// </summary>
-public abstract class LogEntry : IEntryAccessor
+public abstract class LogEntry : IEntry
 {
     private static long _nextEntryId = 0;
 
@@ -55,7 +54,7 @@ public abstract class LogEntry : IEntryAccessor
     public long Timestamp { get; } = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
     /// <inheritdoc/>
-    public int Depth { get; internal set; } = 0;
+    public int Depth { get; set; } = 0;
 
     /// <inheritdoc/>
     public bool IsEndOfScope { get; internal set; } = false;

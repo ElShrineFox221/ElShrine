@@ -11,18 +11,14 @@ public class LogScopeTreeOverflowException(int max) : Exception($"Maximum scope 
 /// <summary>
 /// Encapsulates a method that handles entry updates within a specific session context.
 /// </summary>
-public delegate void SessionEntriesUpdatedHandler(LogScope parentScope, LogEntry newEntry);
+public delegate void SessionEntriesUpdatedHandler(LogScopeAccessor parentScopeAccessor, LogEntry newEntry);
 
 /// <summary>
 /// Manages a logging session, providing hierarchical scope management and entry dispatching.
 /// Uses <see cref="AsyncLocal{T}"/> to track the current scope across asynchronous execution flows.
 /// </summary>
-public sealed class LogSession : IDisposable
+public sealed class LogSession : ILogger, IDisposable
 {
-    /// <summary> Gets the unique name of this session. </summary>
-    public readonly string SessionName;
-    /// <summary> Gets the unique numeric ID of this session. </summary>
-    public readonly int SessionId;
     /// <summary> Gets the maximum allowed nesting depth for scopes. </summary>
     public readonly int MaxDepth;
 
@@ -31,8 +27,10 @@ public sealed class LogSession : IDisposable
     private readonly LogScopeAccessor _rootScopeAccessor;
     private readonly ConcurrentDictionary<long, LogScope> _scopes;
 
-    /// <summary> Gets the root scope of this session. </summary>
-    public LogScope RootScope => _rootScope;
+
+    public string Name { get; }
+    public int Id { get; }
+    public LogScopeAccessor RootScopeAccessor => new(_rootScope);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LogSession"/> class.
@@ -42,8 +40,8 @@ public sealed class LogSession : IDisposable
     /// <param name="maxDepth">The maximum scope depth (defaults to 255).</param>
     public LogSession(string sessionName, int sessionId, int maxDepth = 255)
     {
-        SessionName = sessionName;
-        SessionId = sessionId;
+        Name = sessionName;
+        Id = sessionId;
         MaxDepth = maxDepth;
         _currentScope = new();
         _rootScope = new(this, null, string.Empty, true);
@@ -65,14 +63,13 @@ public sealed class LogSession : IDisposable
     /// <param name="info">The description content for the new scope.</param>
     /// <param name="ignoreChildrenErrors">If true, errors from sub-scopes will not bubble up to this scope.</param>
     /// <returns>A <see cref="LogScopeAccessor"/> to manage the new scope, or <c>null</c> if the max depth is reached.</returns>
-    public LogScopeAccessor? OpenScope(EntryContent info, bool ignoreChildrenErrors = false)
+    public LogScopeAccessor OpenScope(EntryContent info, bool ignoreChildrenErrors = false)
     {
         var scope = CurrentScope;
         if (scope.Depth > MaxDepth - 2)
         {
-            // Note: Assuming 'this.Error' is an extension method or part of the session's logging capability
             this.Error(new LogScopeTreeOverflowException(MaxDepth));
-            return null;
+            return new(CurrentScope);
         }
         var newScope = new LogScope(this, scope, info, ignoreChildrenErrors);
         _scopes.TryAdd(newScope.Id, newScope);
@@ -83,18 +80,20 @@ public sealed class LogSession : IDisposable
     }
 
     /// <summary> Gets the current active scope. </summary>
-    public LogScope GetCurrentScope() => CurrentScope;
+    public LogScopeAccessor GetCurrentScopeAccessor() => new(CurrentScope);
 
     /// <summary> Retrieves a specific scope by its ID. </summary>
-    public LogScope? GetScope(long id)
-        => _scopes.TryGetValue(id, out var scope) ? scope : null;
-
-    /// <summary>
-    /// Restores the current scope pointer to a parent scope. Used internally when a scope ends.
-    /// </summary>
-    internal void RestoreScope(LogScope from, LogScope to)
+    public bool TryGetScope(long id, out LogScopeAccessor scopeAccessor)
     {
-        if (CurrentScope == from) _currentScope.Value = to;
+        var suc = _scopes.TryGetValue(id, out var scope);
+        scopeAccessor = suc ? new(scope!) : new(_rootScope);
+        return suc;
+    }
+
+    public void OnScopeEnded(LogScope endedScope)
+    {
+        if (CurrentScope == endedScope && endedScope.Parent is not null)
+            _currentScope.Value = endedScope.Parent;
     }
     #endregion
 
@@ -111,58 +110,11 @@ public sealed class LogSession : IDisposable
     {
         var scope = CurrentScope;
         var r = scope.AddEntry(entry);
-        SessionEntriesUpdated?.Invoke(scope, entry);
+        SessionEntriesUpdated?.Invoke(new(scope), entry);
         return r;
     }
 
-    #region Table
-    /// <summary>
-    /// Helper method to build a tabular data representation as an <see cref="InfoEntry"/>.
-    /// </summary>
-    /// <param name="title">The title log item for the table.</param>
-    /// <param name="entry">The output info entry containing the rendered table.</param>
-    /// <param name="extraPad">Additional padding spaces between columns.</param>
-    /// <param name="itemCols">A params array of column data, where each column is an array of <see cref="LogItem"/>.</param>
-    public static void BuildTable(LogItem title, out InfoEntry? entry, int extraPad = 1, params LogItem[][] itemCols)
-    {
-        entry = null;
-        if (itemCols.Length == 0) return;
-
-        var rowCount = itemCols.Max(c => c?.Length ?? 0);
-        if (rowCount == 0) return;
-
-        var colWidths = new int[itemCols.Length];
-        for (var i = 0; i < itemCols.Length; i++)
-            colWidths[i] = (itemCols[i]?.Max(i => i.ToString().Length) ?? 0) + extraPad;
-
-        title = LogItem.Normal($"{title}\n", title.Style);
-        var tableItems = new List<LogItem>();
-        for (int i = 0; i < rowCount; i++)
-        {
-            for (int j = 0; j < itemCols.Length; j++)
-            {
-                var col = itemCols[j];
-                var targetWidth = colWidths[j];
-                var isRowLastItem = j == itemCols.Length - 1;
-                if (i < col.Length)
-                {
-                    var originalItem = col[i];
-                    var text = originalItem.ToString().PadRight(targetWidth);
-                    if (isRowLastItem) text += '\n';
-                    var item = LogItem.Normal(text, originalItem.Style);
-                    tableItems.Add(item);
-                }
-                else
-                {
-                    var text = new string(' ', targetWidth);
-                    if (isRowLastItem) text += '\n';
-                    tableItems.Add(LogItem.Normal(text));
-                }
-            }
-        }
-        entry = new InfoEntry(new([title, .. tableItems]));
-    }
-    #endregion
+    
     #endregion
 
     /// <summary>

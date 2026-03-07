@@ -141,10 +141,10 @@ public sealed class ConsoleVM : ViewModelBase, IInitializable<ConsoleVM>
     public CommandInputBarDataVM CommandInputBarData { get; init; } = new([]);
     #endregion
 }
-public sealed class SessionVM : ViewModelBase<LogSession>, ISessionStatefulLogListener<ScopeVM, EntryVM>
+public sealed class SessionVM : ViewModelBase<ILogger>, ISessionStatefulLogListener<ScopeVM, EntryVM>
 {
-    public string Name => Model.SessionName;
-    public long Id => Model.SessionId;
+    public string Name => Model.Name;
+    public long Id => Model.Id;
     public string CombinedNameId => GetCombinedNameId(Model);
     public ObservableCollection<EntryVM> Roots;
     public ICollection<EntryVM> RootNodes => Roots;
@@ -154,11 +154,11 @@ public sealed class SessionVM : ViewModelBase<LogSession>, ISessionStatefulLogLi
         Roots = [];
     }
 
-    private static string GetCombinedNameId(LogSession session)
-       => $"{session.SessionName}({session.SessionId})";
+    private static string GetCombinedNameId(ILogger session)
+       => $"{session.Name}({session.Id})";
 
     public ScopeVM BuildScope(IScopeAccessor accessor)
         => new(this, accessor);
-    public EntryVM BuildEntry(IEntryAccessor accessor)
+    public EntryVM BuildEntry(IEntry accessor)
         => new(this, accessor);
 }

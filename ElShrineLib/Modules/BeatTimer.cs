@@ -7,24 +7,8 @@ namespace ElShrine.Modules;
 /// 提供全局高精度的节拍计时服务。
 /// 基于 Windows 多媒体定时器解析度调整与 <see cref="PeriodicTimer"/> 实现。
 /// </summary>
-[InitializationInfo(PreInstantiate = true, Priority = Bootstrapper.PRIO_TIMER)]
-public sealed partial class BeatTimer : IInitializable<BeatTimer>, IDisposable
+public sealed partial class BeatTimer : IDisposable
 {
-    #region Singleton
-    private readonly static Lazy<BeatTimer> instanceLazy = new(() => new());
-
-    /// <summary>
-    /// 获取 <see cref="BeatTimer"/> 的单例实例。
-    /// </summary>
-    public static BeatTimer Instance => Bootstrapper.GetInstance<BeatTimer>();
-
-    /// <summary>
-    /// 初始化计时器模块。
-    /// </summary>
-    /// <returns>计时器实例。</returns>
-    public static BeatTimer Initialize() => instanceLazy.Value;
-    #endregion
-
     #region Win32 API
     [LibraryImport("winmm.dll")]
     private static partial uint timeBeginPeriod(uint uPeriod);
@@ -41,7 +25,7 @@ public sealed partial class BeatTimer : IInitializable<BeatTimer>, IDisposable
     private long tickCounter;
     private bool isDisposed;
 
-    private BeatTimer()
+    public BeatTimer()
     {
         _ = timeBeginPeriod(1);
         timer = new PeriodicTimer(TimeSpan.FromMilliseconds(10));

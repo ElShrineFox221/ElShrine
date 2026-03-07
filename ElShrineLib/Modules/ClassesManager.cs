@@ -4,26 +4,21 @@ using System.Reflection;
 
 namespace ElShrine.Modules;
 
-[InitializationInfo(PreInstantiate = true, Priority = Bootstrapper.PRIO_CLASSES)]
-public sealed class ClassesManager : IInitializable<ClassesManager>
+public sealed class ClassesManager
 {
-    #region Singleton
-    private static readonly Lazy<ClassesManager> instanceLazy = new(() => new());
-    public static ClassesManager Instance => Bootstrapper.GetInstance<ClassesManager>();
-    public static ClassesManager Initialize() => instanceLazy.Value;
-    #endregion
-
     private readonly HashSet<Assembly> assemblies = [];
     private readonly Queue<Assembly> unvalidatedAssemblies = new();
 
     public Func<Assembly, bool>? AssembliesFilter { get; set; }
     public IEnumerable<Assembly> FilteredAssemblies => AssembliesFilter is null ? assemblies : assemblies.Where(AssembliesFilter);
     public IReadOnlyList<Assembly> Assemblies => [.. assemblies];
-    private static LogSession Session => LogProducer.Instance.CoreSession;
-    private ClassesManager()
+    private readonly ILogger _logger;
+    public ClassesManager(ILoggerManager log)
     {
+        _logger = log.Main;
+
         var initialAsbs = LoadAllAssemblies();
-        Session.Log($"Loaded referenced all {GetAssembliesText(initialAsbs.Count)}.");
+        _logger.Log($"Loaded referenced all {GetAssembliesText(initialAsbs.Count)}.");
         UpdateAssemblies(initialAsbs);
         //
         LoadExtraAssemblies(Environment.CurrentDirectory);
@@ -40,7 +35,7 @@ public sealed class ClassesManager : IInitializable<ClassesManager>
         {
             if (assemblies.Add(asb)) unvalidatedAssemblies.Enqueue(asb);
         }
-        Session.Log($"There are {GetAssembliesText(unvalidatedAssemblies.Count)} to be vaildated.");
+        _logger.Log($"There are {GetAssembliesText(unvalidatedAssemblies.Count)} to be vaildated.");
     }
 
     private const string dllExtension = ".dll";
@@ -52,7 +47,7 @@ public sealed class ClassesManager : IInitializable<ClassesManager>
     }
     public List<Assembly> LoadExtraAssemblies(IEnumerable<string> modulePaths)
     {
-        using var scope = Session.OpenScope("Loading extra assemblies...");
+        using var scope = _logger.OpenScope("Loading extra assemblies...");
         var processedPaths = new List<LogItem>();
         var results = new List<LogItem>();
         var newLoaded = new List<Assembly>();
@@ -75,16 +70,16 @@ public sealed class ClassesManager : IInitializable<ClassesManager>
             }
             catch (Exception e)
             {
-                Session.Error(e);
+                _logger.Error(e);
                 results.Add(LogItem.Normal(ErrorEntry.GetShortErrorName(e, nameof(LogItemStyle.Error)), LogItemStyle.Error));
             }
         }
         if (processedPaths.Count > 0)
         {
-            LogSession.BuildTable(LogItem.Normal(string.Empty), out var entry, 3, [.. processedPaths], [.. results]);
-            if (entry is not null) Session.Log(entry);
+            EntryContent.BuildTable(LogItem.Normal(string.Empty), out var entry, 3, [.. processedPaths], [.. results]);
+            if (entry is not null) _logger.Log(entry);
         }
-        Session.ConfigEnd($"Loaded extra {GetAssembliesText(newLoaded.Count)}.");
+        _logger.ConfigEnd($"Loaded extra {GetAssembliesText(newLoaded.Count)}.");
         if (newLoaded.Count > 0)
         {
             UpdateAssemblies(newLoaded);
@@ -92,7 +87,7 @@ public sealed class ClassesManager : IInitializable<ClassesManager>
         }
         return newLoaded;
     }
-    private static void LoadDependencies(Assembly root, HashSet<Assembly> currentSet, List<Assembly> newlyAdded)
+    private void LoadDependencies(Assembly root, HashSet<Assembly> currentSet, List<Assembly> newlyAdded)
     {
         var queue = new Queue<AssemblyName>(root.GetReferencedAssemblies());
         while (queue.TryDequeue(out var name))
@@ -112,7 +107,7 @@ public sealed class ClassesManager : IInitializable<ClassesManager>
             }
             catch(Exception ex) 
             {
-                Session.Error(ex);
+                _logger.Error(ex);
             }
         }
     }
@@ -189,7 +184,7 @@ public sealed class ClassesManager : IInitializable<ClassesManager>
         while (unvalidatedAssemblies.TryDequeue(out var asb)) toValidate.Add(asb);
         if (toValidate.Count == 0) return;
         //
-        using var scope = Session.OpenScope($"Validating {GetAssembliesText(toValidate.Count)}...");
+        using var scope = _logger.OpenScope($"Validating {GetAssembliesText(toValidate.Count)}...");
         try
         {
             var attributedTypes = GetClassesByAttribute<ValidatableBaseAttribute>(true, toValidate);
@@ -200,7 +195,7 @@ public sealed class ClassesManager : IInitializable<ClassesManager>
                     if (!attr.DoValidate(type, null))
                     {
                         var e = new ValidationFailedException(attr.ValidateFailedReason ?? string.Empty);
-                        Session.Error(e);
+                        _logger.Error(e);
                     }
                     else
                     {
@@ -213,7 +208,7 @@ public sealed class ClassesManager : IInitializable<ClassesManager>
                                 if (!mAttr.DoValidate(typeof(MemberInfo), member))
                                 {
                                     var e = new ValidationFailedException(mAttr.ValidateFailedReason ?? string.Empty);
-                                    Session.Error(e);
+                                    _logger.Error(e);
                                 }
                             }
                         }
@@ -224,11 +219,11 @@ public sealed class ClassesManager : IInitializable<ClassesManager>
         }
         catch (Exception e)
         {
-            Session.Error(e);
+            _logger.Error(e);
         }
         finally
         {
-            Session.ConfigEnd($"Validation process completed, {sw.GetStopwatchElapsed()}");
+            _logger.ConfigEnd($"Validation process completed, {sw.GetStopwatchElapsed()}");
         }
     }
 }
