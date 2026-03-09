@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElShrineLib.Wpf.Generators"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElShrineLib.Wpf.Generators.Attributes", "ElShrineLib.Wpf.Generators.Attributes\ElShrineLib.Wpf.Generators.Attributes.csproj", "{4CEA932A-E0E8-46D4-9AD0-87700717AD46}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestPlugin", "TestPlugin\TestPlugin.csproj", "{337EB138-2DA7-49B2-8B31-A868463481D1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{4CEA932A-E0E8-46D4-9AD0-87700717AD46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CEA932A-E0E8-46D4-9AD0-87700717AD46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CEA932A-E0E8-46D4-9AD0-87700717AD46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{337EB138-2DA7-49B2-8B31-A868463481D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{337EB138-2DA7-49B2-8B31-A868463481D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{337EB138-2DA7-49B2-8B31-A868463481D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{337EB138-2DA7-49B2-8B31-A868463481D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

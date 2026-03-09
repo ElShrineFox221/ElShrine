@@ -37,7 +37,9 @@ public sealed class CommandInvoker
     public bool IsRouteValid => !string.IsNullOrWhiteSpace(RoutedStr);
     public ICommandResult? ExecutionResult { get; private set; } = null;
     public bool Executed => ExecutionResult is not null;
-    private static ILoggerManager Log => field ??= MBootstrapper.Resolve<ILoggerManager>();
+    private static ILoggerManager Log => field ??= CoreModuleAccessor.Log;
+    private static ParamParserManager ParaParser => field ??= CoreModuleAccessor.paramParserManager;
+    private static CommandsManager Command => field ??= CoreModuleAccessor.commandsManager;
 
     #region builders
     public static CommandInvoker Build(string str) => new(str);
@@ -134,7 +136,7 @@ public sealed class CommandInvoker
             return;
         }
         //
-        var matches = MBootstrapper.Resolve<CommandsManager>().Get(cataName, itemName);
+        var matches = Command.Get(cataName, itemName);
         if (matches.Count == 0)
         {
             error = new($"{ParseFailed}: Unknown command: {cataName}.{itemName}");
@@ -154,7 +156,7 @@ public sealed class CommandInvoker
             {
                 for (int i = 0; i < parameters.Length; i++)
                 {
-                    if (!MBootstrapper.Resolve<ParamParserManager>().TryConvert(args[i], parameters[i].ParameterType, out parsedParams[i]))
+                    if (!ParaParser.TryConvert(args[i], parameters[i].ParameterType, out parsedParams[i]))
                     {
                         localSuc = false;
                         break;

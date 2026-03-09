@@ -10,7 +10,7 @@ namespace ElShrine.Commands;
 [CommandCarrier]
 public static class GlobalCommands
 {
-    private static ILogger Logger => field ??= MBootstrapper.Resolve<ILoggerManager>().Main;
+    private static ILogger Logger => field ??= CoreModuleAccessor.Log.Main;
     private static void AddColsRow<T>(List<T>[] cols, Func<T> defaultFactory, params T?[] rowItems)
     {
         for (var i = 0; i < cols.Length; i++)
@@ -36,7 +36,7 @@ public static class GlobalCommands
             LogItem.Normal("Parameters", LogItemStyle.NoticeDarkYellow),
             LogItem.Normal("Description", LogItemStyle.NoticeDarkYellow),
             LogItem.Normal("Implementation", LogItemStyle.NoticeDarkYellow));
-        var allItems = MBootstrapper.Resolve<CommandsManager>().GetAll();
+        var allItems = CoreModuleAccessor.commandsManager.GetAll();
         if (groupedByCata)
         {
             var sortedGroups = allItems.GroupBy(static ci => ci.VirtualCataName)

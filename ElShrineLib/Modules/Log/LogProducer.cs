@@ -3,7 +3,7 @@ using System.Threading.Channels;
 
 namespace ElShrine.Modules.Log;
 
-public sealed class LogProducer : ILoggerManager, IDisposable
+internal sealed class LogProducer : ILoggerManager, IDisposable
 {
     #region Services
     private readonly ILogWriter _writer;

@@ -1,5 +1,6 @@
 ﻿using ElShrine.Commands;
 using ElShrine.Modules;
+using ElShrine.Modules.Plugin;
 using ElShrine.Modules.Log;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -111,7 +112,6 @@ public sealed class InitializationInfoAttribute : ValidatableClassAttribute
     }
 }
 
-
 public interface IModuleRegister
 {
     void RegisterModule<TService, TImplementation>(TImplementation? instance = null)
@@ -122,6 +122,69 @@ public interface IModuleRegister
 }
 public static class MBootstrapper
 {
+    public static TInstance InstanceConstructorInvoker<TInstance>(
+        IDictionary<Type, object> cachedInstances,
+        IReadOnlyDictionary<Type, Type>? typeMap = null)
+        => (TInstance)InstanceConstructorInvoker(typeof(TInstance), cachedInstances, typeMap);
+    public static object InstanceConstructorInvoker(
+        Type instanceType,
+        IDictionary<Type, object> cachedInstances,
+        IReadOnlyDictionary<Type, Type>? typeMap = null)
+    {
+        var resolvingStack = new Stack<Type>();
+        object Resolve(Type type)
+        {
+            if (cachedInstances.TryGetValue(type, out var cached))
+                return cached;
+            if (resolvingStack.Contains(type))
+                throw new InvalidOperationException($"Circular dependency detected for type '{type.Name}'.");
+            if(typeMap is null || !typeMap.TryGetValue(type, out var implementationType))
+                implementationType = type;
+            if (implementationType.IsInterface || implementationType.IsAbstract)
+                throw new InvalidOperationException($"Cannot instantiate abstract type or interface '{implementationType.Name}'.");
+            resolvingStack.Push(implementationType);
+            try
+            {
+                var constructors = implementationType.GetConstructors().OrderByDescending(c => c.GetParameters().Length);
+                foreach (var ctor in constructors)
+                {
+                    try
+                    {
+                        var parameters = ctor.GetParameters();
+                        var args = new object?[parameters.Length];
+                        for (int i = 0; i < parameters.Length; i++)
+                        {
+                            var param = parameters[i];
+                            if (param.HasDefaultValue)
+                            {
+                                args[i] = param.DefaultValue;
+                                continue;
+                            }
+                            var paramType = param.ParameterType;
+                            try
+                            {
+                                args[i] = Resolve(paramType);
+                            }
+                            catch
+                            {
+                                args[i] = null;
+                            }
+                        }
+                        var instance = Activator.CreateInstance(implementationType, args)!;
+                        cachedInstances[type] = instance;
+                        return instance;
+                    }
+                    catch { }
+                }
+                throw new InvalidOperationException($"No suitable constructor found for {implementationType.Name}");
+            }
+            finally
+            {
+                resolvingStack.Pop();
+            }
+        }
+        return Resolve(instanceType);
+    }
     private sealed class ModuleServiceBuilder : IServiceProvider, IModuleRegister
     {
         private readonly ConcurrentDictionary<Type, object> _instancesCached = [];
@@ -135,9 +198,11 @@ public static class MBootstrapper
         }
         private void RegisterDefaultModules()
         {
-            RegisterModule<BeatTimer>();
             RegisterModule<ILogWriter, LogWriter>();
             RegisterModule<ILoggerManager, LogProducer>();
+            RegisterModule<IPluginManager, PluginManagerF>();
+            //old modules
+            RegisterModule<BeatTimer>();
             RegisterModule<ClassesManager>();
             RegisterModule<OptionsManager>();
             RegisterModule<ParamParserManager>();
@@ -148,14 +213,16 @@ public static class MBootstrapper
         #region IServiceProvider implementations
         public object? GetService(Type serviceType)
         {
-            if (_instancesCached.TryGetValue(serviceType, out var instance))
+            var type = _servicesRegistered.TryGetValue(serviceType, out var t) ? t : serviceType;
+            return InstanceConstructorInvoker(type, _instancesCached, _servicesRegistered);
+            /*if (_instancesCached.TryGetValue(serviceType, out var instance))
                 return instance;
             if (!_servicesRegistered.TryGetValue(serviceType, out var registeredType))
                 return null;
             instance = CreateInstance(registeredType);
             if (instance is not null)
                 _instancesCached.TryAdd(serviceType, instance);
-            return instance;
+            return instance;*/
         }
         private object? CreateInstance(Type type)
         {
@@ -192,19 +259,16 @@ public static class MBootstrapper
 
                     if (canConstruct)
                     {
-                        // 尝试创建实例
                         try
                         {
                             return Activator.CreateInstance(type, args);
                         }
-                        catch(Exception e)
+                        catch
                         {
-                            // 构造失败，继续尝试下一个构造函数
                             continue;
                         }
                     }
                 }
-                // 所有构造函数均无法解析
                 return null;
             }
             finally
@@ -216,7 +280,7 @@ public static class MBootstrapper
                 if (_instancesCached.TryGetValue(type, out var instance))
                     return instance;
                 if (!_servicesRegistered.TryGetValue(type, out var implementationType))
-                    return null; // 未注册
+                    return null;
                 if (resolvingStack.Contains(implementationType))
                     throw new InvalidOperationException($"Circular dependency detected for type '{implementationType.Name}'.");
                 instance = CreateInstanceInternal(implementationType, resolvingStack);
@@ -253,14 +317,10 @@ public static class MBootstrapper
     }
 
     private static IServiceProvider? _serviceProvider;
-    private static BeatTimer? _beatTimer;
+    //
+
     private static ILoggerManager? _loggerManager;
     private static ILogger? _logger;
-    private static ClassesManager? _classesManager;
-    private static OptionsManager? _optionsManager;
-    private static ParamParserManager? _paramParserManager;
-    private static CommandsManager? _commandsManager;
-    private static LocalizationManager? _localizationManager;
 
     public static void Initialize(Action<IModuleRegister>? builderConfig = null)
     {
@@ -274,14 +334,10 @@ public static class MBootstrapper
     }
     private static void FinalizeInitialization()
     {
-        _beatTimer = Resolve<BeatTimer>();
-        _loggerManager = Resolve<ILoggerManager>(); 
+        CoreModuleAccessor.Initialize();
+        _loggerManager = CoreModuleAccessor.Log; 
         _logger = _loggerManager.Main;
-        _classesManager = Resolve<ClassesManager>();
-        _optionsManager = Resolve<OptionsManager>();
-        _paramParserManager = Resolve<ParamParserManager>();
-        _commandsManager = Resolve<CommandsManager>();
-        _localizationManager = Resolve<LocalizationManager>();
+        _ = CoreModuleAccessor.Plugin;
     }
     public static TService Resolve<TService>() where TService : class
     {

@@ -2,15 +2,16 @@
 using ElShrine.Modules.Log;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.Loader;
 
 namespace ElShrine;
 
 public static class ModulesExtensions
 {
     #region LocalizationExtensions;
-    private static LocalizationManager _lm => MBootstrapper.Resolve<LocalizationManager>();
+    private static LocalizationManager Localization =>CoreModuleAccessor.localizationManager;
     public static string Translate(this string key, string? defaultS = null, params object?[] args)
-            => _lm.Translate(key, defaultS, args);
+            => Localization.Translate(key, defaultS, args);
     #endregion
 
     #region LogExtensions;
@@ -106,16 +107,36 @@ public static class ModulesExtensions
     public static bool IsImplementOf(this Type subType, Type baseType) => baseType.IsBaseOrInterfaceOf(subType);
 
     public static bool IsStaticClass(this Type type) => type.IsSealed && type.IsAbstract;
-    public static bool IsDistinct(this Assembly a, string filePath) =>
-        !string.Equals(a.Location, filePath, StringComparison.OrdinalIgnoreCase);
-    public static bool IsDistinct(this Assembly a, AssemblyName bName) =>
-        !string.Equals(a.GetName().FullName, bName.FullName, StringComparison.Ordinal);
-    public static bool IsDistinct(this Assembly a, Assembly b)
+
+    public static IEnumerable<Type> GetImplements(this AssemblyLoadContext? ctx, Type baseTypeOrInterface)
     {
-        if (a.FullName != b.FullName) return true;
-        return a.IsDynamic || b.IsDynamic
-            ? a.ManifestModule.ModuleVersionId != b.ManifestModule.ModuleVersionId
-            : a.Location != b.Location;
+        ctx ??= AssemblyLoadContext.Default;
+        var targetRange = ctx.Assemblies;
+        foreach (var asb in targetRange)
+        {
+            var types = asb.GetTypes();
+            foreach (var type in types)
+            {
+                if (baseTypeOrInterface.IsBaseOrInterfaceOf(type)) yield return type;
+            }
+        }
+        yield break;
+    }
+    public static IEnumerable<KeyValuePair<Type, IReadOnlyList<TAttr>>> GetClassesByAttribute<TAttr>(this AssemblyLoadContext? ctx, bool inherit)
+        where TAttr : Attribute
+    {
+        ctx ??= AssemblyLoadContext.Default;
+        var targetRange = ctx.Assemblies;
+        foreach (var asb in targetRange)
+        {
+            var types = asb.GetTypes();
+            foreach (var type in types)
+            {
+                var attrs = type.GetCustomAttributes<TAttr>(inherit).ToList();
+                if (attrs.Count > 0)
+                    yield return new(type, attrs);
+            }
+        }
     }
     #endregion
 }

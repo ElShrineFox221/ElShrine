@@ -1,9 +1,11 @@
 ﻿using ElShrine.Modules.Log;
+using ElShrine.Modules.TBD;
 using System.Diagnostics;
 using System.Reflection;
 
 namespace ElShrine.Modules;
 
+[Obsolete(TBDMsg.TBD_MSG)]
 public sealed class ClassesManager
 {
     private readonly HashSet<Assembly> assemblies = [];
@@ -55,7 +57,7 @@ public sealed class ClassesManager
         foreach (var path in modulePaths)
         {
             if (!File.Exists(path)) continue;
-            if (currentSet.Any(asb => !asb.IsDistinct(path))) continue;
+            if (currentSet.Any(asb => asb.Location == path)) continue;
             processedPaths.Add(LogItem.Normal(path, LogItemStyle.SubInfo));
             try
             {
@@ -92,7 +94,7 @@ public sealed class ClassesManager
         var queue = new Queue<AssemblyName>(root.GetReferencedAssemblies());
         while (queue.TryDequeue(out var name))
         {
-            if (currentSet.Any(asb => !asb.IsDistinct(name))) continue;
+            if (currentSet.Any(asb => asb.GetName() == name)) continue;
             try
             {
                 var loaded = Assembly.Load(name);
@@ -122,7 +124,7 @@ public sealed class ClassesManager
             var queue = new Queue<AssemblyName>(asb.GetReferencedAssemblies());
             while (queue.TryDequeue(out var name))
             {
-                if (resultSet.Any(a => !a.IsDistinct(name))) continue;
+                if (resultSet.Any(a => a.GetName() == name)) continue;
                 try
                 {
                     var loaded = Assembly.Load(name);

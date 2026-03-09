@@ -7,8 +7,8 @@ namespace ElShrine.Commands;
 public static class LogCommands
 {
     private static ILogger Logger => Log.Main;
-    private static ILogWriter LogWriter => MBootstrapper.Resolve<ILogWriter>();
-    private static ILoggerManager Log => MBootstrapper.Resolve<ILoggerManager>();
+    private static ILogWriter LogWriter => CoreModuleAccessor.LogWriter;
+    private static ILoggerManager Log => CoreModuleAccessor.Log;
 
     [Command(Description = "Delete all old logs in log folder.")]
     public static void Clear()
