@@ -1,4 +1,4 @@
-﻿using ElShrine.Modules;
+﻿using ElShrine.Modules.Option;
 using System.Windows.Controls;
 
 namespace ElShrine.VisualTool.Pages.OptionsHub.OptionItemEditors

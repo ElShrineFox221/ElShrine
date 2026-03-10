@@ -36,7 +36,7 @@ public sealed class CommandsManager
 
     private readonly ClassesManager _cm;
     private readonly ILogger _logger;
-    public CommandsManager(ClassesManager cm, ILoggerManager log)
+    public CommandsManager(ClassesManager cm, ILogManager log)
     {
         _cm = cm;
         _logger = log.Main;

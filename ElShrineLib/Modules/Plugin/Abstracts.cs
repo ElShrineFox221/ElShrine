@@ -8,8 +8,8 @@ public interface IPlugin
     void PreUnload(AssemblyLoadContext mainCtx, AssemblyLoadContext curCtx);
 }
 
-public delegate void PluginLoadedHandler(IPlugin plugin, PluginInfo info);
-public delegate void PluginPreUnloadHandler(IPlugin plugin, PluginInfo info);
+public delegate void PluginLoadedHandler(IPlugin plugin, PluginInfo info, AssemblyLoadContext ctx);
+public delegate void PluginPreUnloadHandler(IPlugin plugin, PluginInfo info, AssemblyLoadContext ctx);
 public delegate void PluginUnloadedHandler(PluginInfo info);
 
 public interface IPluginManager

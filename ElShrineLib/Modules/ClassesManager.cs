@@ -15,7 +15,7 @@ public sealed class ClassesManager
     public IEnumerable<Assembly> FilteredAssemblies => AssembliesFilter is null ? assemblies : assemblies.Where(AssembliesFilter);
     public IReadOnlyList<Assembly> Assemblies => [.. assemblies];
     private readonly ILogger _logger;
-    public ClassesManager(ILoggerManager log)
+    public ClassesManager(ILogManager log)
     {
         _logger = log.Main;
 

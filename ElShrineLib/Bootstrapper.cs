@@ -6,9 +6,11 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using ElShrine.Modules.Option;
 
 namespace ElShrine;
 
+[Obsolete("Use MBootstrapper instead")]
 public static class Bootstrapper
 {
     #region Const Priorities
@@ -122,6 +124,51 @@ public interface IModuleRegister
 }
 public static class MBootstrapper
 {
+    private static IServiceProvider? _serviceProvider;
+    //
+
+    private static ILogManager? _loggerManager;
+    private static ILogger? _logger;
+
+    public static void Initialize(Action<IModuleRegister>? builderConfig = null)
+    {
+        _serviceProvider ??= ModuleServiceBuilder.Build(builderConfig);
+        FinalizeInitialization();
+    }
+    public static void Initialize(IServiceProvider externalProvider)
+    {
+        _serviceProvider ??= externalProvider;
+        FinalizeInitialization();
+    }
+    private static void FinalizeInitialization()
+    {
+        CoreModuleAccessor.Initialize();
+        _loggerManager = CoreModuleAccessor.Log; 
+        _logger = _loggerManager.Main;
+        _ = CoreModuleAccessor.Plugin;
+    }
+
+    #region Resolve
+    public static TService Resolve<TService>() where TService : class
+        => (TService)ResolveInternal(typeof(TService), cache: true);
+    public static object Resolve(Type intanceType, bool cache)
+        => ResolveInternal(intanceType, cache);
+    private static object ResolveInternal(Type serviceType, bool cache)
+    {
+        if (_serviceProvider is null) Initialize();
+        var service = _serviceProvider?.GetService(serviceType);
+        if (service is null || !service.GetType().IsAssignableTo(serviceType)) 
+            throw new InvalidOperationException($"Service {serviceType.Name} not registered or failed resolve in service provider {_serviceProvider}.");
+        if (cache)
+        {
+            _cachedServices.RemoveWhere(static i => !i.TryGetTarget(out _));
+            if (!_cachedServices.Any(i => i.TryGetTarget(out var v) && v == service))
+                _cachedServices.Add(new WeakReference<object>(service!));
+        }
+        return service;
+    }
+    #endregion
+
     public static TInstance InstanceConstructorInvoker<TInstance>(
         IDictionary<Type, object> cachedInstances,
         IReadOnlyDictionary<Type, Type>? typeMap = null)
@@ -138,7 +185,7 @@ public static class MBootstrapper
                 return cached;
             if (resolvingStack.Contains(type))
                 throw new InvalidOperationException($"Circular dependency detected for type '{type.Name}'.");
-            if(typeMap is null || !typeMap.TryGetValue(type, out var implementationType))
+            if (typeMap is null || !typeMap.TryGetValue(type, out var implementationType))
                 implementationType = type;
             if (implementationType.IsInterface || implementationType.IsAbstract)
                 throw new InvalidOperationException($"Cannot instantiate abstract type or interface '{implementationType.Name}'.");
@@ -199,12 +246,12 @@ public static class MBootstrapper
         private void RegisterDefaultModules()
         {
             RegisterModule<ILogWriter, LogWriter>();
-            RegisterModule<ILoggerManager, LogProducer>();
-            RegisterModule<IPluginManager, PluginManagerF>();
+            RegisterModule<ILogManager, LogProducer>();
+            RegisterModule<IPluginManager, PluginManager>();
+            RegisterModule<IOptionManager, OptionManager>();
             //old modules
             RegisterModule<BeatTimer>();
             RegisterModule<ClassesManager>();
-            RegisterModule<OptionsManager>();
             RegisterModule<ParamParserManager>();
             RegisterModule<CommandsManager>();
             RegisterModule<LocalizationManager>();
@@ -214,80 +261,7 @@ public static class MBootstrapper
         public object? GetService(Type serviceType)
         {
             var type = _servicesRegistered.TryGetValue(serviceType, out var t) ? t : serviceType;
-            return InstanceConstructorInvoker(type, _instancesCached, _servicesRegistered);
-            /*if (_instancesCached.TryGetValue(serviceType, out var instance))
-                return instance;
-            if (!_servicesRegistered.TryGetValue(serviceType, out var registeredType))
-                return null;
-            instance = CreateInstance(registeredType);
-            if (instance is not null)
-                _instancesCached.TryAdd(serviceType, instance);
-            return instance;*/
-        }
-        private object? CreateInstance(Type type)
-        {
-            var resolvingStack = new Stack<Type>();
-            return CreateInstanceInternal(type, resolvingStack);
-        }
-        private object? CreateInstanceInternal(Type type, Stack<Type> resolvingStack)
-        {
-            resolvingStack.Push(type);
-            try
-            {
-                var constructors = type.GetConstructors().OrderByDescending(c => c.GetParameters().Length);
-                foreach (var ctor in constructors)
-                {
-                    var parameters = ctor.GetParameters();
-                    var args = new object?[parameters.Length];
-                    bool canConstruct = true;
-                    for (int i = 0; i < parameters.Length; i++)
-                    {
-                        var parameter = parameters[i];
-                        if (parameter.HasDefaultValue)
-                        {
-                            args[i] = parameter.DefaultValue;
-                            continue;
-                        }
-                        var paramType = parameters[i].ParameterType;
-                        args[i] = ResolveType(paramType, resolvingStack);
-                        if (args[i] == null && !parameters[i].IsOptional)
-                        {
-                            canConstruct = false;
-                            break;
-                        }
-                    }
-
-                    if (canConstruct)
-                    {
-                        try
-                        {
-                            return Activator.CreateInstance(type, args);
-                        }
-                        catch
-                        {
-                            continue;
-                        }
-                    }
-                }
-                return null;
-            }
-            finally
-            {
-                resolvingStack.Pop();
-            }
-            object? ResolveType(Type type, Stack<Type> resolvingStack)
-            {
-                if (_instancesCached.TryGetValue(type, out var instance))
-                    return instance;
-                if (!_servicesRegistered.TryGetValue(type, out var implementationType))
-                    return null;
-                if (resolvingStack.Contains(implementationType))
-                    throw new InvalidOperationException($"Circular dependency detected for type '{implementationType.Name}'.");
-                instance = CreateInstanceInternal(implementationType, resolvingStack);
-                if (instance is not null)
-                    _instancesCached.TryAdd(type, instance);
-                return instance;
-            }
+            return InstanceConstructorInvoker(serviceType, _instancesCached, _servicesRegistered);
         }
         #endregion
 
@@ -301,7 +275,7 @@ public static class MBootstrapper
             if (instance is null)
             {
                 var implementationType = typeof(TImplementation);
-                if(implementationType.IsAbstract)
+                if (implementationType.IsAbstract)
                     throw new InvalidOperationException($"Cannot register abstract type {implementationType.Name}.");
                 _servicesRegistered[serviceType] = implementationType;
             }
@@ -316,41 +290,6 @@ public static class MBootstrapper
         #endregion
     }
 
-    private static IServiceProvider? _serviceProvider;
-    //
-
-    private static ILoggerManager? _loggerManager;
-    private static ILogger? _logger;
-
-    public static void Initialize(Action<IModuleRegister>? builderConfig = null)
-    {
-        _serviceProvider ??= ModuleServiceBuilder.Build(builderConfig);
-        FinalizeInitialization();
-    }
-    public static void Initialize(IServiceProvider externalProvider)
-    {
-        _serviceProvider ??= externalProvider;
-        FinalizeInitialization();
-    }
-    private static void FinalizeInitialization()
-    {
-        CoreModuleAccessor.Initialize();
-        _loggerManager = CoreModuleAccessor.Log; 
-        _logger = _loggerManager.Main;
-        _ = CoreModuleAccessor.Plugin;
-    }
-    public static TService Resolve<TService>() where TService : class
-    {
-        if (_serviceProvider is null) Initialize();
-        var service = _serviceProvider?.GetService(typeof(TService));
-        var r = service as TService 
-            ?? throw new InvalidOperationException($"Service {typeof(TService).Name} not registered or failed resolve in service provider {_serviceProvider}.");
-        _cachedServices.RemoveWhere(static i => !i.TryGetTarget(out _));
-        if (!_cachedServices.Any(i => i.TryGetTarget(out var v) && v == service))
-            _cachedServices.Add(new WeakReference<object>(service!));
-        return r;
-    }
-
     #region Manage instances
     private readonly static HashSet<WeakReference<object>> _cachedServices = [];
     public static void Exit(bool force)
@@ -363,7 +302,7 @@ public static class MBootstrapper
                 await Task.Delay(3000);
                 while (true)
                 {
-                    if (!force && !_loggerManager!.TemporarilyNoEntriesToUpdate) 
+                    if (!force && !_loggerManager!.TemporarilyNoEntriesToUpdate)
                         await Task.Yield();
                     foreach (var item in _cachedServices)
                     {

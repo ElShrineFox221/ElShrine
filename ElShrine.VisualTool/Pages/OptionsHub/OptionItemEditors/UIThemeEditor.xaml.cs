@@ -1,5 +1,6 @@
 ﻿using ElShrine.Graphics;
 using ElShrine.Modules;
+using ElShrine.Modules.Option;
 using ElShrine.Wpf.UITheme;
 using System.Collections.ObjectModel;
 using System.Windows;

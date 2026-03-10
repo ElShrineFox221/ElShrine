@@ -44,7 +44,7 @@ public interface ISessionStatefulLogListener<TScopeNode, TEntryNode>
 }
 #endregion
 
-public interface ILoggerManager
+public interface ILogManager
 {
     //log
     ILogger GetOrCreateLogger(string name);

@@ -1,4 +1,5 @@
 ﻿using ElShrine.Modules;
+using ElShrine.Modules.Option;
 using ElShrine.Wpf;
 using System.Collections.ObjectModel;
 using System.Windows;

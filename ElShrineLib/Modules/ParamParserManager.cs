@@ -44,7 +44,7 @@ public sealed class ParamParserManager
 {
     private readonly ClassesManager _cm;
     private readonly ILogger _logger;
-    public ParamParserManager(ClassesManager cm, ILoggerManager log)
+    public ParamParserManager(ClassesManager cm, ILogManager log)
     {
         _cm = cm;
         _logger = log.Main;

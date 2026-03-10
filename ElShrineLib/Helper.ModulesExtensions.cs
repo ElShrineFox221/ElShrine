@@ -58,6 +58,11 @@ public static class ModulesExtensions
     }
     #endregion
 
+    #region PluginExtensions;
+    public static string GetContextName(this AssemblyLoadContext ctx)
+        => ctx == AssemblyLoadContext.Default ? "Default" : (ctx.Name ?? "Unknow");
+    #endregion
+
     #region ClassesExtensions;
     public static bool NameEqual(this Type type, string matchName, bool ignoreCase = false)
     {

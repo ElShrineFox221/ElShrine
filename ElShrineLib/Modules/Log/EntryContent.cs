@@ -79,5 +79,7 @@ public sealed record EntryContent(LogItem[] LogItems)
         }
         entry = new([title, .. tableItems]);
     }
+    public static LogItem[] OmitOrExecutingPattern(string text0, string text1, LogItemStyle text1Style, LogItemStyle text0Style = LogItemStyle.Info)
+        => [LogItem.Normal(text0, text0Style), LogItem.Normal(text1, text1Style), LogItem.Normal("...", text0Style)];
     #endregion
 }

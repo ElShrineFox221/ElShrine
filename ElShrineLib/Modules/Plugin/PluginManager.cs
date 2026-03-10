@@ -1,14 +1,48 @@
 ﻿using ElShrine.Modules.Log;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Security.Cryptography;
 
 namespace ElShrine.Modules.Plugin;
 
-internal sealed class PluginManagerF : IPluginManager
+internal sealed class PluginManager : IPluginManager
 {
     private sealed class PluginLoadContext(string folder) : AssemblyLoadContext(folder, true)
     {
+        private readonly AssemblyDependencyResolver _resolver = new(folder);
+        public readonly string Folder = folder;
         public int RefCount = 0;
+        protected override Assembly? Load(AssemblyName assemblyName)
+        {
+            // get path by resolver
+            var p = _resolver.ResolveAssemblyToPath(assemblyName);
+            if (p is not null)
+            {
+                try
+                {
+                    var asm = LoadFromAssemblyPath(p);
+                    return asm;
+                }
+                catch { }
+            }
+            // try load from default context
+            try
+            {
+                var asm = Default.LoadFromAssemblyName(assemblyName);
+                if (asm is not null)
+                    return asm;
+            }
+            catch { }
+            try
+            {
+                var path = Path.Combine(Folder, assemblyName.Name + ".dll");
+                path = Path.GetFullPath(path);
+                var asm = LoadFromAssemblyPath(path);
+                return asm;
+            }
+            catch { }
+            return null;
+        }
     }
 
     private const string PLUGIN_FOLDER = "Plugins";
@@ -60,6 +94,10 @@ internal sealed class PluginManagerF : IPluginManager
             }
             ctx.Unload();
         }
+        //
+        if (_availablePluginInfos.Count == 0)
+            return;
+        LoadPlugin(_availablePluginInfos.First().Value);
     }
     public IPlugin LoadPlugin(PluginInfo info)
     {
@@ -81,10 +119,10 @@ internal sealed class PluginManagerF : IPluginManager
             var type = ctx.GetImplements(typeof(IPlugin)).Where(t => t.FullName == info.PluginFullName).FirstOrDefault()
                 ?? throw new PluginException($"Plugin {info.Name} entry point type {info.PluginFullName} is not found.");
             ctx.RefCount++;
-            plugin = (IPlugin)Activator.CreateInstance(type)!;
+            plugin = (IPlugin)MBootstrapper.Resolve(type, cache: false);
             _loadedPlugins[info.Id] = plugin;
             plugin.PostLoad(AssemblyLoadContext.Default, ctx);
-            PluginLoaded?.Invoke(plugin, info);
+            PluginLoaded?.Invoke(plugin, info, ctx);
         }
         finally
         {
@@ -97,10 +135,11 @@ internal sealed class PluginManagerF : IPluginManager
     {
         if (!_loadedPlugins.Remove(info.Id, out var plugin)) 
             return false;
-        PluginPreUnload?.Invoke(plugin, info);
+        
         
         if (_loadedContexts.TryGetValue(info.Folder, out var ctx))
         {
+            PluginPreUnload?.Invoke(plugin, info, ctx);
             ctx.RefCount--;
             if (ctx.RefCount == 0)
             {
@@ -109,14 +148,19 @@ internal sealed class PluginManagerF : IPluginManager
             }
             plugin.PreUnload(AssemblyLoadContext.Default, ctx);
         }
-        else plugin.PreUnload(AssemblyLoadContext.Default, AssemblyLoadContext.Default);
+        else
+        {
+            var _ctx = AssemblyLoadContext.Default;
+            PluginPreUnload?.Invoke(plugin, info, _ctx);
+            plugin.PreUnload(_ctx, _ctx);
+        }
         PluginUnloaded?.Invoke(info);
         return true;
     }
 
 
 
-    public PluginManagerF(ILoggerManager log)
+    public PluginManager(ILogManager log)
     {
         _logger = log.Main;
         _availablePluginInfos = [];
@@ -127,7 +171,7 @@ internal sealed class PluginManagerF : IPluginManager
         var names = ctx.Assemblies.Select(asm => asm.GetName());
         LoadAllReferences(ctx, names);
         if (!DoValidate(ctx))
-            _logger.Error($"{nameof(PluginManagerF)} initialize failed.");
+            _logger.Error($"{nameof(PluginManager)} initialize failed.");
     }
 
 
@@ -142,11 +186,17 @@ internal sealed class PluginManagerF : IPluginManager
         return ctx;
     }
 
-    private Assembly? LoadAssemblyAndLog(AssemblyLoadContext ctx, AssemblyName name)
+    private Assembly? LoadAssemblyAndLog(AssemblyLoadContext ctx, AssemblyName name, out bool isLoaded)
     {
         var logger = _logger;
-        if (ctx.Assemblies.FirstOrDefault(asm => AssemblyName.ReferenceMatchesDefinition(asm.GetName(), name)) is Assembly asm)
+        isLoaded = true;
+        bool predict(Assembly asm)
+            => AssemblyName.ReferenceMatchesDefinition(asm.GetName(), name);
+        if (AssemblyLoadContext.Default.Assemblies.FirstOrDefault(predict) is Assembly asm_default)
+            return asm_default;
+        if (ctx != AssemblyLoadContext.Default && ctx.Assemblies.FirstOrDefault(predict) is Assembly asm)
             return asm;
+        isLoaded = false;
         try
         {
             asm = ctx.LoadFromAssemblyName(name);
@@ -158,6 +208,7 @@ internal sealed class PluginManagerF : IPluginManager
             logger.Error(e);
             return null;
         }
+       
     }
     private void LoadAllReferences(AssemblyLoadContext ctx, IEnumerable<AssemblyName> roots)
     {
@@ -165,8 +216,8 @@ internal sealed class PluginManagerF : IPluginManager
         using var sc = logger.OpenScope("Loading references...");
         foreach(var name in roots)
         {
-            var asm = LoadAssemblyAndLog(ctx, name);
-            if (asm is null) 
+            var asm = LoadAssemblyAndLog(ctx, name, out var isLoaded);
+            if (asm is null || isLoaded) 
                 continue;
             LoadAllReferenceAssembliesInternal(ctx, asm);
         }
@@ -179,8 +230,8 @@ internal sealed class PluginManagerF : IPluginManager
                     continue;
                 try
                 {
-                    var newLoadedAssembly = LoadAssemblyAndLog(ctx, refAssembly);
-                    if (newLoadedAssembly is null)
+                    var newLoadedAssembly = LoadAssemblyAndLog(ctx, refAssembly, out var isLoaded);
+                    if (newLoadedAssembly is null || isLoaded)
                         continue;
                     LoadAllReferenceAssembliesInternal(ctx, newLoadedAssembly);
                 }
@@ -195,10 +246,10 @@ internal sealed class PluginManagerF : IPluginManager
     private bool DoValidate(AssemblyLoadContext ctx)
     {
         var logger = _logger;
-        var ctxName = ctx == AssemblyLoadContext.Default ? "Default" : (ctx.Name ?? "Unknown");
-        using var sc = logger.OpenScope(OmitOrExecutingPattern("Scanning assembly context ", ctxName, LogItemStyle.NoticeCyan));
+        var ctxName = ctx.GetContextName();
+        using var sc = logger.OpenScope(EntryContent.OmitOrExecutingPattern("Scanning assembly context ", ctxName, LogItemStyle.NoticeCyan));
         try
-        {
+        { 
             var attributedTypes = ctx.GetClassesByAttribute<ValidatableBaseAttribute>(true).ToList();
             logger.Log($"Found {"type".GetPuralWithNum(attributedTypes.Count)} to be validated.");
             foreach (var (type, attrs) in attributedTypes)
@@ -247,11 +298,11 @@ internal sealed class PluginManagerF : IPluginManager
         var suc = sc.Errors.Count == 0;
         return suc;
     }
-    private static string GetFileHash(string path)
+    private static string GetFileHash(string filePath)
     {
-        throw new NotImplementedException();
+        using var sha256 = SHA256.Create();
+        using var stream = File.OpenRead(filePath);
+        return BitConverter.ToString(sha256.ComputeHash(stream)).Replace("-", "");
     }
-    private static LogItem[] OmitOrExecutingPattern(string text0, string text1, LogItemStyle text1Style, LogItemStyle text0Style = LogItemStyle.Info)
-        => [LogItem.Normal(text0, text0Style), LogItem.Normal(text1, text1Style), LogItem.Normal("...", text0Style)];
     private static string GetAssembliesText(int count) => nameof(Assembly).GetPuralWithNum(count).ToLower();
 }

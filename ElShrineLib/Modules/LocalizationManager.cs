@@ -70,7 +70,7 @@ public sealed class LocalizationManager
         }
     }
     public event ValueChangedHandler<Language>? LanguageChanged;
-    public LocalizationManager(ILoggerManager log)
+    public LocalizationManager(ILogManager log)
     {
         _logger = log.Main;
         ReloadLocalization();

@@ -8,7 +8,7 @@ public static class LogCommands
 {
     private static ILogger Logger => Log.Main;
     private static ILogWriter LogWriter => CoreModuleAccessor.LogWriter;
-    private static ILoggerManager Log => CoreModuleAccessor.Log;
+    private static ILogManager Log => CoreModuleAccessor.Log;
 
     [Command(Description = "Delete all old logs in log folder.")]
     public static void Clear()

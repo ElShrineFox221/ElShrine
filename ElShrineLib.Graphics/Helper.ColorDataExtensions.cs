@@ -152,7 +152,7 @@ namespace ElShrine
         }
 
         /// <summary>
-        /// 设置 HSV 明度 (Value)
+        /// 设置 HSV 明度 (ValueText)
         /// </summary>
         /// <param name="value">明度 (0.0 - 1.0)</param>
         public static ColorData WithHsvValue(this ColorData color, double value)

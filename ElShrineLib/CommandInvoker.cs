@@ -37,7 +37,7 @@ public sealed class CommandInvoker
     public bool IsRouteValid => !string.IsNullOrWhiteSpace(RoutedStr);
     public ICommandResult? ExecutionResult { get; private set; } = null;
     public bool Executed => ExecutionResult is not null;
-    private static ILoggerManager Log => field ??= CoreModuleAccessor.Log;
+    private static ILogManager Log => field ??= CoreModuleAccessor.Log;
     private static ParamParserManager ParaParser => field ??= CoreModuleAccessor.paramParserManager;
     private static CommandsManager Command => field ??= CoreModuleAccessor.commandsManager;
 
