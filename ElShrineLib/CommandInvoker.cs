@@ -81,7 +81,7 @@ public sealed class CommandInvoker
                     error = new($"{RouteFailed}: Found no valid command part starts with letter or digit");
                     return;
                 }
-            } while (!char.IsLetterOrDigit(str[chrPos]));
+            } while (!char.IsLetterOrDigit(str[chrPos]) && route != CommandRoute.Log);
             routedStr = str[chrPos..];
         }
         else routedStr = str;
