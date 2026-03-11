@@ -1,13 +1,20 @@
-﻿using ElShrine.Modules;
+﻿using ElShrine.Modules.Option;
 
 namespace ElShrine.Options
 {
-    [Option]
-    public static class CommonOption
+    public class CommonOption : OptionBase
     {
         [OptionItem(Description = "Directly delete files or move to recycle bin.")]
-        public static bool DirectlyDel { get; set; } = false;
+        public bool DirectlyDel
+        {
+            get => field;
+            set => SetProperty(ref field, value);
+        } = false;
         [OptionItem(Description = "Directory of log files.")]
-        public static string LogDir { get; set; } = "Logs";
+        public string LogDir
+        {
+            get => field;
+            set => SetProperty(ref field, value);
+        } = "Logs";
     }
 }

@@ -17,7 +17,7 @@ public sealed class OptionItem : ICataItem
 
     public bool HasChanged => !Equals(GetValue(), DefaultValue);
     public object? GetValue() => MemberInfo.GetMemberValue(OwnerInstance);
-    public bool SetValue(object? value)
+    internal bool SetValue(object? value)
     {
         if (Equals(value, GetValue())) return false;
         MemberInfo.SetMemberValue(OwnerInstance, value);

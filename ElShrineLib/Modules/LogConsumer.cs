@@ -50,15 +50,6 @@ public class SystemConsoleLogger : ILogSessionListener
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.Write(" WRN ");
                 break;
-            case "LogScope":
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write(" BEG ");
-                break;
-            case "Close":
-            case "Shutdown":
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
-                Console.Write(" END ");
-                break;
             default: // Normal
                 if (entry.IsEndOfScope)
                 {
@@ -66,9 +57,14 @@ public class SystemConsoleLogger : ILogSessionListener
                     Console.Write(" END ");
                     break;
                 }
+                else if (entry.IsScopeHeader)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write(" BEG ");
+                    break;
+                }
                 Console.ForegroundColor = ConsoleColor.Gray;
                 Console.Write(" INF ");
-
                 break;
         }
         Console.ResetColor();
@@ -119,7 +115,5 @@ public class SystemConsoleLogger : ILogSessionListener
         };
         return (fg, bg);
     }
-
-    
 }
 #endregion

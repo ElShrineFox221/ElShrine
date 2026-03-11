@@ -122,6 +122,12 @@ public interface IModuleRegister
     void RegisterModule<TService>(TService? instance = null) 
         where TService : class;
 }
+public interface IServiceContainer : IServiceProvider
+{
+    bool AddService(Type serviceType);
+    object GetService(Type serviceType, bool cache);
+    bool RemoveService(Type serviceType);
+}
 public static class MBootstrapper
 {
     private static IServiceProvider? _serviceProvider;
@@ -150,16 +156,16 @@ public static class MBootstrapper
 
     #region Resolve
     public static TService Resolve<TService>() where TService : class
-        => (TService)ResolveInternal(typeof(TService), cache: true);
-    public static object Resolve(Type intanceType, bool cache)
-        => ResolveInternal(intanceType, cache);
-    private static object ResolveInternal(Type serviceType, bool cache)
+        => (TService)ResolveInternal(typeof(TService), disposeWhenExit: true);
+    public static object Resolve(Type intanceType, bool disposeWhenExit)
+        => ResolveInternal(intanceType, disposeWhenExit);
+    private static object ResolveInternal(Type serviceType, bool disposeWhenExit)
     {
         if (_serviceProvider is null) Initialize();
         var service = _serviceProvider?.GetService(serviceType);
         if (service is null || !service.GetType().IsAssignableTo(serviceType)) 
             throw new InvalidOperationException($"Service {serviceType.Name} not registered or failed resolve in service provider {_serviceProvider}.");
-        if (cache)
+        if (disposeWhenExit)
         {
             _cachedServices.RemoveWhere(static i => !i.TryGetTarget(out _));
             if (!_cachedServices.Any(i => i.TryGetTarget(out var v) && v == service))
@@ -171,12 +177,14 @@ public static class MBootstrapper
 
     public static TInstance InstanceConstructorInvoker<TInstance>(
         IDictionary<Type, object> cachedInstances,
-        IReadOnlyDictionary<Type, Type>? typeMap = null)
-        => (TInstance)InstanceConstructorInvoker(typeof(TInstance), cachedInstances, typeMap);
+        IReadOnlyDictionary<Type, Type>? typeMap = null, 
+        bool cacheUnregistered = true)
+        => (TInstance)InstanceConstructorInvoker(typeof(TInstance), cachedInstances, typeMap, cacheUnregistered);
     public static object InstanceConstructorInvoker(
         Type instanceType,
         IDictionary<Type, object> cachedInstances,
-        IReadOnlyDictionary<Type, Type>? typeMap = null)
+        IReadOnlyDictionary<Type, Type>? typeMap = null, 
+        bool cacheUnregistered = true)
     {
         var resolvingStack = new Stack<Type>();
         object Resolve(Type type)
@@ -218,7 +226,8 @@ public static class MBootstrapper
                             }
                         }
                         var instance = Activator.CreateInstance(implementationType, args)!;
-                        cachedInstances[type] = instance;
+                        if ((typeMap?.ContainsKey(type) ?? false) || cacheUnregistered)
+                            cachedInstances[type] = instance;
                         return instance;
                     }
                     catch { }
@@ -260,8 +269,7 @@ public static class MBootstrapper
         #region IServiceProvider implementations
         public object? GetService(Type serviceType)
         {
-            var type = _servicesRegistered.TryGetValue(serviceType, out var t) ? t : serviceType;
-            return InstanceConstructorInvoker(serviceType, _instancesCached, _servicesRegistered);
+            return InstanceConstructorInvoker(serviceType, _instancesCached, _servicesRegistered, false);
         }
         #endregion
 

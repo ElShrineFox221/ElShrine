@@ -1,5 +1,4 @@
-﻿using ElShrine;
-using ElShrine.Common;
+﻿using ElShrine.Common;
 using ElShrine.Common.DataStructure;
 using ElShrine.Common.Serialization;
 using ElShrine.Modules.Log;
@@ -97,29 +96,29 @@ internal sealed class OptionDataSet
 }
 #endregion
 
-public sealed class OptionManager : IOptionManager
+internal class OptionManager : IOptionManager
 {
-    public const string GlobalOptionName = "Global";
     public const string OptionFileName = "Options";
     private readonly ILogManager _log;
     private readonly ILogger _logger;
     private readonly IPluginManager _plugins;
-    private CataItemIndexer<OptionItem> _optionItemsIndexer;
     private readonly ConcurrentDictionary<AssemblyLoadContext, List<OptionItem>> _optionItems;
+    private readonly ConcurrentDictionary<AssemblyLoadContext, ConcurrentDictionary<Type, OptionBase>> _options;
     private readonly OptionDataSet _optionDataSet;
-    public event ValueChangedHandler<object>? OptionChanged;
-    public event CollectionChangedHandler<Cata>? CataChanged;
+    private CataItemIndexer<OptionItem> _optionItemsIndexer;
+    public event ValueChangedHandler<object?>? OptionChanged;
+
     public OptionManager(ILogManager log, IPluginManager plugins)
     {
         _log = log;
         _logger = _log.Main;
         _plugins = plugins;
         _optionItems = [];
+        _options = [];
         _optionDataSet = new();
-        // initialize
+        //
         var mainOptionItems = CollectOptionItems(AssemblyLoadContext.Default);
         _optionItemsIndexer = new(mainOptionItems);
-
         // subscribe
         _plugins.PluginLoaded += OnPluginLoaded;
         _plugins.PluginPreUnload += OnPluginPreUnload;
@@ -138,7 +137,20 @@ public sealed class OptionManager : IOptionManager
     private void OnPluginPreUnload(IPlugin plugin, PluginInfo pluginInfo, AssemblyLoadContext ctx)
     {
         _optionItems.Remove(ctx, out _);
+        if(_options.Remove(ctx, out var options))
+        {
+            foreach (var option in options)
+            {
+                option.Value.PropertyChanged -= OnOptionChanged;
+            }
+        }
         RebuildOptionItemsIndexer();
+    }
+    private void OnOptionChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        var items = sender is not OptionBase option ? [] : Get(option.OptionCataName);
+        var item = items.FirstOrDefault(i => i.ActualItemName == e.PropertyName);
+        OptionChanged?.Invoke(item, new(e.OldValue, e.NewValue));
     }
     #endregion
 
@@ -147,14 +159,30 @@ public sealed class OptionManager : IOptionManager
     {
         using var sc = _logger.OpenScope(EntryContent.OmitOrExecutingPattern("Collecting option items from context ", ctx.GetContextName(), LogItemStyle.NoticeBlue));
         var optionItems = new List<OptionItem>();
-        var optionClasses = AssemblyLoadContext.Default.GetClassesByAttribute<OptionAttribute>(true);
-        _logger.Log($"{GetOptionItemsText(optionClasses.Count())} found.");
-        foreach (var (optionClass, optionClassAttrs) in optionClasses)
+        if (!_options.TryGetValue(ctx, out var options))
+            _options[ctx] = options = [];
+        var ocs = AssemblyLoadContext.Default.GetImplements(typeof(OptionBase));
+        _logger.Log($"{GetOptionItemsText(ocs.Count())} found.");
+        var classes = ocs.Where(t =>
         {
-            var attr = optionClassAttrs[0];
-            var name = TransOptionsName(string.IsNullOrWhiteSpace(attr.OverrideName) ? optionClass.Name : attr.OverrideName);
-            var instance = optionClass.IsStaticClass() ? null :
-                MBootstrapper.Resolve(optionClass, cache: true);
+            if (t.IsAbstract) 
+                return false;
+            var parentType = t.BaseType!;
+            while (parentType.IsAbstract)
+            {
+                if (parentType == typeof(OptionBase)) return true;
+                parentType = parentType.BaseType!;
+            } 
+            return false;
+        });
+        foreach (var optionClass in classes)
+        {
+            if (options.ContainsKey(optionClass))
+                continue;
+            var instance = (MBootstrapper.Resolve(optionClass, disposeWhenExit: true) as OptionBase)!;
+            instance.PropertyChanged += OnOptionChanged;
+            options.TryAdd(optionClass, instance);
+            var name = TransOptionsName(instance.OptionCataName);
             //
             var memberInfos = optionClass.GetMembers(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)
                 .Where(m => m.GetCustomAttribute<OptionItemAttribute>() is not null && m.GetCustomAttribute<IgnoreOptionItemAttribute>() is null);
@@ -181,7 +209,7 @@ public sealed class OptionManager : IOptionManager
                 optionItems.Add(oi);
             }
         }
-        _logger.Log($"Collected {GetOptionAllText(optionClasses.Count(), optionItems.Count)}.");
+        _logger.Log($"Collected {GetOptionAllText(options.Count, optionItems.Count)}.");
         _optionItems[ctx] = optionItems;
         _logger.Log("Refreshed cached option items.");
         return optionItems;
@@ -198,50 +226,33 @@ public sealed class OptionManager : IOptionManager
         => _optionItemsIndexer.GetAllCatas(filter: onlyChanged ? ListAnyHasChangedPredicate : null);
     public IEnumerable<OptionItem> Get(string virtualCata, bool onlyChanged = false)
         => _optionItemsIndexer.QueryCata(
-            cataName: string.IsNullOrWhiteSpace(virtualCata) ? GlobalOptionName : virtualCata,
+            cataName: string.IsNullOrWhiteSpace(virtualCata) ? OptionBase.GlobalOptionName : virtualCata,
             cataType: CataType.Virtual,
             filter: onlyChanged ? HasChangedPredicate : null);
     public IReadOnlyDictionary<Cata, IReadOnlyList<OptionItem>> GetAll(bool onlyChanged = false)
         => _optionItemsIndexer.GetAll(filter: onlyChanged ? ListAnyHasChangedPredicate : null);
+    public TOption GetOption<TOption>() where TOption : OptionBase
+    {
+        var option = _options.Values.SelectMany(o => o.Values).FirstOrDefault(o => o.GetType() == typeof(TOption));
+        return (option as TOption)!;
+    }
 
     private readonly static Predicate<OptionItem> HasChangedPredicate = static item => item.HasChanged;
     private readonly static Predicate<IReadOnlyList<OptionItem>> ListAnyHasChangedPredicate = static l => l.Any(static i => HasChangedPredicate(i));
     #endregion
 
-    /*#region edit operations
-    public bool Set(OptionItem item, object? value) => SetInner(item, value, true);
-    private bool SetInner(OptionItem item, object? value, bool notify)
+    #region edit operations
+    public void Set(OptionItem item, object? value) => SetInner(item, value);
+    private static bool SetInner(OptionItem item, object? value)
     {
         var suc = item.SetValue(value);
-        if (notify) OptionChanged?.Invoke(item, new(null, null, modified: [item]));
         return suc;
     }
-    public void Reset(OptionItem item) => ResetInner(item, true);
-    private bool ResetInner(OptionItem item, bool notify)
+    public void Reset(OptionItem item)
     {
-        var suc = item.SetValue(item.DefaultValue);
-        if (notify) OptionChanged?.Invoke(item, new(null, null, modified: [item]));
-        return suc;
+        SetInner(item, item.DefaultValue);
     }
-    public IReadOnlyList<OptionItem> Reset(string virtualCata)
-    {
-        virtualCata = string.IsNullOrWhiteSpace(virtualCata) ? GlobalOptionName : virtualCata;
-        var items = optionItems.Where(i =>
-        {
-            var matched = i.VirtualCataName.EqualIgnoreCase(virtualCata);
-            if (matched) matched = ResetInner(i, false);
-            return matched;
-        }).ToList();
-        OptionChanged?.Invoke(null, new(null, null, modified: items));
-        return items;
-    }
-    public IReadOnlyList<OptionItem> Reset()
-    {
-        var items = optionItems.Where(i => ResetInner(i, false)).ToList();
-        OptionChanged?.Invoke(null, new(null, null, modified: items));
-        return items;
-    }
-    #endregion*/
+    #endregion
 
     public void Save()
     {
@@ -288,12 +299,13 @@ public sealed class OptionManager : IOptionManager
         return sucReadCount;
     }
 
+
     #region helpers
 
     private static string TransOptionsName(string name)
     {
         var newName = name.RemovePartsIgnoreCase("Options", "Option");
-        if (newName.IsEmpty()) newName = GlobalOptionName;
+        if (newName.IsEmpty()) newName = OptionBase.GlobalOptionName;
         return newName;
     }
 

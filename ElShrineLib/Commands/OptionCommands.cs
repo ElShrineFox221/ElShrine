@@ -6,7 +6,7 @@ namespace ElShrine.Commands;
 [CommandCarrier]
 public static class OptionCommands
 {
-    private static OptionsManager Option => field ??= CoreModuleAccessor.optionsManager;
+    private static IOptionManager Option => field ??= CoreModuleAccessor.Option;
     [Command]
     public static void Save() => Option.Save();
     [Command]

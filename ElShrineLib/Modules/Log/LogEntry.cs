@@ -24,6 +24,7 @@ public interface IEntry
 
     /// <summary> Gets a value indicating whether this entry marks the end of its current scope. </summary>
     public bool IsEndOfScope { get; }
+    public bool IsScopeHeader { get; }
 
     /// <summary> Gets the type name of the entry (typically derived from the class name). </summary>
     public string EntryType { get; }
@@ -58,6 +59,8 @@ public abstract class LogEntry : IEntry
 
     /// <inheritdoc/>
     public bool IsEndOfScope { get; internal set; } = false;
+    /// <inheritdoc/>
+    public virtual bool IsScopeHeader => false;
 
     /// <summary>
     /// Gets the display name for the entry type. 

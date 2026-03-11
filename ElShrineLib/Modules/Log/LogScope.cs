@@ -115,6 +115,9 @@ public sealed class LogScope : InfoEntry, IScopeAccessor
     /// <inheritdoc/>
     public bool IsClosed { get; private set; }
 
+    /// <inheritdoc/>
+    public override bool IsScopeHeader => true;
+
     /// <summary> Event triggered when the scope is fully closed. </summary>
     [Obsolete("Use lifecycle management methods instead of direct event subscription.")]
     private event EventHandler? Closed;
@@ -268,6 +271,7 @@ public readonly struct LogScopeAccessor(LogScope sourceScope, bool isScopeOwner 
     public int Depth { get => scope.Depth; set => scope.Depth = value; }
     /// <inheritdoc/>
     public bool IsEndOfScope => false;
+    public bool IsScopeHeader => true;
     /// <inheritdoc/>
     public string EntryType => scope.EntryType;
     /// <inheritdoc/>

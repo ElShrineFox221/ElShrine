@@ -1,6 +1,7 @@
 ﻿using ElShrine.Common;
 using ElShrine.Modules;
 using ElShrine.Modules.Log;
+using ElShrine.Modules.Option;
 using ElShrine.Options;
 using Microsoft.VisualBasic.FileIO;
 using System.Diagnostics;
@@ -11,6 +12,7 @@ namespace ElShrine.Commands;
 public static class GlobalCommands
 {
     private static ILogger Logger => field ??= CoreModuleAccessor.Log.Main;
+    private static IOptionManager Option => field ??= CoreModuleAccessor.Option;
     private static void AddColsRow<T>(List<T>[] cols, Func<T> defaultFactory, params T?[] rowItems)
     {
         for (var i = 0; i < cols.Length; i++)
@@ -81,9 +83,8 @@ public static class GlobalCommands
                     LogItem.Normal(ci.ToFullName(), LogItemStyle.SubInfo));
             }
         }
-        EntryContent.BuildTable(LogItem.Empty(), out var entry, 4, [.. cataCol], [.. itemCol], [.. paramCol], [.. descCol], [.. implCol]);
+        EntryContent.BuildTable(LogItem.Normal($"There are {"command".GetPuralWithNum(total)} in total:"), out var entry, 4, [.. cataCol], [.. itemCol], [.. paramCol], [.. descCol], [.. implCol]);
         if (entry is not null) Logger.Log(entry);
-        Logger.Log($"There are {"command".GetPuralWithNum(total)} in total:");
     }
     [Command] public static void Help() => Help(true);
     #endregion
@@ -134,7 +135,7 @@ public static class GlobalCommands
     public static void Del(string path)
     {
         bool suc = false;
-        var sign = CommonOption.DirectlyDel;
+        var sign = Option.GetOption<CommonOption>().DirectlyDel;
         if (File.Exists(path) || Directory.Exists(path))
         {
             try
@@ -176,7 +177,7 @@ public static class GlobalCommands
             int fileIgnCount = 0, dirIgnCount = 0;
             int totalFound = entries.Length;
             Logger.Log($"{totalFound} {"item".GetPural(totalFound)} found in directory.");
-            var sign = CommonOption.DirectlyDel;
+            var sign = Option.GetOption<CommonOption>().DirectlyDel;
             try
             {
                 foreach (var entry in entries)

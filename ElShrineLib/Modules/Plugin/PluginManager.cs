@@ -67,16 +67,20 @@ internal sealed class PluginManager : IPluginManager
         _availablePluginInfos.Clear();
         Directory.CreateDirectory(PLUGIN_FOLDER);
         var folders = Directory.GetDirectories(PLUGIN_FOLDER);
+        var folderValidCount = 0;
+        var pluginValidCount = 0;
         foreach (var folder in folders)
         {
             var ctx = LoadPluginAllReferences(folder, out var combinedHash);
             // do validate
             if (DoValidate(ctx))
             {
+                folderValidCount++;
                 // do scan
                 var pts = ctx.GetImplements(typeof(IPlugin));
                 var infos = pts.Where(pt => !pt.IsAbstract).Select(pt =>
                 {
+                    pluginValidCount++;
                     var attr = pt.GetCustomAttribute<PluginAttribute>();
                     return new PluginInfo(
                         Id: $"{folder}_{pt.Name}",
@@ -94,10 +98,7 @@ internal sealed class PluginManager : IPluginManager
             }
             ctx.Unload();
         }
-        //
-        if (_availablePluginInfos.Count == 0)
-            return;
-        LoadPlugin(_availablePluginInfos.First().Value);
+        _logger.Log($"There are {"plugin".GetPuralWithNum(pluginValidCount)} in {"folder".GetPuralWithNum(folderValidCount)}.");
     }
     public IPlugin LoadPlugin(PluginInfo info)
     {
@@ -119,7 +120,7 @@ internal sealed class PluginManager : IPluginManager
             var type = ctx.GetImplements(typeof(IPlugin)).Where(t => t.FullName == info.PluginFullName).FirstOrDefault()
                 ?? throw new PluginException($"Plugin {info.Name} entry point type {info.PluginFullName} is not found.");
             ctx.RefCount++;
-            plugin = (IPlugin)MBootstrapper.Resolve(type, cache: false);
+            plugin = (IPlugin)MBootstrapper.Resolve(type, disposeWhenExit: false);
             _loadedPlugins[info.Id] = plugin;
             plugin.PostLoad(AssemblyLoadContext.Default, ctx);
             PluginLoaded?.Invoke(plugin, info, ctx);
