@@ -47,7 +47,7 @@ internal sealed class OptionDataSet
     [DataMember] private List<OptionRawData> rawData = [];
     public IReadOnlyList<OptionRawData> RawData => rawData;
     private Dictionary<string, OptionRawData> _cachedRawData = [];
-    private SerializerBase _serializer = new XmlSerializer();
+    private SerializerBase _serializer = new JsonSerializer();
     public void RefreshData(IEnumerable<OptionItem> optionItems)
     {
         var data = optionItems.Select(OptionData.FromOptionItem);

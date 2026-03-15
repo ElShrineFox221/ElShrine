@@ -67,7 +67,7 @@ namespace ElShrine.Common.Serialization
                 //Serialize
                 if (fileDetails != null && serializer != null)
                 {
-                    using FileStream fileStream = fileDetails.Open(FileMode.OpenOrCreate, FileAccess.Write);
+                    using FileStream fileStream = fileDetails.Open(FileMode.Create, FileAccess.Write);
                     {
                         serializer.Serialize(data, dataType, fileStream);
                     }
