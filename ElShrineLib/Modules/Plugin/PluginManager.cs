@@ -57,7 +57,7 @@ internal sealed class PluginManager : IPluginManager
         => _loadedPlugins.ToDictionary(kv => _availablePluginInfos[kv.Key], kv => kv.Value);
 
     public event PluginLoadedHandler? PluginLoaded;
-    public event PluginPreUnloadHandler? PluginPreUnload;
+    public event PluginUnloadingHandler? PluginUnloading;
     public event PluginUnloadedHandler? PluginUnloaded;
 
     
@@ -109,7 +109,8 @@ internal sealed class PluginManager : IPluginManager
         PluginLoadContext? ctx = null;
         try
         {
-            if (!_loadedContexts.TryGetValue(pluginInfo.Folder, out ctx))
+            var createNewCtx = !_loadedContexts.TryGetValue(pluginInfo.Folder, out ctx);
+            if (createNewCtx)
             {
                 var newCtx = LoadPluginAllReferences(pluginInfo.Folder, out var combinedHash);
                 if (pluginInfo.FileHash != combinedHash)
@@ -119,11 +120,11 @@ internal sealed class PluginManager : IPluginManager
             //
             var type = ctx.GetImplements(typeof(IPlugin)).Where(t => t.FullName == info.PluginFullName).FirstOrDefault()
                 ?? throw new PluginException($"Plugin {info.Name} entry point type {info.PluginFullName} is not found.");
-            ctx.RefCount++;
+            ctx!.RefCount++;
             plugin = (IPlugin)MBootstrapper.Resolve(type, disposeWhenExit: false);
+            PluginLoaded?.Invoke(plugin, info, ctx, createNewCtx);
             _loadedPlugins[info.Id] = plugin;
             plugin.PostLoad(AssemblyLoadContext.Default, ctx);
-            PluginLoaded?.Invoke(plugin, info, ctx);
         }
         finally
         {
@@ -140,26 +141,25 @@ internal sealed class PluginManager : IPluginManager
         
         if (_loadedContexts.TryGetValue(info.Folder, out var ctx))
         {
-            PluginPreUnload?.Invoke(plugin, info, ctx);
             ctx.RefCount--;
-            if (ctx.RefCount == 0)
+            var unloadingCtx = ctx.RefCount == 0;
+            if (unloadingCtx)
             {
                 _loadedContexts.Remove(info.Folder);
                 ctx.Unload();
             }
             plugin.PreUnload(AssemblyLoadContext.Default, ctx);
+            PluginUnloading?.Invoke(plugin, info, ctx, unloadingCtx);
         }
         else
         {
             var _ctx = AssemblyLoadContext.Default;
-            PluginPreUnload?.Invoke(plugin, info, _ctx);
             plugin.PreUnload(_ctx, _ctx);
+            PluginUnloading?.Invoke(plugin, info, _ctx, false);
         }
         PluginUnloaded?.Invoke(info);
         return true;
     }
-
-
 
     public PluginManager(ILogManager log)
     {

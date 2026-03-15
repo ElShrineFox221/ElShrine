@@ -152,6 +152,7 @@ public static class MBootstrapper
         _loggerManager = CoreModuleAccessor.Log; 
         _logger = _loggerManager.Main;
         _ = CoreModuleAccessor.Plugin;
+        _ = CoreModuleAccessor.Option;
     }
 
     #region Resolve

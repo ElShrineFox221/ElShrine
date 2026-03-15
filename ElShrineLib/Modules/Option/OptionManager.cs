@@ -11,6 +11,7 @@ using System.Runtime.Serialization;
 namespace ElShrine.Modules.Option;
 
 #region Serialization
+[DataContract]
 internal sealed record OptionRawData
 {
     public OptionRawData(string classFullName, string itemName, string? valueText)
@@ -54,7 +55,7 @@ internal sealed class OptionDataSet
         {
             var key = $"{item.Class}.{item.Key}";
             var valueText = item.Value is null ? null : _serializer.SerializeToString(item.Value);
-            _cachedRawData[key] = _cachedRawData[key] with { ValueText = valueText };
+            _cachedRawData[key] = new(item.Class, item.Key, valueText);
         }
     }
     public bool TryParseRawData(OptionItem optionItem, out object? data)
@@ -96,56 +97,62 @@ internal sealed class OptionDataSet
 }
 #endregion
 
-internal class OptionManager : IOptionManager
+internal sealed class OptionManager : PluginResourceTracker<OptionBase>, IOptionManager
 {
     public const string OptionFileName = "Options";
     private readonly ILogManager _log;
     private readonly ILogger _logger;
-    private readonly IPluginManager _plugins;
     private readonly ConcurrentDictionary<AssemblyLoadContext, List<OptionItem>> _optionItems;
-    private readonly ConcurrentDictionary<AssemblyLoadContext, ConcurrentDictionary<Type, OptionBase>> _options;
     private readonly OptionDataSet _optionDataSet;
     private CataItemIndexer<OptionItem> _optionItemsIndexer;
     public event ValueChangedHandler<object?>? OptionChanged;
 
-    public OptionManager(ILogManager log, IPluginManager plugins)
+    public OptionManager(ILogManager log, IPluginManager plugins) : base(plugins)
     {
         _log = log;
         _logger = _log.Main;
-        _plugins = plugins;
         _optionItems = [];
-        _options = [];
         _optionDataSet = new();
         //
-        var mainOptionItems = CollectOptionItems(AssemblyLoadContext.Default);
-        _optionItemsIndexer = new(mainOptionItems);
-        // subscribe
-        _plugins.PluginLoaded += OnPluginLoaded;
-        _plugins.PluginPreUnload += OnPluginPreUnload;
+        CollectResources(AssemblyLoadContext.Default);
+        _optionItemsIndexer = new(_optionItems.SelectMany(i => i.Value));
     }
 
-    #region callbacks
-    private void OnPluginLoaded(IPlugin plugin, PluginInfo pluginInfo, AssemblyLoadContext ctx)
+    #region overrides
+    protected override void OnPluginLoaded(IPlugin plugin, PluginInfo info, AssemblyLoadContext ctx, bool loadedCtx)
     {
-        CollectOptionItems(AssemblyLoadContext.Default);
-        if (ctx != AssemblyLoadContext.Default)
-            CollectOptionItems(ctx);
+        base.OnPluginLoaded(plugin, info, ctx, loadedCtx);
+        _logger.Log($"Collected {GetOptionAllText(Resources[ctx].Values.Count, _optionItems[ctx].Count)}.");
         var count = LoadInternal();
-        _logger.Log($"Loaded {GetOptionItemsText(count)}.");
+        _logger.Log($"Reloaded {GetOptionItemsText(count)}.");
         RebuildOptionItemsIndexer();
     }
-    private void OnPluginPreUnload(IPlugin plugin, PluginInfo pluginInfo, AssemblyLoadContext ctx)
+    protected override void OnPluginUnloading(IPlugin plugin, PluginInfo info, AssemblyLoadContext ctx, bool unloadingCtx)
     {
-        _optionItems.Remove(ctx, out _);
-        if(_options.Remove(ctx, out var options))
+        if (unloadingCtx && Resources.TryGetValue(ctx, out var options))
         {
             foreach (var option in options)
             {
                 option.Value.PropertyChanged -= OnOptionChanged;
             }
         }
+        base.OnPluginUnloading(plugin, info, ctx, unloadingCtx);
         RebuildOptionItemsIndexer();
     }
+    protected override void OnResourceCreated(OptionBase resource, AssemblyLoadContext ctx)
+    {
+        resource.PropertyChanged += OnOptionChanged;
+        var items = ExtractOptionItems(resource);
+        _optionItems.GetOrAdd(ctx, _ => []).AddRange(items);
+    }
+    protected override void OnResourceReleasing(OptionBase resource, AssemblyLoadContext ctx)
+    {
+        resource.PropertyChanged -= OnOptionChanged;
+        _optionItems.TryRemove(ctx, out _);
+    }
+    #endregion
+
+    #region callbacks
     private void OnOptionChanged(object? sender, PropertyChangedEventArgs e)
     {
         var items = sender is not OptionBase option ? [] : Get(option.OptionCataName);
@@ -155,69 +162,44 @@ internal class OptionManager : IOptionManager
     #endregion
 
     #region core
-    private List<OptionItem> CollectOptionItems(AssemblyLoadContext ctx)
+    private static IEnumerable<OptionItem> ExtractOptionItems(OptionBase option)
     {
-        using var sc = _logger.OpenScope(EntryContent.OmitOrExecutingPattern("Collecting option items from context ", ctx.GetContextName(), LogItemStyle.NoticeBlue));
-        var optionItems = new List<OptionItem>();
-        if (!_options.TryGetValue(ctx, out var options))
-            _options[ctx] = options = [];
-        var ocs = AssemblyLoadContext.Default.GetImplements(typeof(OptionBase));
-        _logger.Log($"{GetOptionItemsText(ocs.Count())} found.");
-        var classes = ocs.Where(t =>
+        var instance = option;
+        var optionClass = option.GetType();
+        var name = TransOptionsName(instance.OptionCataName);
+        //
+        var memberInfos = optionClass.GetMembers(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)
+            .Where(m => m.GetCustomAttribute<OptionItemAttribute>() is not null && m.GetCustomAttribute<IgnoreOptionItemAttribute>() is null);
+        foreach (var memberInfo in memberInfos)
         {
-            if (t.IsAbstract) 
-                return false;
-            var parentType = t.BaseType!;
-            while (parentType.IsAbstract)
+            var info = memberInfo.GetCustomAttribute<OptionItemAttribute>()!;
+            var oi = new OptionItem()
             {
-                if (parentType == typeof(OptionBase)) return true;
-                parentType = parentType.BaseType!;
-            } 
-            return false;
-        });
-        foreach (var optionClass in classes)
-        {
-            if (options.ContainsKey(optionClass))
-                continue;
-            var instance = (MBootstrapper.Resolve(optionClass, disposeWhenExit: true) as OptionBase)!;
-            instance.PropertyChanged += OnOptionChanged;
-            options.TryAdd(optionClass, instance);
-            var name = TransOptionsName(instance.OptionCataName);
-            //
-            var memberInfos = optionClass.GetMembers(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)
-                .Where(m => m.GetCustomAttribute<OptionItemAttribute>() is not null && m.GetCustomAttribute<IgnoreOptionItemAttribute>() is null);
-            foreach (var memberInfo in memberInfos)
-            {
-                var info = memberInfo.GetCustomAttribute<OptionItemAttribute>()!;
-                var oi = new OptionItem()
+                ActualCataName = optionClass.FullName!,
+                VirtualCataName = name,
+                ActualItemName = memberInfo.Name,
+                VirtualItemName = info.OverrideName == string.Empty ? memberInfo.Name : info.OverrideName,
+                Description = info.Description,
+                DefaultValue = memberInfo.GetMemberValue(instance),
+                OwnerInstance = instance,
+                ValueType = memberInfo switch
                 {
-                    ActualCataName = optionClass.FullName!,
-                    VirtualCataName = name,
-                    ActualItemName = memberInfo.Name,
-                    VirtualItemName = info.OverrideName == string.Empty ? memberInfo.Name : info.OverrideName,
-                    Description = info.Description,
-                    DefaultValue = memberInfo.GetMemberValue(instance),
-                    OwnerInstance = instance,
-                    ValueType = memberInfo switch
-                    {
-                        FieldInfo fieldInfo => fieldInfo.FieldType,
-                        PropertyInfo propertyInfo => propertyInfo.PropertyType,
-                        _ => typeof(object)
-                    },
-                    MemberInfo = memberInfo
-                };
-                optionItems.Add(oi);
-            }
+                    FieldInfo fieldInfo => fieldInfo.FieldType,
+                    PropertyInfo propertyInfo => propertyInfo.PropertyType,
+                    _ => typeof(object)
+                },
+                MemberInfo = memberInfo
+            };
+            yield return oi;
         }
-        _logger.Log($"Collected {GetOptionAllText(options.Count, optionItems.Count)}.");
-        _optionItems[ctx] = optionItems;
-        _logger.Log("Refreshed cached option items.");
-        return optionItems;
     }
     private void RebuildOptionItemsIndexer()
     {
-        _optionItemsIndexer = new(_optionItems.Values.SelectMany(i => i));
+        var items = _optionItems.Values.SelectMany(i => i).ToList();
+        _optionItemsIndexer = new(items);
         _logger.Log("Rebuilt option items indexer.");
+        _optionDataSet.RefreshData(items);
+        _logger.Log("Refreshed cached option data.");
     }
     #endregion
 
@@ -233,7 +215,7 @@ internal class OptionManager : IOptionManager
         => _optionItemsIndexer.GetAll(filter: onlyChanged ? ListAnyHasChangedPredicate : null);
     public TOption GetOption<TOption>() where TOption : OptionBase
     {
-        var option = _options.Values.SelectMany(o => o.Values).FirstOrDefault(o => o.GetType() == typeof(TOption));
+        var option = Resources.Values.SelectMany(o => o.Values).FirstOrDefault(o => o.GetType() == typeof(TOption));
         return (option as TOption)!;
     }
 
@@ -257,8 +239,7 @@ internal class OptionManager : IOptionManager
     public void Save()
     {
         using var scope = _logger.OpenScope("Saving options...");
-        var items = _optionItems.SelectMany(i => i.Value).ToList();
-        _optionDataSet.RefreshData(items);
+        RebuildOptionItemsIndexer();
         _logger.Log($"Processing {GetOptionItemsText(_optionDataSet.RawData.Count)}...");
         var r = DataHandler.Write(_optionDataSet, new FileDetails(OptionFileName));
         //
@@ -296,9 +277,10 @@ internal class OptionManager : IOptionManager
                 sucReadCount++;
             }
         }
+        if (sucReadCount > 0) 
+            RebuildOptionItemsIndexer();
         return sucReadCount;
     }
-
 
     #region helpers
 
