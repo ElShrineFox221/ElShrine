@@ -21,31 +21,54 @@ public static class LogCommands
     public static void OpenDir()
         => CommandInvoker.Build($"{typeof(GlobalCommands).FullName}.{nameof(GlobalCommands.Open)} \"{LogWriter.LogCurrentDirectory}\"").ExecuteAsync().Wait();
 
-    [Command]
+    /*[Command]
     public static void Reconstruct(string rawLogPath)
     {
         Path.GetFullPath(rawLogPath);
         if (!File.Exists(rawLogPath)) Logger.Error($"File not exists: {rawLogPath}");
         LogStructureRepairer.Reconstruct(rawLogPath);
         Logger.Log($"Reconstructed: {rawLogPath}");
-    }
+    }*/
+    [Command]
+    public static void Reconstruct(string rawLogPath)
+        => ReconstructInternal(rawLogPath, true);
     [Command]
     public static void Reconstruct()
+        => Reconstruct(LogWriter.LogCurrentDirectory);
+    internal static void ReconstructInternal(string path, bool doLog)
     {
-        var path = LogWriter.LogCurrentDirectory;
-        var files = Directory.GetFiles(path, "*.raw.log");
-        Logger.Log($"{"file".GetPuralWithNum(files.Length)} found.");
-        foreach (var file in files)
+        var logger = doLog ? Logger : null;
+        var fullPath = Path.GetFullPath(path);
+        if (File.Exists(fullPath))
         {
             try
             {
-                LogStructureRepairer.Reconstruct(file);
-                Logger.Log($"Reconstructed: {file}");
+                LogStructureRepairer.Reconstruct(fullPath);
+                logger?.Log($"Reconstructed: {fullPath}");
             }
             catch (Exception ex)
             {
-                Logger.Error(ex);
+                logger?.Error(ex);
             }
         }
+        else if (Directory.Exists(fullPath))
+        {
+            var files = Directory.GetFiles(fullPath, "*.raw.log", SearchOption.TopDirectoryOnly);
+            logger?.Log($"{files.Length} file(s) found in directory '{fullPath}'.");
+            foreach (var file in files)
+            {
+                try
+                {
+                    LogStructureRepairer.Reconstruct(file);
+                    logger?.Log($"Reconstructed: {file}");
+                }
+                catch (Exception ex)
+                {
+                    logger?.Error(ex);
+                }
+            }
+        }
+        else
+            logger?.Error($"Path does not exist: {path}");
     }
 }

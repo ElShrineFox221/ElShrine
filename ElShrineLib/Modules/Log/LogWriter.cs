@@ -17,6 +17,7 @@ public record class LogEntryData(
 
 public class LogWriter : ILogWriter
 {
+    private bool _disposed = false;
     private readonly ConcurrentDictionary<int, StreamWriter> _writers = [];
     public string LogBaseDirectory { get; }
     public string LogCurrentFolder { get; }
@@ -32,6 +33,8 @@ public class LogWriter : ILogWriter
 
     public void OnEntryAdded(ILogger session, LogScopeAccessor parentScopeAccessor, LogEntry sourceEntry)
     {
+        if (_disposed)
+            return;
         var data = new LogEntryData(
              sourceEntry.Id,
              parentScopeAccessor.Id,
@@ -58,6 +61,9 @@ public class LogWriter : ILogWriter
 
     public void Dispose()
     {
+        if (_disposed)
+            return;
+        _disposed = true;
         foreach (var writer in _writers.Values)
             writer.Dispose();
         _writers.Clear();

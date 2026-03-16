@@ -315,12 +315,13 @@ public static class MBootstrapper
                 {
                     if (!force && !_loggerManager!.TemporarilyNoEntriesToUpdate)
                         await Task.Yield();
+                    var logDir = CoreModuleAccessor.LogWriter.LogCurrentDirectory;
                     foreach (var item in _cachedServices)
                     {
                         if (item.TryGetTarget(out var obj) && obj is IDisposable disposable)
                             disposable.Dispose();
                     }
-                    LogCommands.Reconstruct();
+                    LogCommands.ReconstructInternal(logDir, false);
                     Environment.Exit(0);
                 }
             });
