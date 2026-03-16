@@ -1,5 +1,6 @@
 ﻿using ElShrine.Common;
 using ElShrine.Modules;
+using ElShrine.Modules.Command;
 using ElShrine.Modules.Log;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -38,8 +39,8 @@ public sealed class CommandInvoker
     public ICommandResult? ExecutionResult { get; private set; } = null;
     public bool Executed => ExecutionResult is not null;
     private static ILogManager Log => field ??= CoreModuleAccessor.Log;
-    private static ParamParserManager ParaParser => field ??= CoreModuleAccessor.paramParserManager;
-    private static CommandsManager Command => field ??= CoreModuleAccessor.commandsManager;
+    private static IParamParserManager ParaParser => field ??= CoreModuleAccessor.ParamParser;
+    private static ICommandManager Command => field ??= CoreModuleAccessor.Command;
 
     #region builders
     public static CommandInvoker Build(string str) => new(str);
@@ -107,7 +108,7 @@ public sealed class CommandInvoker
         const string ParseFailed = nameof(ParseFailed);
         if (error is not null || Route != CommandRoute.Local) return;
         //
-        var tokens = ParamParserManager.TokenizeCommand(RoutedStr).ToArray();
+        var tokens = RoutedStr.TokenizeCommand().ToArray();
         if (tokens.Length == 0)
         {
             error = new($"{ParseFailed}: Empty command");

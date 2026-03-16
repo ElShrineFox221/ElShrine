@@ -1,5 +1,6 @@
 ﻿using ElShrine.Common;
 using ElShrine.Modules;
+using ElShrine.Modules.Command;
 using System.Diagnostics;
 
 namespace ElShrine.Commands;

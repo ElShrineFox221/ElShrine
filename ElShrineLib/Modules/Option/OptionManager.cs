@@ -107,21 +107,22 @@ internal sealed class OptionManager : PluginResourceTracker<OptionBase>, IOption
     private CataItemIndexer<OptionItem> _optionItemsIndexer;
     public event ValueChangedHandler<object?>? OptionChanged;
 
-    public OptionManager(ILogManager log, IPluginManager plugins) : base(plugins)
+    public OptionManager(ILogManager log, IPluginManager plugins) : base(plugins, false)
     {
         _log = log;
         _logger = _log.Main;
         _optionItems = [];
         _optionDataSet = new();
+        _optionItemsIndexer = new([]);
         //
-        CollectResources(AssemblyLoadContext.Default);
-        _optionItemsIndexer = new(_optionItems.SelectMany(i => i.Value));
+        DoCollectResources(AssemblyLoadContext.Default);
     }
 
     #region overrides
-    protected override void OnPluginLoaded(IPlugin plugin, PluginInfo info, AssemblyLoadContext ctx, bool loadedCtx)
+    protected override void DoCollectResources(AssemblyLoadContext ctx)
     {
-        base.OnPluginLoaded(plugin, info, ctx, loadedCtx);
+        using var sc = OpenRecollectTextScope(_logger, ctx);
+        base.DoCollectResources(ctx);
         _logger.Log($"Collected {GetOptionAllText(Resources[ctx].Values.Count, _optionItems[ctx].Count)}.");
         var count = LoadInternal();
         _logger.Log($"Reloaded {GetOptionItemsText(count)}.");

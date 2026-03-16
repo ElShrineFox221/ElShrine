@@ -3,6 +3,7 @@ using ElShrine.Modules.Log;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Text;
 
 namespace ElShrine;
 
@@ -143,5 +144,123 @@ public static class ModulesExtensions
             }
         }
     }
+    #endregion
+
+
+    #region CommandExtensions;
+
+    #region Param Parser
+    //Simple tokenize
+
+    private const char SPACE = ' ';
+    public static List<string> Tokenize(this string str, List<(char left, char right)> bracketSets, char split, bool removeOuterBracket)
+    {
+        List<string> tokens = [];
+        StringBuilder? tokenBuilder = null;
+        bool splitEqualSpace = split == SPACE, lastInToken = false;
+        char? currentLeft = null, currentRight = null;
+
+        for (int index = 0, cachedSpaceCount = 0, braketDegree = 0; index < str.Length; index++)
+        {
+            char currentChar = str[index];
+            if (braketDegree == 0)
+            {
+
+                if (splitEqualSpace)
+                {
+                    if (currentChar == SPACE)
+                    {
+                        if (lastInToken) finishBuildToken();
+                        else continue;
+                    }
+                    else
+                    {
+                        var bracketSetIndexByLeft = bracketSets.FindIndex(cs => cs.left == currentChar);
+                        if (bracketSetIndexByLeft != -1)
+                        {
+                            braketDegree++;
+                            currentLeft = bracketSets[bracketSetIndexByLeft].left;
+                            currentRight = bracketSets[bracketSetIndexByLeft].right;
+                        }
+                        else if (bracketSets.FindIndex(cs => cs.right == currentChar) != -1) throw new("Meet a right bracket <> but no matched left bracket.");
+                        if (!removeOuterBracket || bracketSetIndexByLeft == -1) appendChar(currentChar);
+                        lastInToken = true;
+                    }
+                }
+                else
+                {
+                    //not space split
+                    if (currentChar == SPACE)
+                    {
+                        if (lastInToken) cachedSpaceCount++;
+                        else cachedSpaceCount = 0;
+                    }
+                    else if (currentChar == split) finishBuildToken();
+                    else
+                    {
+                        while (cachedSpaceCount > 0)
+                        {
+                            appendChar(SPACE);
+                            cachedSpaceCount--;
+                        }
+                        var bracketSetIndexByLeft = bracketSets.FindIndex(cs => cs.left == currentChar);
+                        if (bracketSetIndexByLeft != -1)
+                        {
+                            braketDegree++;
+                            currentLeft = bracketSets[bracketSetIndexByLeft].left;
+                            currentRight = bracketSets[bracketSetIndexByLeft].right;
+                        }
+                        else if (bracketSets.FindIndex(cs => cs.right == currentChar) != -1) throw new("Meet a right bracket <> but no matched left bracket.");
+                        if (!removeOuterBracket || bracketSetIndexByLeft == -1) appendChar(currentChar);
+                        lastInToken = true;
+                    }
+                }
+            }
+            else
+            {
+                tokenBuilder ??= new();
+                if (currentChar == currentRight) braketDegree--;
+                else if (currentChar == currentLeft) braketDegree++;
+                if (!removeOuterBracket || braketDegree != 0 || currentChar != currentLeft && currentChar != currentRight) appendChar(currentChar);
+                lastInToken = true;
+            }
+        }
+
+        finishBuildToken();
+        return tokens;
+        void appendChar(char c) => (tokenBuilder ??= new()).Append(c);
+        void finishBuildToken()
+        {
+            if (tokenBuilder is not null)
+            {
+                tokens.Add(tokenBuilder.ToString());
+                tokenBuilder = new();
+                lastInToken = false;
+            }
+            else tokenBuilder = new();
+        }
+    }
+    public static List<string> TokenizeCommand(this string cmdStr)
+    {
+        var bracketSets = new List<(char left, char right)>
+        {
+            ('\"', '\"'),
+            ('(', ')'),
+            ('[', ']'),
+        };
+        return Tokenize(cmdStr, bracketSets, ' ', removeOuterBracket: true);
+    }
+    public static List<string> TokenizeArray(this string str)
+    {
+        var bracketSets = new List<(char left, char right)>
+        {
+            ('\"', '\"'),
+            ('(', ')'),
+            ('[', ']'),
+        };
+        return Tokenize(str, bracketSets, ',', removeOuterBracket: false);
+    }
+    #endregion
+
     #endregion
 }

@@ -1,4 +1,5 @@
 ﻿using ElShrine.Modules;
+using ElShrine.Modules.Command;
 
 namespace ElShrine.Commands;
 

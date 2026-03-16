@@ -1,5 +1,6 @@
 ﻿using ElShrine.Common;
 using ElShrine.Modules;
+using ElShrine.Modules.Command;
 using ElShrine.Modules.Log;
 using ElShrine.Modules.Option;
 using ElShrine.Options;
@@ -38,21 +39,19 @@ public static class GlobalCommands
             LogItem.Normal("Parameters", LogItemStyle.NoticeDarkYellow),
             LogItem.Normal("Description", LogItemStyle.NoticeDarkYellow),
             LogItem.Normal("Implementation", LogItemStyle.NoticeDarkYellow));
-        var allItems = CoreModuleAccessor.commandsManager.GetAll();
+        var allItems = CoreModuleAccessor.Command.GetAll().OrderBy(i => i.Key.CataName);
         if (groupedByCata)
         {
-            var sortedGroups = allItems.GroupBy(static ci => ci.VirtualCataName)
-                .OrderBy(static g => g.Key);
-            foreach (var group in sortedGroups)
+            foreach (var (cata, items) in allItems)
             {
-                var count = group.Count();
+                var count = cata.ItemsCount;
                 if (count == 0) continue;
                 total += count;
                 addLine(
-                    LogItem.Normal($"[{group.Key}]", LogItemStyle.NoticePurple),
+                    LogItem.Normal($"[{cata.CataName}]", LogItemStyle.NoticePurple),
                     LogItem.Empty(),
                     LogItem.Normal("command".GetPuralWithNum(count), LogItemStyle.Info));
-                var sortedGroup = group.OrderBy(static ci => ci.ActualCataName)
+                var sortedGroup = items.OrderBy(static ci => ci.ActualCataName)
                     .ThenBy(static ci => ci.VirtualItemName)
                     .ThenBy(static ci => ci.ActualItemName);
                 foreach (var ci in sortedGroup)
@@ -68,8 +67,9 @@ public static class GlobalCommands
         }
         else
         {
-            total = allItems.Count;
-            var sortedCis = allItems.OrderBy(static ci => ci.VirtualCataName)
+            var items = allItems.SelectMany(static i => i.Value);
+            total = allItems.Sum(static i => i.Key.ItemsCount);
+            var sortedCis = items.OrderBy(static ci => ci.VirtualCataName)
                 .ThenBy(static ci => ci.ActualCataName)
                 .ThenBy(static ci => ci.VirtualItemName)
                 .ThenBy(static ci => ci.ActualItemName);

@@ -3,13 +3,13 @@ using System.Threading.Channels;
 
 namespace ElShrine.Modules.Log;
 
-internal sealed class LogProducer : ILogManager, IDisposable
+internal sealed class LogManager : ILogManager, IDisposable
 {
     #region Services
     private readonly ILogWriter _writer;
     #endregion
 
-    public LogProducer(ILogWriter writer)
+    public LogManager(ILogWriter writer)
     {
         _writer = writer;
 
@@ -196,7 +196,7 @@ internal sealed class LogProducer : ILogManager, IDisposable
         where TScopeNode : class, IHandleChildAppend<TEntryNode>, TEntryNode
         where TEntryNode : class
     {
-        public StatefulRegistration(LogProducer log, ILogger session, ISessionStatefulLogListener<TScopeNode, TEntryNode> listener)
+        public StatefulRegistration(LogManager log, ILogger session, ISessionStatefulLogListener<TScopeNode, TEntryNode> listener)
         {
             _session = session;
             _listener = listener;
@@ -214,7 +214,7 @@ internal sealed class LogProducer : ILogManager, IDisposable
                 _isSyncing = false;
             });
         }
-        private readonly LogProducer _log;
+        private readonly LogManager _log;
         private readonly ILogger _session;
         private readonly ISessionStatefulLogListener<TScopeNode, TEntryNode> _listener;
         private bool _isSyncing = true;

@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using ElShrine.Modules.Option;
+using ElShrine.Modules.Command;
 
 namespace ElShrine;
 
@@ -153,6 +154,8 @@ public static class MBootstrapper
         _logger = _loggerManager.Main;
         _ = CoreModuleAccessor.Plugin;
         _ = CoreModuleAccessor.Option;
+        _ = CoreModuleAccessor.ParamParser;
+        _ = CoreModuleAccessor.Command;
     }
 
     #region Resolve
@@ -256,14 +259,13 @@ public static class MBootstrapper
         private void RegisterDefaultModules()
         {
             RegisterModule<ILogWriter, LogWriter>();
-            RegisterModule<ILogManager, LogProducer>();
+            RegisterModule<ILogManager, LogManager>();
             RegisterModule<IPluginManager, PluginManager>();
             RegisterModule<IOptionManager, OptionManager>();
+            RegisterModule<IParamParserManager, ParamParserManager>();
+            RegisterModule<ICommandManager, CommandsManager>();
             //old modules
             RegisterModule<BeatTimer>();
-            RegisterModule<ClassesManager>();
-            RegisterModule<ParamParserManager>();
-            RegisterModule<CommandsManager>();
             RegisterModule<LocalizationManager>();
         }
 
