@@ -15,12 +15,12 @@ public static class PluginCommands
     private static IOptionManager Option => field ??= CoreModuleAccessor.Option;
     
     [Command]
-    public static void RescanPlugins()
+    public static void Rescan()
     {
         Plugin.RescanPluginInfos();
     }
     [Command]
-    public static void LoadPlugin(int index)
+    public static void Load(int index)
     {
         var plugins = Plugin.UnloadPlugins;
         if(index >= plugins.Count)
@@ -31,7 +31,7 @@ public static class PluginCommands
         Plugin.LoadPlugin(plugins[index]);
     }
     [Command]
-    public static void UnloadPlugin(int index)
+    public static void Unload(int index)
     {
         var plugins = Plugin.LoadedPlugins.Keys.ToList();
         if(index >= plugins.Count)
