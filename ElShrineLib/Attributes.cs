@@ -92,30 +92,4 @@ namespace ElShrine
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method)]
     public abstract class ValidatableMemberAttribute() : ValidatableBaseAttribute<MemberInfo>(true, false);
     #endregion
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public class SingletonAttribute() : ValidatableClassAttribute()
-    {
-        public BindingFlags ItemSearchFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance;
-
-        protected override bool ValidateType(Type typeToValidate)
-        {
-            var suc = false;
-            var t = typeToValidate;
-            if (t.IsStaticClass() || typeof(IInitializable<>).IsBaseOrInterfaceOf(t)) suc = true;
-            else ValidateFailedReason = $"Type <{t.FullName}> is not a static class or implement of interface {nameof(IInitializable<>)}<TIns>.";
-            return suc;
-        }
-    }
-    public class SingletonItemAttribute<TOwnerAttr>() : ValidatableMemberAttribute() where TOwnerAttr : SingletonAttribute
-    {
-        protected readonly Type RequiredOwnerAttribtue = typeof(TOwnerAttr);
-        protected override bool Validate(MemberInfo target)
-        {
-            var t = target.DeclaringType;
-            var notSuc = t?.GetCustomAttribute<SingletonAttribute>(true) is null;
-            if (notSuc) ValidateFailedReason = $"Type <{t?.FullName}> is not a singleton class, the class it belong to should be a {RequiredOwnerAttribtue.Name} attributed class.";
-            return !notSuc;
-        }
-    }
 }

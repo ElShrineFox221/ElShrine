@@ -8,7 +8,7 @@ using ElShrine.Options;
 namespace ElShrine.Commands;
 
 [CommandCarrier]
-public static class TestCommands
+public static class PluginCommands
 {
     private static ILogger Logger => field ??= CoreModuleAccessor.Log.Main;
     private static IPluginManager Plugin => field ??= CoreModuleAccessor.Plugin;
