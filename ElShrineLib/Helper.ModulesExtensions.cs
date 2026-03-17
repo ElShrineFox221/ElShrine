@@ -1,4 +1,5 @@
 ﻿using ElShrine.Modules;
+using ElShrine.Modules.Localization;
 using ElShrine.Modules.Log;
 using System.Diagnostics;
 using System.Reflection;
@@ -10,7 +11,7 @@ namespace ElShrine;
 public static class ModulesExtensions
 {
     #region LocalizationExtensions;
-    private static LocalizationManager Localization =>CoreModuleAccessor.localizationManager;
+    private static ILocalizationManager Localization => field ??= CoreModuleAccessor.Localization;
     public static string Translate(this string key, string? defaultS = null, params object?[] args)
             => Localization.Translate(key, defaultS, args);
     #endregion

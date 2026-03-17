@@ -3,46 +3,9 @@ using ElShrine.Common.Serialization;
 using ElShrine.Modules.Log;
 using System.Text;
 
-namespace ElShrine.Modules;
+namespace ElShrine.Modules.Localization;
 
-public enum Language
-{
-    None = 0,
-    English = 1,
-    French = 2,
-    German = 3,
-    Italian = 4,
-    Korean = 5,
-    Spanish = 6,
-    SimplifiedChinese = 7,
-    TraditionalChinese = 8,
-    Russian = 9,
-    Portuguese = 10,
-    Polish = 11,
-    Thai = 12,
-    Japanese = 13,
-    Turkish = 14,
-    Hungarian = 15,
-    Greek = 16,
-    Czech = 17,
-    Danish = 18,
-    Dutch = 19,
-    Finnish = 20,
-    Norwegian = 21,
-    Swedish = 22,
-    Romanian = 23,
-    Bulgarian = 24,
-    Ukrainian = 25,
-    SpanishLatam = 26,
-    Vietnamese = 27,
-    Indonesian = 28,
-    Arabic = 29,
-    Filipino = 30,
-    Malay = 31,
-    Max = 32
-}
-
-public sealed class LocalizationManager
+internal sealed class LocalizationManager : ILocalizationManager
 {
     private readonly ILogger _logger;
 
@@ -73,10 +36,10 @@ public sealed class LocalizationManager
     public LocalizationManager(ILogManager log)
     {
         _logger = log.Main;
-        ReloadLocalization();
+        Reload();
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
-    public void ReloadLocalization()
+    public void Reload()
     {
         var serializer = new DictionaryXmlSerializer();
         var languageChanged = false;
@@ -104,7 +67,7 @@ public sealed class LocalizationManager
         }
         if (languageChanged) LanguageChanged?.Invoke(this, new(Language, Language));
     }
-    public void SaveUntranslatedKeys()
+    public void SaveKeys()
     {
         var serializer = new DictionaryXmlSerializer();
         foreach (var enumKey in Enum.GetValues<Language>())
@@ -132,15 +95,15 @@ public sealed class LocalizationManager
             }
         }
     }
-    public string Translate(string key, string? defaultS, params object?[] args)
+    public string Translate(string key, string? defaultS, Language language, params object?[] args)
     {
         if (string.IsNullOrWhiteSpace(key)) throw new ArgumentException("key is null or empty");
         var got = CurrentKV.TryGetValue(key, out var value);
         if (!got || value is null)
         {
             value = defaultS ?? key;
-            var got1 = untranslatedKeysByLanguages.TryGetValue(Language, out var list);
-            if (!got1 || list is null) untranslatedKeysByLanguages.Add(Language, list = []);
+            var got1 = untranslatedKeysByLanguages.TryGetValue(language, out var list);
+            if (!got1 || list is null) untranslatedKeysByLanguages.Add(language, list = []);
             if ( !list.Contains(key))
             {
                 list.Add(key);

@@ -1,5 +1,6 @@
 ﻿using ElShrine.Modules;
 using ElShrine.Modules.Command;
+using ElShrine.Modules.Localization;
 
 namespace ElShrine.Commands;
 
@@ -7,9 +8,9 @@ namespace ElShrine.Commands;
 public static class LocalizationCommandsCarrier
 {
     public const string Name = "Localization";
-    private static LocalizationManager Localization => CoreModuleAccessor.localizationManager;
+    private static ILocalizationManager Localization => field ??= CoreModuleAccessor.Localization;
     #region Commands
-    [Command] public static void Reload() => Localization.ReloadLocalization();
-    [Command] public static void Save() => Localization.SaveUntranslatedKeys();
+    [Command] public static void Reload() => Localization.Reload();
+    [Command] public static void Save() => Localization.SaveKeys();
     #endregion
 }

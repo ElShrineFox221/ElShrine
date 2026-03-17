@@ -3,11 +3,12 @@ using System.Runtime.InteropServices;
 
 namespace ElShrine.Modules;
 
+[Obsolete("To be deleted.")]
 /// <summary>
 /// 提供全局高精度的节拍计时服务。
 /// 基于 Windows 多媒体定时器解析度调整与 <see cref="PeriodicTimer"/> 实现。
 /// </summary>
-public sealed partial class BeatTimer : IDisposable
+internal sealed partial class BeatTimer : IDisposable
 {
     #region Win32 API
     [LibraryImport("winmm.dll")]
