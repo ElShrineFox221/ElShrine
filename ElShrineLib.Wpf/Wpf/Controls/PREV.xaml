@@ -7,7 +7,13 @@
              mc:Ignorable="d" 
              d:DesignHeight="400" d:DesignWidth="350">
     <UserControl.Resources>
-        <ResourceDictionary Source="EColorPalette.xaml"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/ConverterResources.xaml"/>
+                <ResourceDictionary Source="/ElShrineLib.Wpf;component/Wpf/ControlResources.xaml"/>
+                <ResourceDictionary Source="EColorPalette.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
     <Grid Background="Wheat">
         <local:EColorPalette Margin="40"/>

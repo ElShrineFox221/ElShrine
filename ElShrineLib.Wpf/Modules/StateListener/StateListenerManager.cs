@@ -1,11 +1,13 @@
 ﻿using ElShrine.Common;
 using ElShrine.Common.DataStructure;
 using ElShrine.Common.Interpreter;
+using ElShrine.Modules.Plugin;
 using ElShrine.Wpf.Common;
 using ElShrine.Wpf.Controls;
 using ElShrine.Wpf.Controls.Extensions;
 using ElShrine.Wpf.Converters;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 using System.Linq;
@@ -21,26 +23,29 @@ namespace ElShrine.Modules.StateListener;
 
 public sealed class StateParseException(string msg) : Exception(msg);
 //
-internal sealed class StateListenerManager : IStateListenerManager
+internal sealed class StateListenerManager : PluginAwareServiceBase, IStateListenerManager
 {
-    public StateListenerManager()
+    public StateListenerManager(IPluginManager plugin) : base(plugin)
     {
-        //ClassesManager.Instance.AssembliesUpdated += RecollectStateGroups;
-        //RecollectStateGroups([..ClassesManager.Instance.Assemblies]);
-        var slm = this as IStateListenerManager;
-        slm.GetStateGroup(MouseStateGroup.MouseIn).StateCalculator = CommonStateCalculator.CalculateMouseState;
-        slm.GetStateGroup(SelectionStateGroup.Selected).StateCalculator = CommonStateCalculator.CalculateSelectionState;
-        slm.GetStateGroup(FocusStateGroup.Focused).StateCalculator = CommonStateCalculator.CalculateFocusState;
+        DoRecollectStateGroups(AssemblyLoadContext.Default);
+        (this as IStateListenerManager).GetStateGroup(MouseStateGroup.MouseIn).StateCalculator = CommonStateCalculator.CalculateMouseState;
+        (this as IStateListenerManager).GetStateGroup(SelectionStateGroup.Selected).StateCalculator = CommonStateCalculator.CalculateSelectionState;
+        (this as IStateListenerManager).GetStateGroup(FocusStateGroup.Focused).StateCalculator = CommonStateCalculator.CalculateFocusState;
+
     }
 
     #region state groups
-    public readonly Dictionary<string, StateGroup> StateGroupsByStateName = [];
+    private readonly ConcurrentDictionary<AssemblyLoadContext, ConcurrentDictionary<string, StateGroup>> _stateGroups = []; 
     private void RecollectStateGroups(AssemblyLoadContext ctx)
     {
+        if (!_stateGroups.TryGetValue(ctx, out var stateGroupsDict)) 
+            stateGroupsDict = _stateGroups[ctx] = new ConcurrentDictionary<string, StateGroup>();
         var gs = ctx.GetClassesByAttribute<StateGroupRuleAttribute>(true);
-        foreach (var (groupType, attrs) in gs)
+        foreach (var (type, attrs) in gs)
         {
-            var sg = StateGroup.FromEnum(groupType);
+            var sg = StateGroup.FromEnum(type);
+            if (sg.StateNames.Any(stateGroupsDict.ContainsKey))
+                continue;
             foreach (var attr in attrs)
             {
                 var targetType = attr.RelativeType;
@@ -50,11 +55,34 @@ internal sealed class StateListenerManager : IStateListenerManager
                     .Select(e => e!);
                 sg.RelativeRoutedEventsInternal[targetType] = [.. events];
             }
-            foreach(var stateName in sg.StateNames) StateGroupsByStateName[stateName] = sg;
+            foreach (var stateName in sg.StateNames) stateGroupsDict[stateName] = sg;
         }
     }
-    
-    public StateGroup GetStateGroup(string stateName) => StateGroupsByStateName[stateName];
+    private void DoRecollectStateGroups(AssemblyLoadContext ctx)
+    {
+        RecollectStateGroups(AssemblyLoadContext.Default);
+        if (ctx != AssemblyLoadContext.Default)
+            RecollectStateGroups(ctx);
+    }
+
+    public StateGroup GetStateGroup(string stateName)
+    {
+        foreach (var sgv in _stateGroups.Values)
+        {
+            if (sgv.TryGetValue(stateName, out var sg)) 
+                return sg;
+        }
+        throw new StateParseException($"StateGroup \"{stateName}\" is not found.");
+    }
+
+    protected override void OnPluginLoaded(IPlugin plugin, PluginInfo info, AssemblyLoadContext ctx, bool loadedNewCtx)
+    {
+        DoRecollectStateGroups(ctx);
+    }
+    protected override void OnPluginUnloading(IPlugin plugin, PluginInfo info, AssemblyLoadContext ctx, bool unloadingCtx)
+    {
+        _stateGroups.TryRemove(ctx, out _);
+    }
     #endregion
 
     #region rule str parser
