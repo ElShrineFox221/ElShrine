@@ -1,9 +1,10 @@
-﻿using ElShrine.Modules.Log;
+﻿using ElShrine.Modules;
+using ElShrine.Modules.Log;
 
 namespace ElShrine;
 
 public static class WpfLog
 {
-    public static LogProducer Log => field ??= LogProducer.Instance;
-    public static LogSession UISession => field ??= Log.GetOrCreateSession("UISession");
+    public static ILogManager Log => field ??= CoreModuleAccessor.Log;
+    public static ILogger UILogger => field ??= Log.GetOrCreateLogger("UI");
 }

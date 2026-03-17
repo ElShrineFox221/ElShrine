@@ -38,7 +38,7 @@ internal sealed class CommandsManager : PluginAwareServiceBase, ICommandManager
                 .RemovePartsIgnoreCase("CommandsCarrier", "Commands", "Carrier");
             if (string.IsNullOrEmpty(name)) name = GlobalCommandCarrierName;
 
-            var instance = type.IsStaticClass() ? null : MBootstrapper.Resolve(type, disposeWhenExit: true);
+            var instance = type.IsStaticClass() ? null : Bootstrapper.Resolve(type, disposeWhenExit: true);
             var methods = type.GetMethods(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)
                 .Where(m => m.GetCustomAttribute<CommandAttribute>() is not null && m.GetCustomAttribute<IgnoreCommandAttribute>() is null);
             foreach (var method in methods)

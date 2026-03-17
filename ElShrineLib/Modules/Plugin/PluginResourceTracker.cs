@@ -46,7 +46,7 @@ public abstract class PluginResourceTracker<TResourceBase> : PluginAwareServiceB
         {
             if (contextResources.ContainsKey(type)) 
                 continue;
-            if (MBootstrapper.Resolve(type, disposeWhenExit: true) is TResourceBase instance && contextResources.TryAdd(type, instance))
+            if (Bootstrapper.Resolve(type, disposeWhenExit: true) is TResourceBase instance && contextResources.TryAdd(type, instance))
                 OnResourceCreated(instance, ctx);
         }
     }

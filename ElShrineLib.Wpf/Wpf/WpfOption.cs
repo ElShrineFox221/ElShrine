@@ -1,19 +1,17 @@
-﻿using ElShrine.Modules;
+﻿using ElShrine.Modules.Option;
 using ElShrine.Wpf.UITheme;
 
-namespace ElShrine.Wpf
+namespace ElShrine.Wpf;
+
+public static class WpfOption
 {
-    [Option]
-    public static class WpfOption
-    {
-        #region Theme
-        [OptionItem]
-        public static Theme SelectedTheme { get; set; } = Theme.Default;
-        #endregion
+    #region Theme
+    [OptionItem]
+    public static Theme SelectedTheme { get; set; } = Theme.Default;
+    #endregion
 
 
-        #region Window animation
-        public static int FadeInOutms { get; set; } = 300;
-        #endregion
-    }
+    #region Window animation
+    public static int FadeInOutms { get; set; } = 300;
+    #endregion
 }

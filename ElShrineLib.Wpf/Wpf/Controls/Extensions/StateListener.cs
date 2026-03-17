@@ -110,7 +110,7 @@ namespace ElShrine.Wpf.Controls.Extensions
                 SetListener(d, d);
                 listener = d;
             }
-            if (listnerByRegister.TryGetValue(d, out var _listener)) StateListenersManager.Instance.Unregister(_listener);
+            if (listnerByRegister.TryGetValue(d, out var _listener)) WpfModuleAccessor.StateListener.Unregister(_listener);
             else listnerByRegister.Add(d, listener);
             //ValidateType target and data source equality, warning if equals.
             var rulesDpo = GetRules(d);
@@ -130,7 +130,7 @@ namespace ElShrine.Wpf.Controls.Extensions
                     }
                     ruleSnapshots.Add(new(new(settersTarget), new(dataSource), rule.StateMap));
                 }
-                StateListenersManager.Instance.Register(listener, ruleSnapshots);
+                WpfModuleAccessor.StateListener.Register(listener, ruleSnapshots);
             }
             //
         }

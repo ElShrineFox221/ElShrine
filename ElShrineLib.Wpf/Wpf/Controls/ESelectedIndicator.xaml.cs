@@ -35,9 +35,9 @@ namespace ElShrine.Wpf.Controls
 
         #region Implements
         static ESelectedIndicator() => DefaultStyleKeyProperty.OverrideMetadata(typeof(ESelectedIndicator), new FrameworkPropertyMetadata(typeof(ESelectedIndicator)));
-        public ESelectedIndicator() => UIThemesManager.RegisterCoerceThemeDPs(this);
-        public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => UIThemesManager.CoerceValue(this);
-        public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => StateListenersManager.Instance.RedoSetterTransitions(this);
+        public ESelectedIndicator() => WpfModuleAccessor.UITheme.RegisterCoerceThemeDPs(this);
+        public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => TransHelper.CoerceValue(this);
+        public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
         #endregion
     }
 }

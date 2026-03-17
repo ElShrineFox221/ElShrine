@@ -1,6 +1,6 @@
 ﻿using ElShrine.Graphics;
-using ElShrine.Modules;
 using ElShrine.Modules.Option;
+using ElShrine.Modules.UITheme;
 using ElShrine.Wpf.UITheme;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -18,16 +18,16 @@ namespace ElShrine.VisualTool.Pages.OptionsHub.OptionItemEditors
         public UIThemeEditor()
         {
             InitializeComponent();
-            Themes = [.. UIThemesManager.Instance.AllThemes];
+            Themes = [.. UIThemeManager.Instance.AllThemes];
             //Update data source
-            UIThemesManager.Instance.ThemesChanged += (s, e) =>
+            UIThemeManager.Instance.ThemesChanged += (s, e) =>
             {
-                var ins = UIThemesManager.Instance;
+                var ins = UIThemeManager.Instance;
                 Themes.ReplaceAll(ins.AllThemes);
             };
-            UIThemesManager.Instance.CurrentThemeChanged += (s, e) => 
+            UIThemeManager.Instance.CurrentThemeChanged += (s, e) => 
             {
-                currentIsDefaultTheme = UIThemesManager.Instance.CurrentTheme == Theme.Default;
+                currentIsDefaultTheme = UIThemeManager.Instance.CurrentTheme == Theme.Default;
                 PART_SubEditorsGrid.IsEnabled = !currentIsDefaultTheme;
             };
             //Update view - binding
@@ -36,12 +36,12 @@ namespace ElShrine.VisualTool.Pages.OptionsHub.OptionItemEditors
                 Source = Themes
             };
             PART_ThemeSelectionBox.SetBinding(ItemsControl.ItemsSourceProperty, binding);
-            PART_ThemeSelectionBox.SelectedItem = UIThemesManager.Instance.CurrentTheme;
+            PART_ThemeSelectionBox.SelectedItem = UIThemeManager.Instance.CurrentTheme;
             //
             PART_Palette.Confirmed += (s, e) =>
             {
                 PART_PalettePopup.IsOpen = false;
-                var utmct = UIThemesManager.Instance.CurrentTheme;
+                var utmct = UIThemeManager.Instance.CurrentTheme;
                 var rc = PART_Palette.ResultColor;
                 switch (cached_TargetProp)
                 {
@@ -67,7 +67,7 @@ namespace ElShrine.VisualTool.Pages.OptionsHub.OptionItemEditors
             PART_NewThemeBtn.Click += (s, e) =>
             {
                 var newName = PART_NewThemeNameBox.Text;
-                var ins = UIThemesManager.Instance;
+                var ins = UIThemeManager.Instance;
                 if (newName.IsEmpty()) newName = "NewTheme";
                 if (ins.AllThemes.Any(th => th.ThemeName.EqualIgnoreCase(newName))) newName = $"{newName}_New";
                 ins.NewTheme(newName);
@@ -75,8 +75,8 @@ namespace ElShrine.VisualTool.Pages.OptionsHub.OptionItemEditors
             };
             PART_ThemeSelectionBox.SelectionChanged += (s, e) =>
             { 
-                if(PART_ThemeSelectionBox.SelectedItem is Theme theme && theme != UIThemesManager.Instance.CurrentTheme)
-                    UIThemesManager.Instance.CurrentTheme = theme;
+                if(PART_ThemeSelectionBox.SelectedItem is Theme theme && theme != UIThemeManager.Instance.CurrentTheme)
+                    UIThemeManager.Instance.CurrentTheme = theme;
             };
         }
 
@@ -122,7 +122,7 @@ namespace ElShrine.VisualTool.Pages.OptionsHub.OptionItemEditors
             cached_Container = uie is null ? null : new(uie);
             if(uie is ContentControl cc && cc.Content is ColorData cd)
             {
-                var utmct = UIThemesManager.Instance.CurrentTheme;
+                var utmct = UIThemeManager.Instance.CurrentTheme;
                 if(cd == utmct.PrimaryColor) cached_TargetProp = ThemeProperty.PrimaryBrush;
                 else if(cd == utmct.BackColor) cached_TargetProp = ThemeProperty.BackBrush;
                 else if(cd == utmct.SecondaryColor) cached_TargetProp = ThemeProperty.SecondaryBrush;

@@ -1,4 +1,5 @@
 ﻿using ElShrine.Common;
+using ElShrine.Modules;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;

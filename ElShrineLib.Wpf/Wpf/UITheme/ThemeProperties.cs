@@ -86,7 +86,7 @@ public static class ThemeProperties
     private static object? CoerceThemeBrushValue(DependencyObject _, object baseValue, ThemeProperty tp)
     {
         if (baseValue is Brush brush && brush is not null) return baseValue;
-        var theme = UIThemesManager.Instance.CurrentTheme;
+        var theme = WpfModuleAccessor.UITheme.CurrentTheme;
         var color = tp switch
         {
             ThemeProperty.PrimaryBrush => theme.PrimaryColor,
@@ -148,7 +148,7 @@ public static class ThemeProperties
     private static object? CoerceThemeAnimParamValue(DependencyObject _, object baseValue, ThemeProperty tp)
     {
         if (baseValue is double d && !double.IsNaN(d)) return baseValue;
-        var theme = UIThemesManager.Instance.CurrentTheme;
+        var theme = WpfModuleAccessor.UITheme.CurrentTheme;
         var value = tp switch
         {
             ThemeProperty.AnimaDurationIn => theme.AnimDurationIn,

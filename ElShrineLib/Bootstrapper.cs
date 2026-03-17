@@ -1,17 +1,12 @@
 ﻿using ElShrine.Commands;
 using ElShrine.Modules;
-using ElShrine.Modules.Command;
-using ElShrine.Modules.Localization;
-using ElShrine.Modules.Log;
-using ElShrine.Modules.Option;
-using ElShrine.Modules.Plugin;
 using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace ElShrine;
 
-[Obsolete("Use MBootstrapper initialize instead")]
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-public sealed class InitializationInfoAttribute : ValidatableClassAttribute
+public class InitializationInfoAttribute : ValidatableClassAttribute
 {
     public bool PreInstantiate = true;
 
@@ -26,48 +21,42 @@ public sealed class InitializationInfoAttribute : ValidatableClassAttribute
 
 public interface IModuleRegister
 {
-    void RegisterModule<TService, TImplementation>(TImplementation? instance = null)
+    bool RegisterModule<TService, TImplementation>(TImplementation? instance = null, bool overrides = true)
         where TImplementation : class, TService
         where TService : notnull;
-    void RegisterModule<TService>(TService? instance = null) 
+    bool RegisterModule<TService>(TService? instance = null, bool overrides = true) 
         where TService : class;
+    void FinalizeRegistration();
 }
-public interface IServiceContainer : IServiceProvider
-{
-    bool AddService(Type serviceType);
-    object GetService(Type serviceType, bool cache);
-    bool RemoveService(Type serviceType);
-}
-public static class MBootstrapper
+public static class Bootstrapper
 {
     private static IServiceProvider? _serviceProvider;
+    private static IModuleRegister? _moduleRegister;
     //
-
-    private static ILogManager? _loggerManager;
-    private static ILogger? _logger;
 
     public static void Initialize(Action<IModuleRegister>? builderConfig = null)
     {
-        _serviceProvider ??= ModuleServiceBuilder.Build(builderConfig);
+        if(_serviceProvider is null || _moduleRegister is null)
+        {
+            var defaultBuilder = new ModuleServiceBuilder();
+            _moduleRegister = defaultBuilder;
+            _serviceProvider = defaultBuilder;
+        }
+        builderConfig?.Invoke(_moduleRegister);
         FinalizeInitialization();
     }
-    public static void Initialize(IServiceProvider externalProvider)
+    public static bool Initialize(IServiceProvider externalProvider, IModuleRegister moduleRegister)
     {
-        _serviceProvider ??= externalProvider;
-        FinalizeInitialization();
+        var suc = _serviceProvider is null || _moduleRegister is null;
+        if (suc)
+        {
+            _serviceProvider = externalProvider;
+            _moduleRegister = moduleRegister;
+            FinalizeInitialization();
+        }
+        return suc;
     }
-    private static void FinalizeInitialization()
-    {
-        CoreModuleAccessor.Initialize();
-        
-        _loggerManager = CoreModuleAccessor.Log; 
-        _logger = _loggerManager.Main;
-        _ = CoreModuleAccessor.Localization;
-        _ = CoreModuleAccessor.Plugin;
-        _ = CoreModuleAccessor.Option;
-        _ = CoreModuleAccessor.ParamParser;
-        _ = CoreModuleAccessor.Command;
-    }
+    private static void FinalizeInitialization() => _moduleRegister?.FinalizeRegistration();
 
     #region Resolve
     public static TService Resolve<TService>() where TService : class
@@ -90,6 +79,7 @@ public static class MBootstrapper
     }
     #endregion
 
+    #region InstanceConstructor
     public static TInstance InstanceConstructorInvoker<TInstance>(
         IDictionary<Type, object> cachedInstances,
         IReadOnlyDictionary<Type, Type>? typeMap = null, 
@@ -156,27 +146,13 @@ public static class MBootstrapper
         }
         return Resolve(instanceType);
     }
+    #endregion
     private sealed class ModuleServiceBuilder : IServiceProvider, IModuleRegister
     {
         private readonly ConcurrentDictionary<Type, object> _instancesCached = [];
         private readonly ConcurrentDictionary<Type, Type> _servicesRegistered = [];
-        public static ModuleServiceBuilder Build(Action<IModuleRegister>? builderConfig = null)
-        {
-            var builder = new ModuleServiceBuilder();
-            builder.RegisterDefaultModules();
-            builderConfig?.Invoke(builder);
-            return builder;
-        }
-        private void RegisterDefaultModules()
-        {
-            RegisterModule<ILogWriter, LogWriter>();
-            RegisterModule<ILogManager, LogManager>();
-            RegisterModule<ILocalizationManager, LocalizationManager>();
-            RegisterModule<IPluginManager, PluginManager>();
-            RegisterModule<IOptionManager, OptionManager>();
-            RegisterModule<IParamParserManager, ParamParserManager>();
-            RegisterModule<ICommandManager, CommandsManager>();
-        }
+
+        
 
         #region IServiceProvider implementations
         public object? GetService(Type serviceType)
@@ -186,11 +162,13 @@ public static class MBootstrapper
         #endregion
 
         #region IModuleRegister implementations
-        public void RegisterModule<TService, TImplementation>(TImplementation? instance = null)
+        public bool RegisterModule<TService, TImplementation>(TImplementation? instance = null, bool overrides = false)
             where TImplementation : class, TService
             where TService : notnull
         {
             var serviceType = typeof(TService);
+            if (!overrides && (_servicesRegistered.ContainsKey(serviceType) || _instancesCached.ContainsKey(serviceType)))
+                return false;
             _instancesCached.Remove(serviceType, out _);
             if (instance is null)
             {
@@ -201,11 +179,22 @@ public static class MBootstrapper
             }
             else
                 _instancesCached[serviceType] = instance;
+            return true;
         }
-        public void RegisterModule<TService>(TService? instance = null)
+        public bool RegisterModule<TService>(TService? instance = null, bool overrides = false)
             where TService : class
+            => RegisterModule<TService, TService>(instance, overrides);
+        public void FinalizeRegistration()
         {
-            RegisterModule<TService, TService>(instance);
+            foreach(var serviceType in _servicesRegistered.Keys)
+            {
+                if (_instancesCached.ContainsKey(serviceType))
+                    continue;
+                var attr = serviceType.GetCustomAttribute<InitializationInfoAttribute>(true);
+                if (attr is not null && !attr.PreInstantiate)
+                    continue;
+                else _ = Resolve(serviceType, disposeWhenExit: true);
+            }
         }
         #endregion
     }
@@ -214,15 +203,17 @@ public static class MBootstrapper
     private readonly static HashSet<WeakReference<object>> _cachedServices = [];
     public static void Exit(bool force)
     {
-        if (!force && _logger is not null)
+        var log = CoreModuleAccessor.Log;
+        var logger = log.Main;
+        if (!force && logger is not null)
         {
-            _logger.Warning(new ProcessException("The process will be closed in 3 seconds if there are no more waiting tasks."));
+            logger.Warning(new ProcessException("The process will be closed in 3 seconds if there are no more waiting tasks."));
             Task.Run(async () =>
             {
                 await Task.Delay(3000);
                 while (true)
                 {
-                    if (!force && !_loggerManager!.TemporarilyNoEntriesToUpdate)
+                    if (!force && !log!.TemporarilyNoEntriesToUpdate)
                         await Task.Yield();
                     var logDir = CoreModuleAccessor.LogWriter.LogCurrentDirectory;
                     foreach (var item in _cachedServices)

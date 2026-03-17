@@ -91,7 +91,7 @@ public static class GlobalCommands
 
     #region Exit
     [Command]
-    public static void Exit(bool force) => MBootstrapper.Exit(force);
+    public static void Exit(bool force) => Bootstrapper.Exit(force);
     [Command] public static void Exit() => Exit(false);
     #endregion
 

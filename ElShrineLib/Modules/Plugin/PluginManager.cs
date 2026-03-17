@@ -121,7 +121,7 @@ internal sealed class PluginManager : IPluginManager
             var type = ctx.GetImplements(typeof(IPlugin)).Where(t => t.FullName == info.PluginFullName).FirstOrDefault()
                 ?? throw new PluginException($"Plugin {info.Name} entry point type {info.PluginFullName} is not found.");
             ctx!.RefCount++;
-            plugin = (IPlugin)MBootstrapper.Resolve(type, disposeWhenExit: false);
+            plugin = (IPlugin)Bootstrapper.Resolve(type, disposeWhenExit: false);
             PluginLoaded?.Invoke(plugin, info, ctx, createNewCtx);
             _loadedPlugins[info.Id] = plugin;
             plugin.PostLoad(AssemblyLoadContext.Default, ctx);

@@ -3,7 +3,6 @@ using ElShrine.Modules;
 using ElShrine.Wpf.Controls.Extensions;
 using ElShrine.Wpf.UITheme;
 using System;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -18,9 +17,9 @@ namespace ElShrine.Wpf.Controls
             DefaultStyleKeyProperty.OverrideMetadata(typeof(EExpander), new FrameworkPropertyMetadata(typeof(EExpander)));
             IsExpandedProperty.OverrideMetadata(typeof(EExpander), new FrameworkPropertyMetadata(defaultValue:false, propertyChangedCallback: IsExpandedChanged));
         }
-        public EExpander() => UIThemesManager.RegisterCoerceThemeDPs(this);
-        public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => UIThemesManager.CoerceValue(this);
-        public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => StateListenersManager.Instance.RedoSetterTransitions(this);
+        public EExpander() => WpfModuleAccessor.UITheme.RegisterCoerceThemeDPs(this);
+        public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => TransHelper.CoerceValue(this);
+        public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
         #endregion
 
         #region DPs
