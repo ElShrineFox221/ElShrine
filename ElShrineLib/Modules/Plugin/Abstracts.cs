@@ -15,7 +15,7 @@ public delegate void PluginUnloadedHandler(PluginInfo info);
 public interface IPluginManager
 {
     void RescanPluginInfos();
-    IReadOnlyList<PluginInfo> UnloadPlugins { get; }
+    IReadOnlyList<PluginInfo> AvailablePlugins { get; }
     IReadOnlyDictionary<PluginInfo, IPlugin> LoadedPlugins { get; }
     IPlugin LoadPlugin(PluginInfo info);
     bool UnloadPlugin(PluginInfo info);

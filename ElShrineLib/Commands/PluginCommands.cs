@@ -22,7 +22,7 @@ public static class PluginCommands
     [Command]
     public static void Load(int index)
     {
-        var plugins = Plugin.UnloadPlugins;
+        var plugins = Plugin.AvailablePlugins;
         if(index >= plugins.Count)
         {
             Logger.Error(new IndexOutOfRangeException());

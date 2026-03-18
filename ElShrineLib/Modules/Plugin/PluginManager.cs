@@ -51,8 +51,8 @@ internal sealed class PluginManager : IPluginManager
     private readonly Dictionary<string, IPlugin> _loadedPlugins; // by id
     private readonly Dictionary<string, PluginLoadContext> _loadedContexts; // by folder
 
-    public IReadOnlyList<PluginInfo> UnloadPlugins 
-        => [.. _availablePluginInfos.Where(kv => !_loadedPlugins.ContainsKey(kv.Key)).Select(kv => kv.Value)];
+    public IReadOnlyList<PluginInfo> AvailablePlugins
+        => [.. _availablePluginInfos.Values];
     public IReadOnlyDictionary<PluginInfo, IPlugin> LoadedPlugins
         => _loadedPlugins.ToDictionary(kv => _availablePluginInfos[kv.Key], kv => kv.Value);
 
@@ -82,16 +82,9 @@ internal sealed class PluginManager : IPluginManager
                 {
                     pluginValidCount++;
                     var attr = pt.GetCustomAttribute<PluginAttribute>();
-                    return new PluginInfo(
-                        Id: $"{folder}_{pt.Name}",
-                        PluginFullName: pt.FullName!,
-                        Folder: folder,
-                        FileHash: combinedHash,
-                        Name: attr?.Name ?? pt.Name,
-                        Author: attr?.Author ?? string.Empty,
-                        VersionInfo: attr?.Version ?? string.Empty,
-                        Description: attr?.Description ?? string.Empty
-                        );
+                    var info = attr is not null ? attr.DoSummarizePluginInfo(pt, folder, combinedHash)
+                     : PluginAttribute.SummarizePluginInfoDefalut(null, pt, folder, combinedHash);
+                    return info;
                 });
                 foreach (var info in infos)
                     _availablePluginInfos.Add(info.Id, info);
