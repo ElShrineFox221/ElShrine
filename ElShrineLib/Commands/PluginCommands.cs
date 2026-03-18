@@ -46,4 +46,15 @@ public static class PluginCommands
     {
         Option.GetOption<CommonOption>().DirectlyDel = !Option.GetOption<CommonOption>().DirectlyDel;
     }
+
+    [Command]
+    public static void SaveConfig()
+    {
+        Plugin.Save();
+    }
+    [Command]
+    public static void LoadConfig()
+    {
+        Plugin.Load();
+    }
 }

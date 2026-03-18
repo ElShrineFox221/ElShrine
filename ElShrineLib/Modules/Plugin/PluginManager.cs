@@ -299,4 +299,21 @@ internal sealed class PluginManager : IPluginManager
         return BitConverter.ToString(sha256.ComputeHash(stream)).Replace("-", "");
     }
     private static string GetAssembliesText(int count) => nameof(Assembly).GetPuralWithNum(count).ToLower();
+
+    #region persistence
+
+    public void Save()
+    {
+        PluginConfigWirter.Write(LoadedPlugins.Keys, AvailablePlugins.Except(LoadedPlugins.Keys));
+    }
+    public void Load()
+    {
+        PluginConfigWirter.Read(AvailablePlugins, out var enableds, out var disableds);
+        var loadeds = LoadedPlugins.Keys.ToList();
+        foreach (var info in loadeds)
+            UnloadPlugin(info);
+        foreach (var info in enableds)
+            LoadPlugin(info);
+    }
+    #endregion
 }

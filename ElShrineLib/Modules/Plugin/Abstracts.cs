@@ -22,4 +22,7 @@ public interface IPluginManager
     event PluginLoadedHandler? PluginLoaded;
     event PluginUnloadingHandler? PluginUnloading;
     event PluginUnloadedHandler? PluginUnloaded;
+
+    void Save();
+    void Load();
 }
