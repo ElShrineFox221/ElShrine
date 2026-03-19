@@ -19,7 +19,7 @@ public abstract class PluginResourceTracker<TResourceBase> : PluginAwareServiceB
 
     protected static LogScopeAccessor OpenRecollectTextScope(ILogger logger, AssemblyLoadContext ctx)
     {
-        var item0 = LogItem.Normal("Recollecting ressource ");
+        var item0 = LogItem.Normal("Recollecting resource ");
         var item1 = LogItem.Normal(typeof(TResourceBase).Name, LogItemStyle.NoticeCyan);
         var item2 = LogItem.Normal(" from context ");
         var item3 = LogItem.Normal(ctx.Name ?? "Unknown", LogItemStyle.NoticeBlue);

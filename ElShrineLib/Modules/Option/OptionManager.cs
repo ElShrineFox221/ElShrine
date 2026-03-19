@@ -130,15 +130,18 @@ internal sealed class OptionManager : PluginResourceTracker<OptionBase>, IOption
     }
     protected override void OnPluginUnloading(IPlugin plugin, PluginInfo info, AssemblyLoadContext ctx, bool unloadingCtx)
     {
+        var doUnload = false;
         if (unloadingCtx && Resources.TryGetValue(ctx, out var options))
         {
+            doUnload = true;
             foreach (var option in options)
             {
                 option.Value.PropertyChanged -= OnOptionChanged;
             }
         }
         base.OnPluginUnloading(plugin, info, ctx, unloadingCtx);
-        RebuildOptionItemsIndexer();
+        if (doUnload)
+            RebuildOptionItemsIndexer();
     }
     protected override void OnResourceCreated(OptionBase resource, AssemblyLoadContext ctx)
     {

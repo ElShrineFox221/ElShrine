@@ -86,6 +86,13 @@ public static class PluginCommands
         }
         Logger.Error(new PluginException($"Found no plugin named {name}"));
     }
+    [Command]
+    public static void UnloadAll()
+    {
+        var plugins = Plugin.LoadedPlugins.Keys.ToList();
+        foreach (var info in plugins)
+            Plugin.UnloadPlugin(info);
+    }
 
     [Command]
     public static void SaveConfig()
