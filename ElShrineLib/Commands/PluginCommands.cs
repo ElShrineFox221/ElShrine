@@ -23,7 +23,7 @@ public static class PluginCommands
     {
         var ec = PluginInfo.BuildPluginTable(
             LogItem.Normal($"Infos of {"plugin".GetPuralWithNum(Plugin.AvailablePlugins.Count)} have been collected."),
-            Plugin.AvailablePlugins.Select(i => (i, Plugin.LoadedPlugins.ContainsKey(i))), true);
+            Plugin.AvailablePlugins.Select((i, index) => (i, Plugin.LoadedPlugins.ContainsKey(i), index)), true);
         Logger.Log(ec);
     }
 

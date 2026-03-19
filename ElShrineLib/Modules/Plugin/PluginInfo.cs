@@ -13,7 +13,7 @@ public record PluginInfo(
     string Description // From attr 
     )
 {
-    public static EntryContent BuildPluginTable(LogItem title, IEnumerable<(PluginInfo info, bool loaded)> infos, bool useLoadedCol)
+    public static EntryContent BuildPluginTable(LogItem title, IEnumerable<(PluginInfo info, bool loaded, int index)> infos, bool useLoadedCol)
     {
         var list = infos.ToList();
         var countIncludedHeaders = list.Count + 1;
@@ -32,9 +32,10 @@ public record PluginInfo(
         for (int i = 1; i <= list.Count; i++)
         {
             var index = i - 1;
+            var rIndex = list[index].index;
             var info = list[index].info;
             var loaded = list[index].loaded;
-            indexCol[i] = LogItem.Header($"{index}", LogItemStyle.NoticePaleGreen);
+            indexCol[i] = LogItem.Header($"{rIndex}", LogItemStyle.NoticePaleGreen);
             loadedCol[i] = LogItem.Normal($"{loaded}", loaded ? LogItemStyle.Success : LogItemStyle.SubInfo);
             nameCol[i] = LogItem.Normal(info.Name);
             folderCol[i] = LogItem.Normal(info.Folder, LogItemStyle.NoticeBlue);

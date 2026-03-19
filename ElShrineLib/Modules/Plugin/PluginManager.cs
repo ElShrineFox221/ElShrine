@@ -93,7 +93,7 @@ internal sealed class PluginManager : IPluginManager
             ctx.Unload();
         }
         var title = $"There are {"plugin".GetPuralWithNum(pluginValidCount)} in {"folder".GetPuralWithNum(folderValidCount)}.";
-        var ec = PluginInfo.BuildPluginTable(LogItem.Normal(title), AvailablePlugins.Select(i => (i, LoadedPlugins.ContainsKey(i))), true);
+        var ec = PluginInfo.BuildPluginTable(LogItem.Normal(title), AvailablePlugins.Select((i, index) => (i, LoadedPlugins.ContainsKey(i), index)), true);
         _logger.Log(ec);
     }
     public IPlugin LoadPlugin(PluginInfo info)
@@ -345,7 +345,8 @@ internal sealed class PluginManager : IPluginManager
                     LoadPlugin(info);
             }
             var title = LogItem.Normal($"Reloaded {"enabled plugin".GetPuralWithNum(enableds.Count)} from config.");
-            var ec = PluginInfo.BuildPluginTable(title, enableds.Select(i => (i, false)), false);
+            var availables = AvailablePlugins.ToList();
+            var ec = PluginInfo.BuildPluginTable(title, enableds.Select(i => (i, false, availables.IndexOf(i))), false);
             _logger.Log(ec);
         }
         else
