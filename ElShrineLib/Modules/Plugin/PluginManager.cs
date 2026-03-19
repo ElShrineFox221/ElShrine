@@ -170,10 +170,13 @@ internal sealed class PluginManager : IPluginManager
         LoadAllReferences(ctx, names);
         if (!DoValidate(ctx))
             _logger.Error($"{nameof(PluginManager)} initialize failed.");
-        using var sc = _logger.OpenScope("Try do plugins initial loading from config...");
-        ScanPluginInfos();
-        Load();
-        sc.HandleErrors<Exception>((ex, r) => true);
+        Bootstrapper.RegisterFinalization(() =>
+        {
+            using var sc = _logger.OpenScope("Try do plugins initial loading from config...");
+            ScanPluginInfos();
+            Load();
+            sc.HandleErrors<Exception>((ex, r) => true);
+        });
     }
 
 

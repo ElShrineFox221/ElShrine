@@ -33,6 +33,10 @@ public static class Bootstrapper
     private static IServiceProvider? _serviceProvider;
     private static IModuleRegister? _moduleRegister;
     //
+    private readonly static ConcurrentBag<Finalizer> _finalizers = [];
+    private sealed record Finalizer(int Priority, Action Action);
+    public static void RegisterFinalization(Action action, int priority = -1)
+        => _finalizers.Add(new(priority, action));
 
     public static void Initialize(Action<IModuleRegister>? builderConfig = null)
     {
@@ -56,7 +60,12 @@ public static class Bootstrapper
         }
         return suc;
     }
-    private static void FinalizeInitialization() => _moduleRegister?.FinalizeRegistration();
+    private static void FinalizeInitialization()
+    {
+        _moduleRegister?.FinalizeRegistration();
+        foreach (var f in _finalizers.OrderByDescending(static f => f.Priority))
+            f.Action.Invoke();
+    }
 
     #region Resolve
     public static TService Resolve<TService>() where TService : class
