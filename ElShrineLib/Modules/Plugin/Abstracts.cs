@@ -23,6 +23,8 @@ public interface IPluginManager
     event PluginUnloadingHandler? PluginUnloading;
     event PluginUnloadedHandler? PluginUnloaded;
 
+    void LoadPluginList(IEnumerable<PluginInfo> infos, out bool reloaded);
+
     void Save();
     void Load();
 }

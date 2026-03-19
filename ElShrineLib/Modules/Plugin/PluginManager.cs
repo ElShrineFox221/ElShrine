@@ -99,7 +99,10 @@ internal sealed class PluginManager : IPluginManager
     public IPlugin LoadPlugin(PluginInfo info)
     {
         if(_loadedPlugins.TryGetValue(info.Id, out var plugin))
+        {
+            _logger.Log(LogItem.Normal($"Plugin {info.Name} is already loaded."));
             return plugin;
+        }
         if (!_availablePluginInfos.TryGetValue(info.Id, out var pluginInfo))
             throw new PluginException($"Plugin {info.PluginFullName} is not found.");
         PluginLoadContext? ctx = null;
@@ -326,31 +329,37 @@ internal sealed class PluginManager : IPluginManager
         
         var r = PluginConfigWirter.Read(AvailablePlugins, out var enableds, out var disableds);
         if (r.Success)
-        {
-            var loadeds = LoadedPlugins.Keys.ToList();
-            if (loadeds.SequenceEqual(enableds))
-            {
-                _logger.Log(LogItem.Normal("Enabled plugins list from config has been loaded."));
-                return;
-            }
-            using var sc1 = _logger.OpenScope($"Reloading {"enabled plugin".GetPuralWithNum(enableds.Count)}...");
-            using (var _ = _logger.OpenScope("Unloading all plugins..."))
-            {
-                foreach (var info in loadeds)
-                    UnloadPlugin(info);
-            }
-            using (var _ = _logger.OpenScope("Loading plugins..."))
-            {
-                foreach (var info in enableds)
-                    LoadPlugin(info);
-            }
-            var title = LogItem.Normal($"Reloaded {"enabled plugin".GetPuralWithNum(enableds.Count)} from config.");
-            var availables = AvailablePlugins.ToList();
-            var ec = PluginInfo.BuildPluginTable(title, enableds.Select(i => (i, false, availables.IndexOf(i))), false);
-            _logger.Log(ec);
-        }
+            LoadPluginList(enableds, out _);
         else
             _logger.Error(r.FailedSource ?? new Exception());
     }
     #endregion
+
+    public void LoadPluginList(IEnumerable<PluginInfo> infos, out bool reloaded)
+    {
+        reloaded = false;
+        var enableds = infos.ToList();
+        var loadeds = LoadedPlugins.Keys.ToList();
+        if (loadeds.SequenceEqual(enableds))
+        {
+            _logger.Log(LogItem.Normal("Enabled plugins list from config has been loaded."));
+            return;
+        }
+        using var sc1 = _logger.OpenScope($"Reloading {"enabled plugin".GetPuralWithNum(enableds.Count)}...");
+        using (var _ = _logger.OpenScope("Unloading all plugins..."))
+        {
+            foreach (var info in loadeds)
+                UnloadPlugin(info);
+        }
+        using (var _ = _logger.OpenScope("Loading plugins..."))
+        {
+            foreach (var info in enableds)
+                LoadPlugin(info);
+        }
+        var title = LogItem.Normal($"Reloaded {"enabled plugin".GetPuralWithNum(enableds.Count)} from config.");
+        var availables = AvailablePlugins.ToList();
+        var ec = PluginInfo.BuildPluginTable(title, enableds.Select(i => (i, false, availables.IndexOf(i))), false);
+        _logger.Log(ec);
+        reloaded = true;
+    }
 }
