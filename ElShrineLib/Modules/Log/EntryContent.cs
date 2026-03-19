@@ -56,6 +56,7 @@ public sealed record EntryContent(LogItem[] LogItems)
         var tableItems = new List<LogItem>();
         for (int i = 0; i < rowCount; i++)
         {
+            var isLastRow = i == rowCount - 1;
             for (int j = 0; j < itemCols.Length; j++)
             {
                 var col = itemCols[j];
@@ -65,14 +66,15 @@ public sealed record EntryContent(LogItem[] LogItems)
                 {
                     var originalItem = col[i];
                     var text = originalItem.ToString().PadRight(targetWidth);
-                    if (isRowLastItem) text += '\n';
+                    if (isRowLastItem && !isLastRow) text += '\n';
                     var item = LogItem.Normal(text, originalItem.Style);
                     tableItems.Add(item);
                 }
                 else
                 {
                     var text = new string(' ', targetWidth);
-                    if (isRowLastItem) text += '\n';
+                    if (isRowLastItem && !isLastRow) 
+                        text += '\n';
                     tableItems.Add(LogItem.Normal(text));
                 }
             }

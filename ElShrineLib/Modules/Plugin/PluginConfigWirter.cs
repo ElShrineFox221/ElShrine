@@ -30,7 +30,9 @@ internal sealed record PluginConfig
 internal class PluginConfigWirter
 {
     private readonly static SerializerBase _serializer = new XmlSerializer();
-    public static void Write(IEnumerable<PluginInfo> enableds, IEnumerable<PluginInfo> disableds)
+    public static IDataHandleResult<PluginConfig> Write(
+        IEnumerable<PluginInfo> enableds,
+        IEnumerable<PluginInfo> disableds)
     {
         var config = new PluginConfig();
         var i = 0;
@@ -40,9 +42,12 @@ internal class PluginConfigWirter
         foreach(var x in disableds)
             config.Disableds.Add(PluginRawData.FromInfo(x, i++, false));
         // do write
-        DataHandler.Write(config, serializer: _serializer);
+        return DataHandler.Write(config, serializer: _serializer);
     }
-    public static void Read(IEnumerable<PluginInfo> availables, out List<PluginInfo> enableds, out List<PluginInfo> disableds)
+    public static IDataHandleResult<PluginConfig> Read(
+        IEnumerable<PluginInfo> availables,
+        out List<PluginInfo> enableds,
+        out List<PluginInfo> disableds)
     {
         var r = DataHandler.Read<PluginConfig>(serializer: _serializer);
         if (r.Success)
@@ -63,5 +68,6 @@ internal class PluginConfigWirter
             enableds = [];
             disableds = [.. availables];
         }
+        return r;
     }
 }

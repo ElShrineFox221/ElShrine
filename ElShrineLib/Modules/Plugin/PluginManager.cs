@@ -1,4 +1,5 @@
 ﻿using ElShrine.Modules.Log;
+using ElShrine.Options;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Security.Cryptography;
@@ -62,7 +63,7 @@ internal sealed class PluginManager : IPluginManager
 
     
 
-    public void RescanPluginInfos()
+    public void ScanPluginInfos()
     {
         _availablePluginInfos.Clear();
         Directory.CreateDirectory(PLUGIN_FOLDER);
@@ -91,7 +92,9 @@ internal sealed class PluginManager : IPluginManager
             }
             ctx.Unload();
         }
-        _logger.Log($"There are {"plugin".GetPuralWithNum(pluginValidCount)} in {"folder".GetPuralWithNum(folderValidCount)}.");
+        var title = $"There are {"plugin".GetPuralWithNum(pluginValidCount)} in {"folder".GetPuralWithNum(folderValidCount)}.";
+        var ec = PluginInfo.BuildPluginTable(LogItem.Normal(title), AvailablePlugins.Select(i => (i, LoadedPlugins.ContainsKey(i))), true);
+        _logger.Log(ec);
     }
     public IPlugin LoadPlugin(PluginInfo info)
     {
@@ -151,6 +154,7 @@ internal sealed class PluginManager : IPluginManager
             PluginUnloading?.Invoke(plugin, info, _ctx, false);
         }
         PluginUnloaded?.Invoke(info);
+
         return true;
     }
 
@@ -304,16 +308,41 @@ internal sealed class PluginManager : IPluginManager
 
     public void Save()
     {
-        PluginConfigWirter.Write(LoadedPlugins.Keys, AvailablePlugins.Except(LoadedPlugins.Keys));
+        using var sc = _logger.OpenScope(EntryContent.OmitOrExecutingPattern("Saving ", nameof(PluginConfig), LogItemStyle.NoticeCyan));
+        var r = PluginConfigWirter.Write(LoadedPlugins.Keys, AvailablePlugins.Except(LoadedPlugins.Keys));
+        if (!r.Success)
+            _logger.Error(r.FailedSource ?? new Exception());
     }
     public void Load()
     {
-        PluginConfigWirter.Read(AvailablePlugins, out var enableds, out var disableds);
-        var loadeds = LoadedPlugins.Keys.ToList();
-        foreach (var info in loadeds)
-            UnloadPlugin(info);
-        foreach (var info in enableds)
-            LoadPlugin(info);
+        using var sc = _logger.OpenScope(EntryContent.OmitOrExecutingPattern("Loading ", nameof(PluginConfig), LogItemStyle.NoticeCyan));
+        
+        var r = PluginConfigWirter.Read(AvailablePlugins, out var enableds, out var disableds);
+        if (r.Success)
+        {
+            var loadeds = LoadedPlugins.Keys.ToList();
+            if (loadeds.SequenceEqual(enableds))
+            {
+                _logger.Log(LogItem.Normal("Enabled plugins list from config has been loaded."));
+                return;
+            }
+            using var sc1 = _logger.OpenScope($"Reloading {"enabled plugin".GetPuralWithNum(enableds.Count)}...");
+            using (var _ = _logger.OpenScope("Unloading all plugins..."))
+            {
+                foreach (var info in loadeds)
+                    UnloadPlugin(info);
+            }
+            using (var _ = _logger.OpenScope("Loading plugins..."))
+            {
+                foreach (var info in enableds)
+                    LoadPlugin(info);
+            }
+            var title = LogItem.Normal($"Reloaded {"enabled plugin".GetPuralWithNum(enableds.Count)} from config.");
+            var ec = PluginInfo.BuildPluginTable(title, enableds.Select(i => (i, false)), false);
+            _logger.Log(ec);
+        }
+        else
+            _logger.Error(r.FailedSource ?? new Exception());
     }
     #endregion
 }
