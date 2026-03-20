@@ -1,4 +1,6 @@
-﻿namespace ElShrine.Modules.Plugin;
+﻿using System.Runtime.Loader;
+
+namespace ElShrine.Modules.Plugin;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 public class PluginAttribute : ValidatableClassAttribute
@@ -23,6 +25,7 @@ public class PluginAttribute : ValidatableClassAttribute
     {
         return new PluginInfo(
                         Id: $"{folder}_{pluginType.Name}",
+                        FromHost: AssemblyLoadContext.Default.Assemblies.Contains(pluginType.Assembly),
                         PluginFullName: pluginType.FullName!,
                         Folder: folder,
                         FileHash: filesHash,

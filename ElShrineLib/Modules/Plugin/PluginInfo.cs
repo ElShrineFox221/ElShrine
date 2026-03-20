@@ -4,6 +4,7 @@ namespace ElShrine.Modules.Plugin;
 
 public record PluginInfo(
     string Id, // Unique name
+    bool FromHost,
     string PluginFullName, // Entry point type full name
     string Folder, // Plugin folder to locate container
     string FileHash, // File hash of its assembly

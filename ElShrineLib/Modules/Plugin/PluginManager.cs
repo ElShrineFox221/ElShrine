@@ -1,5 +1,4 @@
 ﻿using ElShrine.Modules.Log;
-using ElShrine.Options;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Security.Cryptography;
@@ -73,6 +72,16 @@ internal sealed class PluginManager : IPluginManager
         foreach (var folder in folders)
         {
             var ctx = LoadPluginAllReferences(folder, out var combinedHash);
+            scanFromCtx(ctx, folder, combinedHash);
+            ctx.Unload();
+        }
+        scanFromCtx(AssemblyLoadContext.Default, string.Empty, string.Empty);
+        var title = $"There are {"plugin".GetPuralWithNum(pluginValidCount)} in {"folder".GetPuralWithNum(folderValidCount)}.";
+        var ec = PluginInfo.BuildPluginTable(LogItem.Normal(title), AvailablePlugins.Select((i, index) => (i, LoadedPlugins.ContainsKey(i), index)), true);
+        _logger.Log(ec);
+
+        void scanFromCtx(AssemblyLoadContext ctx, string folder, string combinedHash)
+        {
             // do validate
             if (DoValidate(ctx))
             {
@@ -90,13 +99,15 @@ internal sealed class PluginManager : IPluginManager
                 foreach (var info in infos)
                     _availablePluginInfos.Add(info.Id, info);
             }
-            ctx.Unload();
         }
-        var title = $"There are {"plugin".GetPuralWithNum(pluginValidCount)} in {"folder".GetPuralWithNum(folderValidCount)}.";
-        var ec = PluginInfo.BuildPluginTable(LogItem.Normal(title), AvailablePlugins.Select((i, index) => (i, LoadedPlugins.ContainsKey(i), index)), true);
-        _logger.Log(ec);
     }
     public IPlugin LoadPlugin(PluginInfo info)
+    {
+        if (!info.FromHost) 
+            return LoadFolderPlugin(info);
+        return LoadHostPlugin(info);
+    }
+    private IPlugin LoadFolderPlugin(PluginInfo info)
     {
         if(_loadedPlugins.TryGetValue(info.Id, out var plugin))
         {
@@ -132,13 +143,31 @@ internal sealed class PluginManager : IPluginManager
         }
         return plugin;
     }
+    private IPlugin LoadHostPlugin(PluginInfo info)
+    {
+        var ctx = AssemblyLoadContext.Default;
+        if (_loadedPlugins.TryGetValue(info.Id, out var plugin))
+            return plugin;
+        var type = ctx.GetImplements(typeof(IPlugin)).Where(t => t.FullName == info.PluginFullName).FirstOrDefault()
+            ?? throw new PluginException($"Plugin {info.Name} entry point type {info.PluginFullName} is not found.");
+        plugin = (IPlugin)Bootstrapper.Resolve(type, disposeWhenExit: false);
+        PluginLoaded?.Invoke(plugin, info, ctx, false);
+        _loadedPlugins[info.Id] = plugin;
+        plugin.PostLoad(AssemblyLoadContext.Default, ctx);
+        return plugin;
+    }
+
     public bool UnloadPlugin(PluginInfo info)
     {
         if (!_loadedPlugins.Remove(info.Id, out var plugin)) 
             return false;
-        
-        
-        if (_loadedContexts.TryGetValue(info.Folder, out var ctx))
+
+        if (info.FromHost)
+        {
+            plugin.PreUnload(AssemblyLoadContext.Default, AssemblyLoadContext.Default);
+            PluginUnloading?.Invoke(plugin, info, AssemblyLoadContext.Default, false);
+        }
+        else if (_loadedContexts.TryGetValue(info.Folder, out var ctx))
         {
             ctx.RefCount--;
             var unloadingCtx = ctx.RefCount == 0;
