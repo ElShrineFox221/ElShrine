@@ -24,7 +24,7 @@ public partial class EListBox : ListBox, IThemeControlBase, IScrollBarControlBas
         PreviewMouseUp += ListBox_PreviewMouseUp;
     }
     public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => TransHelper.CoerceValue(this);
-    public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
+    public void LocalThemePropertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
     #endregion
 
     protected override DependencyObject GetContainerForItemOverride() => new EListBoxItem();

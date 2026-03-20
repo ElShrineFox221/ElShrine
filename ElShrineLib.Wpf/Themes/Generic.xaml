@@ -46,7 +46,7 @@
                                                 <Setter Property="ContentTemplate" Value="{Binding RelativeSource={RelativeSource AncestorType=controls:EWindow}, Path=HeaderButtonTemplate}"/>
                                             </Style>
                                             <Style TargetType="TextBlock" BasedOn="{StaticResource TextBlock_IconStyle}">
-                                                <Setter Property="Foreground" Value="{Binding ElementName=MainBorder, Path=BorderBrush}"/>
+                                                <Setter Property="Foreground" Value="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=Border}}"/>
                                             </Style>
                                         </StackPanel.Resources>
                                         <controls:EButton x:Name="MinButton"

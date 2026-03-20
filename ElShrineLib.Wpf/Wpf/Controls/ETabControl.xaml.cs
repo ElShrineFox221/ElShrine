@@ -71,7 +71,7 @@ public partial class ETabControl : TabControl, IThemeControlBase
         SelectionChanged += OnSelectionChanged;
     }
     public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => TransHelper.CoerceValue(this);
-    public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
+    public void LocalThemePropertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
     #endregion
 
     public override void OnApplyTemplate()

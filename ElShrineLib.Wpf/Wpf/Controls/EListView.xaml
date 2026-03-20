@@ -35,7 +35,7 @@
                                                 Focusable="false" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
                                                 CornerContent="{TemplateBinding CornerContent}" 
                                                 EBorderCornerRadius="{TemplateBinding BarSize, Converter={StaticResource CommonModifyConverter}, ConverterParameter=LTRB_L0.5}">
-                            <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                            <ItemsPresenter x:Name="PART_ItemsHandler" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
                         </controls:EScrollViewer>
                     </Border>
                 </ControlTemplate>

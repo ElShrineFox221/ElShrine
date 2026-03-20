@@ -51,7 +51,7 @@ public partial class ETextBox : TextBox, IThemeControlBase, IHeaderControlBase
     static ETextBox() => DefaultStyleKeyProperty.OverrideMetadata(typeof(ETextBox), new FrameworkPropertyMetadata(typeof(ETextBox)));
     public ETextBox() => WpfModuleAccessor.UITheme.RegisterCoerceThemeDPs(this);
     public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => TransHelper.CoerceValue(this);
-    public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
+    public void LocalThemePropertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
     #endregion
 
     #region Initialize

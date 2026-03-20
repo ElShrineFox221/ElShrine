@@ -37,5 +37,5 @@ public partial class EToggleButton : ToggleButton, IThemeControlBase
     static EToggleButton() => DefaultStyleKeyProperty.OverrideMetadata(typeof(EToggleButton), new FrameworkPropertyMetadata(typeof(EToggleButton)));
 
     public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => TransHelper.CoerceValue(this);
-    public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
+    public void LocalThemePropertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
 }

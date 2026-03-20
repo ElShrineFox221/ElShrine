@@ -48,13 +48,13 @@ namespace ElShrine.Wpf
         public static FrameworkElement? FindParent(this DependencyObject child, Predicate<DependencyObject> predicate, bool selfIncluded = true)
         {
             var current = selfIncluded ? child : VisualTreeHelper.GetParent(child);
-            while (current != null)
+            while (current is not null)
             {
                 if (predicate(current))
                 {
                     return current as FrameworkElement;
                 }
-                current = VisualTreeHelper.GetParent(current);
+                current = (current is FrameworkElement fe ? fe.Parent : null) ?? VisualTreeHelper.GetParent(current);
             }
             return null;
         }

@@ -28,7 +28,7 @@ namespace ElShrine.Wpf.UITheme
         public EasingFunctionBase AnimaEaseFunc { get; set; }
         #endregion
 
-        void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e);
+        void LocalThemePropertyChanged(DependencyPropertyChangedEventArgs e);
         void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e);
     }
 }

@@ -29,7 +29,7 @@ public partial class ETreeView : TreeView, IThemeControlBase, IItemRenderControl
     static ETreeView() => DefaultStyleKeyProperty.OverrideMetadata(typeof(ETreeView), new FrameworkPropertyMetadata(typeof(ETreeView)));
     public ETreeView() => WpfModuleAccessor.UITheme.RegisterCoerceThemeDPs(this);
     public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => TransHelper.CoerceValue(this);
-    public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
+    public void LocalThemePropertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
     #endregion
 
     protected override DependencyObject GetContainerForItemOverride() => new ETreeViewItem();

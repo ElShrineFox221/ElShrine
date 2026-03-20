@@ -161,6 +161,6 @@ public static class ThemeProperties
 
     private static void OnThemePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is IThemeControlBase themeControl) themeControl.LocalThemePorpertyChanged(e);
+        if (d is IThemeControlBase themeControl) themeControl.LocalThemePropertyChanged(e);
     }
 }

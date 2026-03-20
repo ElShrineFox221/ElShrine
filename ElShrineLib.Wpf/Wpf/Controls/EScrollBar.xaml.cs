@@ -13,6 +13,6 @@ public partial class EScrollBar : ScrollBar, IThemeControlBase, IScrollBarContro
     static EScrollBar() => DefaultStyleKeyProperty.OverrideMetadata(typeof(EScrollBar), new FrameworkPropertyMetadata(typeof(EScrollBar)));
     public EScrollBar() => WpfModuleAccessor.UITheme.RegisterCoerceThemeDPs(this);
     public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => TransHelper.CoerceValue(this);
-    public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
+    public void LocalThemePropertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
     #endregion
 }

@@ -72,6 +72,6 @@ public partial class ESlider : Slider, IThemeControlBase, IScaleControllerBase
     static ESlider() => DefaultStyleKeyProperty.OverrideMetadata(typeof(ESlider), new FrameworkPropertyMetadata(typeof(ESlider)));
     public ESlider() => WpfModuleAccessor.UITheme.RegisterCoerceThemeDPs(this);
     public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => TransHelper.CoerceValue(this);
-    public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
+    public void LocalThemePropertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
     #endregion
 }

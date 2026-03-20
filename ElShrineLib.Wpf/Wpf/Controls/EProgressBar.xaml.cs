@@ -23,7 +23,7 @@ public partial class EProgressBar : ContentControl, IThemeControlBase
     static EProgressBar() => DefaultStyleKeyProperty.OverrideMetadata(typeof(EProgressBar), new FrameworkPropertyMetadata(typeof(EProgressBar)));
     public EProgressBar() => WpfModuleAccessor.UITheme.RegisterCoerceThemeDPs(this);
     public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => TransHelper.CoerceValue(this);
-    public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
+    public void LocalThemePropertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
 
     #region Dependency Properties - Additional
     public bool IsIndeterminate

@@ -141,7 +141,7 @@ public partial class EWindow : Window, IThemeControlBase
         MouseLeave += EWindow_MouseLeave;
     }
     public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => TransHelper.CoerceValue(this);
-    public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) { }
+    public void LocalThemePropertyChanged(DependencyPropertyChangedEventArgs e) { }
 
     #region override
     public override void OnApplyTemplate()

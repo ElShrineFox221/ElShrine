@@ -21,21 +21,21 @@
                     <Line x:Name="PART_SelectionIndicator" X1="0" Y1="0" X2="0" Y2="1" Stretch="Fill"
                       StrokeEndLineCap="Round" StrokeStartLineCap="Round"
                       Opacity="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TransNorm}"
-                      StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=controls:EListBox}, Path=SelectedItemLineWidth}"/>
+                      StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=controls:EListView}, Path=SelectedItemLineWidth}"/>
                     <Grid.MaxHeight>
                         <MultiBinding Converter="{StaticResource ExpressionConverter}" ConverterParameter="V0*V1*V2">
                             <Binding RelativeSource="{RelativeSource TemplatedParent}" Path="TransNorm"/>
-                            <Binding Path="SelectedItemLineLengthRate" RelativeSource="{RelativeSource AncestorType=controls:EListBox}"/>
+                            <Binding Path="SelectedItemLineLengthRate" RelativeSource="{RelativeSource AncestorType=controls:EListView}"/>
                             <Binding ElementName="PART_ContentContainer" Path="ActualHeight"/>
                         </MultiBinding>
                     </Grid.MaxHeight>
                 </Grid>
                 <Border x:Name="PART_ContentContainer" Grid.Column="1"       
-                    BorderThickness="{Binding ItemBorderThickness, RelativeSource={RelativeSource AncestorType=controls:EListBox}}" 
-                    Margin="{Binding ItemMargin, RelativeSource={RelativeSource AncestorType=controls:EListBox}}" 
-                    Padding="{Binding ItemPadding, RelativeSource={RelativeSource AncestorType=controls:EListBox}}" 
-                    CornerRadius="{Binding ItemBorderCornerRadius, RelativeSource={RelativeSource AncestorType=controls:EListBox}}">
-                    <ContentControl Content="{TemplateBinding Content}" ContentTemplate="{Binding ItemTemplate, RelativeSource={RelativeSource AncestorType=controls:EListBox}}"/>
+                    BorderThickness="{Binding ItemBorderThickness, RelativeSource={RelativeSource AncestorType=controls:EListView}}" 
+                    Margin="{Binding ItemMargin, RelativeSource={RelativeSource AncestorType=controls:EListView}}" 
+                    Padding="{Binding ItemPadding, RelativeSource={RelativeSource AncestorType=controls:EListView}}" 
+                    CornerRadius="{Binding ItemBorderCornerRadius, RelativeSource={RelativeSource AncestorType=controls:EListView}}">
+                    <ContentControl Content="{TemplateBinding Content}" ContentTemplate="{Binding ItemTemplate, RelativeSource={RelativeSource AncestorType=controls:EListView}}"/>
                 </Border>
                 <ext:StateListener.Rules>
                     <ext:RuleCollection>
@@ -87,7 +87,7 @@
                     <Setter.Value>
                         <MultiBinding Converter="{StaticResource ExpressionConverter}" ConverterParameter="V0*V1*V2">
                             <Binding RelativeSource="{RelativeSource TemplatedParent}" Path="TransNorm"/>
-                            <Binding Path="SelectedItemLineLengthRate" RelativeSource="{RelativeSource AncestorType=controls:EListBox}"/>
+                            <Binding Path="SelectedItemLineLengthRate" RelativeSource="{RelativeSource AncestorType=controls:EListView}"/>
                             <Binding ElementName="PART_ContentContainer" Path="ActualWidth"/>
                         </MultiBinding>
                     </Setter.Value>
@@ -110,7 +110,7 @@
                     <Setter.Value>
                         <MultiBinding Converter="{StaticResource ExpressionConverter}" ConverterParameter="V0*V1*V2">
                             <Binding RelativeSource="{RelativeSource TemplatedParent}" Path="TransNorm"/>
-                            <Binding Path="SelectedItemLineLengthRate" RelativeSource="{RelativeSource AncestorType=controls:EListBox}"/>
+                            <Binding Path="SelectedItemLineLengthRate" RelativeSource="{RelativeSource AncestorType=controls:EListView}"/>
                             <Binding ElementName="PART_ContentContainer" Path="ActualWidth"/>
                         </MultiBinding>
                     </Setter.Value>

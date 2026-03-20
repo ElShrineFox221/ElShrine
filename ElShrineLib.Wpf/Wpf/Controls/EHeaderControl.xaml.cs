@@ -14,6 +14,6 @@ public partial class EHeaderControl : ContentControl, IThemeControlBase, IHeader
     static EHeaderControl() => DefaultStyleKeyProperty.OverrideMetadata(typeof(EHeaderControl), new FrameworkPropertyMetadata(typeof(EHeaderControl)));
     public EHeaderControl() => WpfModuleAccessor.UITheme.RegisterCoerceThemeDPs(this);
     public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => TransHelper.CoerceValue(this);
-    public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
+    public void LocalThemePropertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
     #endregion
 }

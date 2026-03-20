@@ -13,6 +13,6 @@ public partial class ERepeatButton : RepeatButton, IThemeControlBase
     static ERepeatButton() => DefaultStyleKeyProperty.OverrideMetadata(typeof(ERepeatButton), new FrameworkPropertyMetadata(typeof(ERepeatButton)));
     public ERepeatButton() => WpfModuleAccessor.UITheme.RegisterCoerceThemeDPs(this);
     public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => TransHelper.CoerceValue(this);
-    public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
+    public void LocalThemePropertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
     #endregion
 }

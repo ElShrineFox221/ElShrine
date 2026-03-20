@@ -7,6 +7,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -18,7 +19,7 @@ namespace ElShrine.Wpf.Controls;
 [GenerateDPCli]
 public partial class EListView : ListView, IThemeControlBase, IScrollBarControlBase, IScrollBarControllerBase, ISelectionRenderControlBase, IItemRenderControlBase
 {
-    private record DragData(object Item, ListViewItem Container, ListView Source);
+    private record DragData(object Item, EListViewItem Container, ListView Source);
 
     #region Normal Properties
     private bool isDraggable = false;
@@ -35,7 +36,7 @@ public partial class EListView : ListView, IThemeControlBase, IScrollBarControlB
 
     private object? draggedItem;
     private static InsertionAdorner? insertionAdorner;
-    private ListViewItem? draggedContainer;
+    private EListViewItem? draggedContainer;
     private bool somethingDragging;
     public bool Dragging => somethingDragging;
 
@@ -61,8 +62,13 @@ public partial class EListView : ListView, IThemeControlBase, IScrollBarControlB
     #region Implements
     static EListView() => DefaultStyleKeyProperty.OverrideMetadata(typeof(EListView), new FrameworkPropertyMetadata(typeof(EListView)));
     public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => TransHelper.CoerceValue(this);
-    public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
+    public void LocalThemePropertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
     #endregion
+
+    protected override DependencyObject GetContainerForItemOverride()
+    {
+        return new EListViewItem();
+    }
 
     private void OnDragEnter(object sender, DragEventArgs e)
     {
@@ -77,18 +83,18 @@ public partial class EListView : ListView, IThemeControlBase, IScrollBarControlB
         e.Effects = DragDropEffects.Move;
         e.Handled = true;
 
-        var itemContainer = ((DependencyObject)e.OriginalSource).FindParent<ListViewItem>();
+        var itemContainer = ((DependencyObject)e.OriginalSource).FindParent<EListViewItem>();
         var item = itemContainer?.DataContext;
         var ePosY = e.GetPosition(this).Y;
         insertionIndex = 0;
         if (item is not null && itemContainer is not null) insertionIndex = Items.IndexOf(item) + (e.GetPosition(itemContainer).Y >= itemContainer.ActualHeight / 2 ? 1 : 0);
         else if (Items.Count == 0) insertionIndex = 0; 
-        else if (ItemContainerGenerator.ContainerFromIndex(Items.Count - 1) is ListViewItem lastContainer && ePosY > (lastContainer.TransformToVisual(this).Transform(new Point(0, lastContainer.ActualHeight)).Y)) insertionIndex = Items.Count;
+        else if (ItemContainerGenerator.ContainerFromIndex(Items.Count - 1) is EListViewItem lastContainer && ePosY > (lastContainer.TransformToVisual(this).Transform(new Point(0, lastContainer.ActualHeight)).Y)) insertionIndex = Items.Count;
         else
         {
             for (var i = 0; i < Items.Count; i++)
             {
-                if (ItemContainerGenerator.ContainerFromIndex(i) is not ListViewItem container) continue;
+                if (ItemContainerGenerator.ContainerFromIndex(i) is not EListViewItem container) continue;
                 var itemTop = container.TransformToVisual(this).Transform(default).Y;
                 var itemMidpoint = itemTop + container.ActualHeight / 2;
                 if (ePosY < itemMidpoint)
@@ -103,23 +109,23 @@ public partial class EListView : ListView, IThemeControlBase, IScrollBarControlB
         Point relativePos = default;
         if (Items.Count != 0)
         {
-            ListViewItem? relaItem0, relaItem1;
+            EListViewItem? relaItem0, relaItem1;
             double spaceHeight = 0;
             if (insertionIndex == 0)
             {
-                relaItem0 = ItemContainerGenerator.ContainerFromIndex(0) as ListViewItem;
+                relaItem0 = ItemContainerGenerator.ContainerFromIndex(0) as EListViewItem;
                 relativePos = relaItem0?.GetPositionRelativeTo(PART_ItemsHandler!) ?? default;
             }
             else if (insertionIndex == Items.Count)
             {
-                relaItem0 = ItemContainerGenerator.ContainerFromIndex(Items.Count - 1) as ListViewItem;
+                relaItem0 = ItemContainerGenerator.ContainerFromIndex(Items.Count - 1) as EListViewItem;
                 var pos = relaItem0?.GetPositionRelativeTo(PART_ItemsHandler!) ?? default;
                 relativePos = new(pos.X, pos.Y + relaItem0?.RenderSize.Height ?? 0);
             }
             else
             {
-                relaItem0 = ItemContainerGenerator.ContainerFromIndex(insertionIndex - 1) as ListViewItem;
-                relaItem1 = ItemContainerGenerator.ContainerFromIndex(insertionIndex) as ListViewItem;
+                relaItem0 = ItemContainerGenerator.ContainerFromIndex(insertionIndex - 1) as EListViewItem;
+                relaItem1 = ItemContainerGenerator.ContainerFromIndex(insertionIndex) as EListViewItem;
                 var pos0 = relaItem0?.GetPositionRelativeTo(PART_ItemsHandler!) ?? default;
                 var pos1 = relaItem1?.GetPositionRelativeTo(PART_ItemsHandler!) ?? default;
                 spaceHeight = pos1.Y - (pos0.Y + relaItem0?.RenderSize.Height ?? 0);
@@ -132,7 +138,7 @@ public partial class EListView : ListView, IThemeControlBase, IScrollBarControlB
     private void OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         dragStartPoint = e.GetPosition(null);
-        draggedContainer = ((DependencyObject)e.OriginalSource).FindParent<ListViewItem>();
+        draggedContainer = ((DependencyObject)e.OriginalSource).FindParent<EListViewItem>();
     }
     private Point dragStartPoint = default;
     private void OnPreviewMouseMove(object sender, MouseEventArgs e)
@@ -161,7 +167,7 @@ public partial class EListView : ListView, IThemeControlBase, IScrollBarControlB
         if (e.Data.GetData(DragDataDicIndex) is not DragData dragData) return;
         var item = dragData.Item;
         var source = dragData.Source;
-        var targetItem = ((DependencyObject)e.OriginalSource).FindParent<ListViewItem>();
+        var targetItem = ((DependencyObject)e.OriginalSource).FindParent<EListViewItem>();
 
         var sourceColl = source.ItemsSource as IList ?? source.Items;
         var targetColl = ItemsSource as IList ?? Items;
@@ -177,6 +183,9 @@ public partial class EListView : ListView, IThemeControlBase, IScrollBarControlB
         draggedItem = null;
         somethingDragging = false;
         e.Handled = true;
+        source.ReleaseMouseCapture();
+        CaptureMouse();
+        //
     }
 
     public ItemsPresenter? PART_ItemsHandler { get; protected set; }

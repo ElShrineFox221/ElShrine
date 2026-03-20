@@ -158,7 +158,7 @@ public partial class ENumInput : Control, IThemeControlBase, IHeaderControlBase
     static ENumInput() => DefaultStyleKeyProperty.OverrideMetadata(typeof(ENumInput), new FrameworkPropertyMetadata(typeof(ENumInput)));
     public ENumInput() => WpfModuleAccessor.UITheme.RegisterCoerceThemeDPs(this);
     public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => TransHelper.CoerceValue(this);
-    public void LocalThemePorpertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
+    public void LocalThemePropertyChanged(DependencyPropertyChangedEventArgs e) => WpfModuleAccessor.StateListener.RedoSetterTransitions(this);
     #endregion
 
     #region Value relas
