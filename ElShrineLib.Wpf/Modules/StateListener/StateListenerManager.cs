@@ -81,7 +81,8 @@ internal sealed class StateListenerManager : PluginAwareServiceBase, IStateListe
     }
     protected override void OnPluginUnloading(IPlugin plugin, PluginInfo info, AssemblyLoadContext ctx, bool unloadingCtx)
     {
-        _stateGroups.TryRemove(ctx, out _);
+        if (unloadingCtx)
+            _stateGroups.TryRemove(ctx, out _);
     }
     #endregion
 

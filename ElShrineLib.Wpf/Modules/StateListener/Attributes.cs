@@ -17,21 +17,26 @@ public sealed class StateGroupRuleAttribute<TUIElement>(params string[] relative
     public override Type RelativeType => typeof(TUIElement);
     public override IReadOnlyList<string> RelativeRoutedEventNames => relativeRoutedEventNames;
 
+    private static readonly HashSet<string> _registeredAssemblies = [];
     private static readonly HashSet<string> registeredStateNames = [];
     protected override bool ValidateType(Type typeToValidate)
     {
         var names = Enum.GetNames(typeToValidate);
-        var suc = true;
+        var namesSuc = true;
         var failedName = string.Empty;
+        var asmName = typeToValidate.Assembly.FullName ?? string.Empty;
+        var isNewAsm = _registeredAssemblies.Add(asmName);
         foreach (var name in names)
         {
-            suc = registeredStateNames.Add(name);
-            if (!suc)
+            namesSuc = registeredStateNames.Add(name);
+            registeredStateNames.Add(name);
+            if (!namesSuc)
             {
                 failedName = name;
                 break;
             }
         }
+        var suc = !isNewAsm || namesSuc;
         if (!suc) ValidateFailedReason = $"[StateGroup Error]: The state name({typeToValidate.FullName}.{failedName}) already exists.";
         return suc;
     }
