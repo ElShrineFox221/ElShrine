@@ -19,4 +19,9 @@
     <ProjectReference Include="..\ElShrineLib.Wpf\ElShrineLib.Wpf.csproj" />
   </ItemGroup>
 
+
+	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
+		<Compile Remove="..\ElShrine.VisualTool\Pages\**\*.*" />
+		<Page Remove="..\ElShrine.VisualTool\Pages\**\*.*" />
+	</ItemGroup>
 </Project>

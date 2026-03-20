@@ -4,142 +4,130 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodel ="clr-namespace:ElShrine.VisualTool"
+                  xmlns:uiPlugin="clr-namespace:ElShrine.VisualTool.UIPlugin"
+                  xmlns:newuiPlugin="clr-namespace:ElShrine.VisualTool.NewUIPlugin"
         xmlns:controls="clr-namespace:ElShrine.Wpf.Controls;assembly=ElShrineLib.Wpf"
         d:DataContext="{d:DesignInstance Type=viewmodel:MainWindowViewModel}"
         mc:Ignorable="d"
                   
         Title="MainWindow" TitleBarHeight="25" 
-        Height="720" Width="1100" MinWidth="300" MinHeight="600" 
+        Height="540" Width="960" MinWidth="800" MinHeight="450" 
         FontSize="12" FontFamily="Cascadia Code" 
         EBorderCornerRadius="5" Padding="0" DragResizeEdgeWidth="8">
-    <controls:EWindow.Resources>
-        <DataTemplate x:Key="ModuleInfoDataTemplate" DataType="{x:Type viewmodel:WpfPageInfoVM}">
+  <controls:EWindow.Resources>
+    <DataTemplate x:Key="ModuleInfoDataTemplate" DataType="{x:Type newuiPlugin:PluginInfoVM}">
+      <Grid>
+        <Border x:Name="rootBorder" CornerRadius="10" Padding="9,3" Width="150">
+          <Grid>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="auto"/>
+              <RowDefinition Height="auto"/>
+              <RowDefinition Height="auto"/>
+              <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Bold"/>
+            <TextBlock Grid.Row="1" Text="{Binding Description}" HorizontalAlignment="Stretch" TextWrapping="Wrap"/>
+            <TextBlock Grid.Row="3" Text="{Binding VersionInfo}" HorizontalAlignment="Right" FontSize="12" TextWrapping="Wrap"/>
+          </Grid>
+          <Border.ToolTip>
             <Grid>
-                <Border x:Name="rootBorder" CornerRadius="10" Padding="9,3" Width="150">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Text="{Binding Name}" FontSize="{Binding CurrentTheme.FontSizeMedium, Source={StaticResource ThemeProvider}}" FontWeight="Bold"/>
-                        <TextBlock Grid.Row="1" Text="{Binding Description}" HorizontalAlignment="Stretch" TextWrapping="Wrap"/>
-                        <ItemsControl ItemsSource="{Binding Tags}" Grid.Row="2">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="String">
-                                    <Border CornerRadius="4" Background="#88AAAAAA" Margin="2,2" Padding="4,1">
-                                        <TextBlock Text="{Binding}"/>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel Orientation="Horizontal"/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
-                        <TextBlock Grid.Row="3" Text="{Binding Version}" HorizontalAlignment="Right" FontSize="{Binding CurrentTheme.FontSizeSmall, Source={StaticResource ThemeProvider}}" TextWrapping="Wrap"/>
-                    </Grid>
-                    <Border.ToolTip>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <TextBlock Text="Data Template:"/>
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding DataTemplateUri}" HorizontalAlignment="Stretch" TextWrapping="Wrap"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Margin="5,0,0,0" Text="{Binding DataTemplateName}" FontWeight="Bold"/>
-                        </Grid>
-                    </Border.ToolTip>
-                </Border>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+              </Grid.RowDefinitions>
+              <TextBlock Text="Data Template:"/>
+              <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding DataTemplateUri}" HorizontalAlignment="Stretch" TextWrapping="Wrap"/>
+              <TextBlock Grid.Row="1" Grid.Column="1" Margin="5,0,0,0" Text="{Binding DataTemplateName}" FontWeight="Bold"/>
             </Grid>
-            <DataTemplate.Triggers>
-                <DataTrigger Binding="{Binding Enabled}" Value="True">
-                    <Setter TargetName="rootBorder" Property="Background" Value="#CCFFCC"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Enabled}" Value="False">
-                    <Setter TargetName="rootBorder" Property="Background" Value="#FFCCCC"/>
-                </DataTrigger>
-            </DataTemplate.Triggers>
-        </DataTemplate>
-        <LinearGradientBrush x:Key="ColorGradientBrush" StartPoint="1,0" EndPoint="0,0">
-            <GradientStop Color="#ff0000"/>
-            <GradientStop Color="#ff00ff" Offset="0.207"/>
-            <GradientStop Color="#0000ff" Offset="0.334"/>
-            <GradientStop Color="#00ffff" Offset="0.501"/>
-            <GradientStop Color="#00ff00" Offset="0.668"/>
-            <GradientStop Color="#ffff00" Offset="0.835"/>
-            <GradientStop Color="#ff0000" Offset="1"/>
-        </LinearGradientBrush>
-        <LinearGradientBrush x:Key="ColorGradientBrushV" StartPoint="0,1" EndPoint="0,0">
-            <GradientStop Color="#ff0000"/>
-            <GradientStop Color="#ff00ff" Offset="0.207"/>
-            <GradientStop Color="#0000ff" Offset="0.334"/>
-            <GradientStop Color="#00ffff" Offset="0.501"/>
-            <GradientStop Color="#00ff00" Offset="0.668"/>
-            <GradientStop Color="#ffff00" Offset="0.835"/>
-            <GradientStop Color="#ff0000" Offset="1"/>
-        </LinearGradientBrush>
-    </controls:EWindow.Resources>
-    <controls:EWindow.HeaderContent>
-        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
-            <Grid>
-                <controls:EPopupExpander ExpandDirection="Down" EBorderThickness="0,0,0,1.5">
-                    <controls:EPopupExpander.Header>
-                        <TextBlock Text="Config Modules" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right"/>
-                    </controls:EPopupExpander.Header>
-                    <Border>
-                        <Grid Grid.Column="0" Width="360">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid Grid.Row="0" Grid.ColumnSpan="2">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition/>
-                                </Grid.ColumnDefinitions>
-                                <controls:EButton Grid.Column="0" Content="Refresh" Command="{Binding Source={x:Static viewmodel:WpfPageManagerVM.Refresh}}"/>
-                                <controls:EButton Grid.Column="1" Content="Confrim" IsEnabled="{Binding Source={x:Static viewmodel:WpfPageManagerVM.IsDirty}}" Command="{Binding ModuleManager.Confrim}" CommandParameter="{Binding ElementName=ModulesTabControl}"/>
-                                <controls:EButton Grid.Column="2" Content="Cancel" IsEnabled="{Binding Source={x:Static viewmodel:WpfPageManagerVM.IsDirty}}" Command="{Binding Source={x:Static viewmodel:WpfPageManagerVM.Discard}}"/>
-                            </Grid>
-                            <TextBlock Grid.Row="1" Text="Disabled Modules" FontSize="{Binding CurrentTheme.FontSizeMedium, Source={StaticResource ThemeProvider}}" HorizontalAlignment="Center"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="Enabled Modules" FontSize="{Binding CurrentTheme.FontSizeMedium, Source={StaticResource ThemeProvider}}" HorizontalAlignment="Center"/>
-                            <controls:EListView x:Name="DisabledModulesListView" Grid.Row="2" 
-ItemsSource="{Binding ModuleManager.DisabledModules}" ItemTemplate="{StaticResource ModuleInfoDataTemplate}" IsDraggable="True" DragItemDropped="DisabledModulesListView_DragItemDropped"/>
-                            <controls:EListView x:Name="EnabledModulesListView" Grid.Row="2" Grid.Column="1" 
-ItemsSource="{Binding ModuleManager.EnabledModules}" ItemTemplate="{StaticResource ModuleInfoDataTemplate}" IsDraggable="True" DragItemDropped="EnabledModulesListView_DragItemDropped"/>
-                        </Grid>
-                    </Border>
-                </controls:EPopupExpander>
+          </Border.ToolTip>
+        </Border>
+      </Grid>
+      <DataTemplate.Triggers>
+        <DataTrigger Binding="{Binding IsEnabled}" Value="True">
+          <Setter TargetName="rootBorder" Property="Background" Value="#CCFFCC"/>
+        </DataTrigger>
+        <DataTrigger Binding="{Binding IsEnabled}" Value="False">
+          <Setter TargetName="rootBorder" Property="Background" Value="#FFCCCC"/>
+        </DataTrigger>
+      </DataTemplate.Triggers>
+    </DataTemplate>
+    <LinearGradientBrush x:Key="ColorGradientBrush" StartPoint="1,0" EndPoint="0,0">
+      <GradientStop Color="#ff0000"/>
+      <GradientStop Color="#ff00ff" Offset="0.207"/>
+      <GradientStop Color="#0000ff" Offset="0.334"/>
+      <GradientStop Color="#00ffff" Offset="0.501"/>
+      <GradientStop Color="#00ff00" Offset="0.668"/>
+      <GradientStop Color="#ffff00" Offset="0.835"/>
+      <GradientStop Color="#ff0000" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="ColorGradientBrushV" StartPoint="0,1" EndPoint="0,0">
+      <GradientStop Color="#ff0000"/>
+      <GradientStop Color="#ff00ff" Offset="0.207"/>
+      <GradientStop Color="#0000ff" Offset="0.334"/>
+      <GradientStop Color="#00ffff" Offset="0.501"/>
+      <GradientStop Color="#00ff00" Offset="0.668"/>
+      <GradientStop Color="#ffff00" Offset="0.835"/>
+      <GradientStop Color="#ff0000" Offset="1"/>
+    </LinearGradientBrush>
+  </controls:EWindow.Resources>
+  <controls:EWindow.HeaderContent>
+    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+      <Grid>
+        <controls:EPopupExpander ExpandDirection="Down" EBorderThickness="0,0,0,1.5">
+          <controls:EPopupExpander.Header>
+            <TextBlock Text="Config Modules" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right"/>
+          </controls:EPopupExpander.Header>
+          <Border>
+            <Grid Grid.Column="0" Width="360">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition/>
+              </Grid.RowDefinitions>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <Grid Grid.Row="0" Grid.ColumnSpan="2">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition/>
+                  <ColumnDefinition/>
+                  <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <controls:EButton Grid.Column="0" Content="Refresh" Command="{Binding PluginManagerUI.Refresh}"/>
+                <controls:EButton Grid.Column="1" Content="Confrim" IsEnabled="{Binding PluginManagerUI.IsDirty}" Command="{Binding PluginManagerUI.Confrim}" CommandParameter="{Binding ElementName=ModulesTabControl}"/>
+                <controls:EButton Grid.Column="2" Content="Cancel" IsEnabled="{Binding PluginManagerUI.IsDirty}" Command="{Binding PluginManagerUI.Discard}"/>
+              </Grid>
+              <TextBlock Grid.Row="1" Text="Disabled Modules" FontSize="14" HorizontalAlignment="Center"/>
+              <TextBlock Grid.Row="1" Grid.Column="1" Text="Enabled Modules" FontSize="12" HorizontalAlignment="Center"/>
+              <controls:EListView x:Name="DisabledModulesListView" Grid.Row="2"
+ItemsSource="{Binding PluginManagerUI.Disableds}" ItemTemplate="{StaticResource ModuleInfoDataTemplate}" IsDraggable="True" DragItemDropped="DisabledModulesListView_DragItemDropped"/>
+              <controls:EListView x:Name="EnabledModulesListView" Grid.Row="2" Grid.Column="1" 
+ItemsSource="{Binding PluginManagerUI.Enableds}" ItemTemplate="{StaticResource ModuleInfoDataTemplate}" IsDraggable="True" DragItemDropped="EnabledModulesListView_DragItemDropped"/>
             </Grid>
-        </StackPanel>
-    </controls:EWindow.HeaderContent>
-    <Grid Margin="0">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
+          </Border>
+        </controls:EPopupExpander>
+      </Grid>
+    </StackPanel>
+  </controls:EWindow.HeaderContent>
+  <Grid Margin="0">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="Auto"/>
+    </Grid.ColumnDefinitions>
 
-        <controls:ETabControl Grid.Row="1" x:Name="ModulesTabControl" EBorderThickness="1" ClipToBounds="False" HorizontalHeaderAlignment="Left" EBorderCornerRadius="4"/>
+    <controls:ETabControl Grid.Row="1" x:Name="ModulesTabControl" EBorderThickness="0,1.5,0,0" EBorderCornerRadius="0" Margin="0,0,0,5" ClipToBounds="False" HorizontalHeaderAlignment="Left"/>
 
-        <StackPanel Grid.Column="1" Grid.Row="1" VerticalAlignment="Center">
+    <StackPanel Grid.Column="1" Grid.Row="1" VerticalAlignment="Center">
 
-        </StackPanel>
-    </Grid>
+    </StackPanel>
+  </Grid>
 </controls:EWindow>

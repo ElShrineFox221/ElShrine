@@ -1,4 +1,5 @@
 ﻿using ElShrine.Modules;
+using ElShrine.Modules.Command;
 using ElShrine.VisualTool.ColorTransfer.Model;
 using System.Drawing;
 using System.IO;

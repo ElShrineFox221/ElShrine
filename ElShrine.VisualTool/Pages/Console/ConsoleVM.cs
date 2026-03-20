@@ -12,13 +12,8 @@ namespace ElShrine.VisualTool.Pages.Console;
     Description = "The advanced console, as implement of the IConsoleListener instead of System.Console.", 
     DataTemplateUri = "/ElShrine.VisualTool;component/Pages/Console/Console.xaml", 
     DataTemplateName = "ConsoleTemplate", DefaultEnabled = true)]
-public sealed class ConsoleVM : ViewModelBase, IInitializable<ConsoleVM>
+public sealed class ConsoleVM : ViewModelBase
 {
-    #region Singleton
-    private static readonly Lazy<ConsoleVM> instanceLazy = new(() => new());
-    public static ConsoleVM Instance => Bootstrapper.GetInstance<ConsoleVM>();
-    public static new ConsoleVM Initialize() => instanceLazy.Value;
-    #endregion
 
     #region Lines
     internal List<WeakReference<EntryVM>> LineVMRefs = [];

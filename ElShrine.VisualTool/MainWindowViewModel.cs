@@ -1,10 +1,10 @@
-﻿using ElShrine.Wpf;
+﻿using ElShrine.VisualTool.PluginUI;
+using ElShrine.Wpf;
 using System.Windows;
 
-namespace ElShrine.VisualTool
+namespace ElShrine.VisualTool;
+
+public sealed class MainWindowViewModel(Window ownerWindow) : EWindowViewModelBase(ownerWindow)
 {
-    public sealed class MainWindowViewModel(Window ownerWindow) : EWindowViewModelBase(ownerWindow)
-    {
-        public WpfPageManagerVM ModuleManager { get; } = new WpfPageManagerVM();
-    }
+    public PluginManagerUIVM PluginManagerUI { get; } = Bootstrapper.Resolve<PluginManagerUIVM>();
 }

@@ -11,13 +11,8 @@ namespace ElShrine.VisualTool.Pages.OptionsHub
         Description = "UI for options, created a visual page for user viewing and changing settings.",
         DataTemplateUri = "/ElShrine.VisualTool;component/Pages/OptionsHub/OptionsHub.xaml", 
         DataTemplateName = "OptionsHubTemplate", DefaultEnabled = true)]
-    public sealed class OptionsHubVM : ViewModelBase, IInitializable<OptionsHubVM>
+    public sealed class OptionsHubVM : ViewModelBase
     {
-        #region Singleton
-        private static readonly Lazy<OptionsHubVM> instanceLazy = new(() => new());
-        public static OptionsHubVM Instance => Bootstrapper.GetInstance<OptionsHubVM>();
-        public static new OptionsHubVM Initialize() => instanceLazy.Value;
-        #endregion
 
         private readonly Dictionary<OptionItem, OptionItemVM> optionItemVMByModel = [];
         private readonly List<OptionItemVM> modifiedOptionItemVMs = [];

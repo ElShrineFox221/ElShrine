@@ -5,30 +5,29 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace ElShrine.VisualTool
+namespace ElShrine.VisualTool;
+
+public static class MediaImageHelper
 {
-    public static class MediaImageHelper
+    public static ImageSource ToImageSource(this Icon icon)
     {
-        public static ImageSource ToImageSource(this Icon icon)
+        using Bitmap bitmap = icon.ToBitmap();
         {
-            using Bitmap bitmap = icon.ToBitmap();
+            IntPtr hBitmap = bitmap.GetHbitmap();
+            try
             {
-                IntPtr hBitmap = bitmap.GetHbitmap();
-                try
-                {
-                    return Imaging.CreateBitmapSourceFromHBitmap(hBitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                }
-                finally
-                {
-                    DeleteObject(hBitmap);
-                }
+                return Imaging.CreateBitmapSourceFromHBitmap(hBitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            }
+            finally
+            {
+                DeleteObject(hBitmap);
             }
         }
-
-        #region GDI+
-        [DllImport("gdi32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool DeleteObject(IntPtr hObject);
-        #endregion
     }
+
+    #region GDI+
+    [DllImport("gdi32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool DeleteObject(IntPtr hObject);
+    #endregion
 }
