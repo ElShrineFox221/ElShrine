@@ -6,17 +6,28 @@ namespace ElShrine.Modules;
 
 public static class WpfModuleAccessor
 {
-    public static ImageSourceManager ImageSource => Bootstrapper.Resolve<ImageSourceManager>();
-    public static IStateListenerManager StateListener => Bootstrapper.Resolve<IStateListenerManager>();
-    public static TransitionsManager Transition => Bootstrapper.Resolve<TransitionsManager>();
-    public static IUIThemeManager UITheme => Bootstrapper.Resolve<IUIThemeManager>();
+    public static ImageSourceManager ImageSource => ResolveLocal<ImageSourceManager>();
+    public static IStateListenerManager StateListener => ResolveLocal<IStateListenerManager>();
+    public static TransitionsManager Transition => ResolveLocal<TransitionsManager>();
+    public static IUIThemeManager UITheme => ResolveLocal<IUIThemeManager>();
     
-    static WpfModuleAccessor()
+    static WpfModuleAccessor() { }
+    private static bool _initialized;
+    private static TService ResolveLocal<TService>()
+        where TService : class
     {
-        RuntimeHelpers.RunClassConstructor(typeof(CoreModuleAccessor).TypeHandle);
-        Bootstrapper.Initialize(RegisterWpfModules);
+        if (!_initialized)
+        {
+            _initialized = true;
+            Bootstrapper.Initialize(builder =>
+            {
+                RegisterWpfModules(builder);
+                CoreModuleAccessor.RegisterCoreModules(builder);
+            });
+        }
+        return Bootstrapper.Resolve<TService>();
     }
-    private static void RegisterWpfModules(this IModuleRegister register)
+    public static void RegisterWpfModules(this IModuleRegister register)
     {
         register.RegisterModule<IStateListenerManager, StateListenerManager>(overrides: false);
         register.RegisterModule<IUIThemeManager, UIThemeManager>(overrides: false);
