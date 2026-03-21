@@ -60,8 +60,13 @@ public static class Bootstrapper
         }
         return suc;
     }
+
+    private static bool _finalizedInitialization = false;
     private static void FinalizeInitialization()
     {
+        if (_finalizedInitialization) 
+            return;
+        _finalizedInitialization = true;
         _moduleRegister?.FinalizeRegistration();
         foreach (var f in _finalizers.OrderByDescending(static f => f.Priority))
             f.Action.Invoke();

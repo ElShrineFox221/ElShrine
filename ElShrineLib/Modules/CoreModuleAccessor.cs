@@ -29,6 +29,7 @@ public static class CoreModuleAccessor
     }
     public static void RegisterCoreModules(IModuleRegister builder)
     {
+        _initialized = true;
         builder.RegisterModule<ILogWriter, LogWriter>(overrides: false);
         builder.RegisterModule<ILogManager, LogManager>(overrides: false);
         builder.RegisterModule<ILocalizationManager, LocalizationManager>(overrides: false);

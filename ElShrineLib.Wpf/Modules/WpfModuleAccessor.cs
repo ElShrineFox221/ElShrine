@@ -29,6 +29,7 @@ public static class WpfModuleAccessor
     }
     public static void RegisterWpfModules(this IModuleRegister register)
     {
+        _initialized = true;
         register.RegisterModule<IStateListenerManager, StateListenerManager>(overrides: false);
         register.RegisterModule<IUIThemeManager, UIThemeManager>(overrides: false);
 

@@ -4,8 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodel ="clr-namespace:ElShrine.VisualTool"
-                  xmlns:uiPlugin="clr-namespace:ElShrine.VisualTool.UIPlugin"
-                  xmlns:newuiPlugin="clr-namespace:ElShrine.VisualTool.NewUIPlugin"
+                  xmlns:pluginUI="clr-namespace:ElShrine.VisualTool.PluginUI"
         xmlns:controls="clr-namespace:ElShrine.Wpf.Controls;assembly=ElShrineLib.Wpf"
         d:DataContext="{d:DesignInstance Type=viewmodel:MainWindowViewModel}"
         mc:Ignorable="d"
@@ -15,7 +14,7 @@
         FontSize="12" FontFamily="Cascadia Code" 
         EBorderCornerRadius="5" Padding="0" DragResizeEdgeWidth="8">
   <controls:EWindow.Resources>
-    <DataTemplate x:Key="ModuleInfoDataTemplate" DataType="{x:Type newuiPlugin:PluginInfoVM}">
+    <DataTemplate x:Key="ModuleInfoDataTemplate" DataType="{x:Type pluginUI:PluginInfoVM}">
       <Grid>
         <Border x:Name="rootBorder" CornerRadius="10" Padding="9,3" Width="150">
           <Grid>
@@ -77,7 +76,7 @@
   <controls:EWindow.HeaderContent>
     <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
       <Grid>
-        <controls:EPopupExpander ExpandDirection="Down" EBorderThickness="0,0,0,1.5">
+        <controls:EPopupExpander ExpandDirection="Down" EBorderThickness="0,0,0,1.5" StaysOpen="False">
           <controls:EPopupExpander.Header>
             <TextBlock Text="Config Modules" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right"/>
           </controls:EPopupExpander.Header>
@@ -104,7 +103,7 @@
               </Grid>
               <TextBlock Grid.Row="1" Text="Disabled Modules" FontSize="14" HorizontalAlignment="Center"/>
               <TextBlock Grid.Row="1" Grid.Column="1" Text="Enabled Modules" FontSize="12" HorizontalAlignment="Center"/>
-              <controls:EListView x:Name="DisabledModulesListView" Grid.Row="2"
+              <controls:EListView x:Name="DisabledModulesListView" Grid.Row="2" 
 ItemsSource="{Binding PluginManagerUI.Disableds}" ItemTemplate="{StaticResource ModuleInfoDataTemplate}" IsDraggable="True" DragItemDropped="DisabledModulesListView_DragItemDropped"/>
               <controls:EListView x:Name="EnabledModulesListView" Grid.Row="2" Grid.Column="1" 
 ItemsSource="{Binding PluginManagerUI.Enableds}" ItemTemplate="{StaticResource ModuleInfoDataTemplate}" IsDraggable="True" DragItemDropped="EnabledModulesListView_DragItemDropped"/>
@@ -124,7 +123,21 @@ ItemsSource="{Binding PluginManagerUI.Enableds}" ItemTemplate="{StaticResource M
       <ColumnDefinition Width="Auto"/>
     </Grid.ColumnDefinitions>
 
-    <controls:ETabControl Grid.Row="1" x:Name="ModulesTabControl" EBorderThickness="0,1.5,0,0" EBorderCornerRadius="0" Margin="0,0,0,5" ClipToBounds="False" HorizontalHeaderAlignment="Left"/>
+    <controls:ETabControl Grid.Row="1" x:Name="ModulesTabControl" 
+                          EBorderThickness="0,1.5,0,0" EBorderCornerRadius="0" Margin="0,0,0,5" 
+                          ClipToBounds="False" HorizontalHeaderAlignment="Left"
+                          ItemsSource="{Binding PluginManagerUI.EnabledTitleComps}">
+      <controls:ETabControl.ItemTemplate>
+        <DataTemplate DataType="pluginUI:PluginInfoVM">
+          <ContentControl Content="{Binding Name}"/>
+        </DataTemplate>
+      </controls:ETabControl.ItemTemplate>
+      <controls:ETabControl.ContentTemplate>
+        <DataTemplate DataType="pluginUI:PluginInfoVM">
+          <ContentControl Content="{Binding Content}"/>
+        </DataTemplate>
+      </controls:ETabControl.ContentTemplate>
+    </controls:ETabControl>
 
     <StackPanel Grid.Column="1" Grid.Row="1" VerticalAlignment="Center">
 

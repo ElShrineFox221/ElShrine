@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace ElShrine.VisualTool.Pages.Console;
+namespace ElShrine.VisualTool.Pages.Console.ViewModel;
 
 public class CommandInputBarDataVM(ObservableCollection<string> model) : ViewModelBase<ObservableCollection<string>>(model)
 {

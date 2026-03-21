@@ -1,24 +1,57 @@
 ﻿using ElShrine.Graphics;
 using ElShrine.Modules.Log;
 using ElShrine.Wpf;
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows;
 using MediaColor = System.Windows.Media.Color;
 
-namespace ElShrine.VisualTool.Pages.Console;
+namespace ElShrine.VisualTool.Pages.Console.ViewModel;
 
-[InitializationInfo(PreInstantiate = false)]
-[WpfPageRootVM(Name = "Console", Version = "2.0", Tags = ["Common", "Console", "Command"], 
-    Description = "The advanced console, as implement of the IConsoleListener instead of System.Console.", 
-    DataTemplateUri = "/ElShrine.VisualTool;component/Pages/Console/Console.xaml", 
-    DataTemplateName = "ConsoleTemplate", DefaultEnabled = true)]
-public sealed class ConsoleVM : ViewModelBase
+public sealed class ConsoleVM : ViewModelBase, IStatefulLogListener<ScopeVM, EntryVM>, IDisposable
 {
+    private readonly ILogManager _logManager;
+    public static ConsoleVM Instance => field ??= Bootstrapper.Resolve<ConsoleVM>();
+
+    public ConsoleVM(ILogManager logManager)
+    {
+        _logManager = logManager;
+        _logManager.RegisterListener(this);
+    }
+
+    #region Listener implements
+    public ScopeVM BuildScope(ILogger logger, IScopeAccessor accessor)
+    {
+        var sessionVm = GetSessionVM(logger);
+        var scopeVM = new ScopeVM(sessionVm, accessor);
+        return scopeVM;
+    }
+    public EntryVM BuildEntry(ILogger logger, IEntry entry)
+    {
+        var sessionVm = GetSessionVM(logger);
+        var entryVM = new EntryVM(sessionVm, entry);
+        return entryVM;
+    }
+    public IReadOnlyCollection<EntryVM> GetLoggerRootNodes(ILogger logger)
+    {
+        var sessionVm = GetSessionVM(logger);
+        return sessionVm.RootNodes;
+    }
+    public void AppendRootNode(ILogger logger, EntryVM entry)
+    {
+        var sessionVm = GetSessionVM(logger);
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            sessionVm.Roots.Add(entry);
+        });
+    }
+    #endregion
 
     #region Lines
     internal List<WeakReference<EntryVM>> LineVMRefs = [];
 
-    private readonly Dictionary<LogSession, SessionVM> sessionByCombinedNameId = [];
+    private readonly ConcurrentDictionary<ILogger, SessionVM> _loggers = [];
     public ObservableCollection<SessionVM> SessionByCombinedNameId { get; } = [];
     public SessionVM? SelectedSession
     {
@@ -39,6 +72,19 @@ public sealed class ConsoleVM : ViewModelBase
             field = value;
             NotifyPropertiesChanged(nameof(SelectedLine));
         }
+    }
+    private SessionVM GetSessionVM(ILogger logger)
+    {
+        var sessionVm = _loggers.GetOrAdd(logger, k =>
+        {
+            var svm = new SessionVM(k);
+            Application.Current.Dispatcher.BeginInvoke(() =>
+            {
+                SessionByCombinedNameId.Add(svm);
+            });
+            return svm;
+        });
+        return sessionVm;
     }
     #endregion
 
@@ -135,19 +181,19 @@ public sealed class ConsoleVM : ViewModelBase
     #region Input
     public CommandInputBarDataVM CommandInputBarData { get; init; } = new([]);
     #endregion
+
+    public void Dispose()
+    {
+        _logManager.UnregisterListener(this);
+    }
 }
-public sealed class SessionVM : ViewModelBase<ILogger>, ISessionStatefulLogListener<ScopeVM, EntryVM>
+public sealed class SessionVM(ILogger model) : ViewModelBase<ILogger>(model)
 {
     public string Name => Model.Name;
     public long Id => Model.Id;
     public string CombinedNameId => GetCombinedNameId(Model);
-    public ObservableCollection<EntryVM> Roots;
-    public ICollection<EntryVM> RootNodes => Roots;
-
-    public SessionVM(LogSession model) : base(model)
-    {
-        Roots = [];
-    }
+    public ObservableCollection<EntryVM> Roots { get; } = [];
+    public IReadOnlyCollection<EntryVM> RootNodes => Roots;
 
     private static string GetCombinedNameId(ILogger session)
        => $"{session.Name}({session.Id})";

@@ -35,7 +35,8 @@ public interface IStatefulLogListener<TScopeNode, TEntryNode>
 {
     TScopeNode BuildScope(ILogger logger, IScopeAccessor accessor);
     TEntryNode BuildEntry(ILogger logger, IEntry entry);
-    ICollection<TEntryNode> GetLoggerRootNodes(ILogger logger);
+    IReadOnlyCollection<TEntryNode> GetLoggerRootNodes(ILogger logger);
+    void AppendRootNode(ILogger logger, TEntryNode entry);
 }
 #endregion
 

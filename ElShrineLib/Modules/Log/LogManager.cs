@@ -210,11 +210,11 @@ internal sealed class LogManager : ILogManager, IDisposable
                     var roots = _listener.GetLoggerRootNodes(session);
                     // do traversal
                     foreach (var newEntry in ParseScopeChildren(session.RootScopeAccessor))
-                        roots.Add(newEntry);
+                        listener.AppendRootNode(session, newEntry);
                     var tempCache = _tempCache.GetOrAdd(session, k => []);
                     // empty the cache
                     while (tempCache.TryDequeue(out var kv))
-                        OnUpdate(session, kv.scope, kv.entry);
+                        HandleAddedEntry(session, kv.scope, kv.entry);
                     _isSyncing = false;
                 });
             }
@@ -222,7 +222,7 @@ internal sealed class LogManager : ILogManager, IDisposable
         private readonly LogManager _log;
         private readonly IStatefulLogListener<TScopeNode, TEntryNode> _listener;
         private bool _isSyncing = true;
-        private readonly ConcurrentDictionary<ILogger, ConcurrentDictionary<IScopeAccessor, TScopeNode>> _scopes = [];
+        private readonly ConcurrentDictionary<ILogger, ConcurrentDictionary<long, TScopeNode>> _scopes = [];
         private readonly ConcurrentDictionary<ILogger, ConcurrentQueue<(IScopeAccessor scope, IEntry entry)>> _tempCache = [];
         private TEntryNode ConvertToNewEntryNode(ILogger session, IEntry entry, out bool isScopeNode)
         {
@@ -232,24 +232,26 @@ internal sealed class LogManager : ILogManager, IDisposable
             isScopeNode = true;
             var scope = _listener.BuildScope(session, scopeAccessor);
             var scopes = _scopes.GetOrAdd(session, k => []);
-            scopes[scopeAccessor] = scope;
+            scopes[scopeAccessor.Id] = scope;
             return scope;
         }
         private void OnUpdate(ILogger session, IScopeAccessor scopeAccessor, IEntry entry)
         {
-            var scopes = _scopes.GetOrAdd(session, k => []);
+            
             var tempCache = _tempCache.GetOrAdd(session, k => []);
-            var roots = _listener.GetLoggerRootNodes(session);
             if (_isSyncing)
                 tempCache.Enqueue((scopeAccessor, entry));
             else
-            {
-                var newEntry = ConvertToNewEntryNode(session, entry, out _);
-                if (scopes.TryGetValue(scopeAccessor, out var scopeNode)) 
-                    scopeNode.AppendChild(newEntry);
-                else
-                    roots.Add(newEntry);
-            }
+                HandleAddedEntry(session, scopeAccessor, entry);
+        }
+        private void HandleAddedEntry(ILogger session, IScopeAccessor scopeAccessor, IEntry entry)
+        {
+            var newEntry = ConvertToNewEntryNode(session, entry, out _);
+            var scopes = _scopes.GetOrAdd(session, k => []);
+            if (scopes.TryGetValue(scopeAccessor.Id, out var scopeNode))
+                scopeNode.AppendChild(newEntry);
+            else
+                _listener.AppendRootNode(session, newEntry);
         }
         private IEnumerable<TEntryNode> ParseScopeChildren(IScopeAccessor scope)
         {

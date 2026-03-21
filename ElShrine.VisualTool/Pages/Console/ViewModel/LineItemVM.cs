@@ -1,10 +1,11 @@
-﻿using ElShrine.Graphics;
+﻿using ElShrine;
+using ElShrine.Graphics;
 using ElShrine.Modules.Log;
 using ElShrine.Wpf;
 using System.Windows;
 using MediaColor = System.Windows.Media.Color;
 
-namespace ElShrine.VisualTool.Pages.Console;
+namespace ElShrine.VisualTool.Pages.Console.ViewModel;
 
 public sealed class LineItemVM(LogItem model) : ViewModelBase<LogItem>(model)
 {

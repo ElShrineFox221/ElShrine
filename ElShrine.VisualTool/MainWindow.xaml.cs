@@ -1,4 +1,6 @@
-﻿using ElShrine.Modules;
+﻿using ElShrine.Common;
+using ElShrine.Debug;
+using ElShrine.Modules;
 using ElShrine.VisualTool.PluginUI;
 using ElShrine.Wpf;
 using ElShrine.Wpf.Controls;
@@ -15,11 +17,6 @@ public partial class MainWindow : EWindow
 {
     public MainWindow()
     {
-        RuntimeHelpers.RunClassConstructor(typeof(WpfModuleAccessor).TypeHandle);
-        Bootstrapper.Initialize(builder =>
-        {
-            builder.RegisterModule<IPluginManagerUI, PluginManagerUI>();
-        });
         InitializeComponent();
         
         Loaded += (_, _) =>

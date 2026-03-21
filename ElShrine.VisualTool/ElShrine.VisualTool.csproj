@@ -21,7 +21,9 @@
 
 
 	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
-		<Compile Remove="..\ElShrine.VisualTool\Pages\**\*.*" />
-		<Page Remove="..\ElShrine.VisualTool\Pages\**\*.*" />
+		<Compile Remove="..\ElShrine.VisualTool\Pages\OptionsHub\*.*" />
+		<Compile Remove="..\ElShrine.VisualTool\Pages\OptionsHub\*\*.*" />
+		<Page Remove="..\ElShrine.VisualTool\Pages\OptionsHub\*\*.*" />
+		<Page Remove="..\ElShrine.VisualTool\Pages\OptionsHub\*.*" />
 	</ItemGroup>
 </Project>
