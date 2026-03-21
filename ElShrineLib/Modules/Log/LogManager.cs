@@ -196,59 +196,66 @@ internal sealed class LogManager : ILogManager, IDisposable
         where TScopeNode : class, IHandleChildAppend<TEntryNode>, TEntryNode
         where TEntryNode : class
     {
-        public StatefulRegistration(LogManager log, ILogger session, ISessionStatefulLogListener<TScopeNode, TEntryNode> listener)
+        public StatefulRegistration(LogManager log, IStatefulLogListener<TScopeNode, TEntryNode> listener)
         {
-            _session = session;
             _listener = listener;
             _log = log;
 
             _log.LogEntryAdded += OnUpdate;
-            Task.Run(() =>
+            var li = log._sessions.Values.ToList();
+            foreach (var session in li)
             {
-                // do traversal
-                foreach (var newEntry in ParseScopeChildren(session.RootScopeAccessor))
-                    _listener.RootNodes.Add(newEntry);
-                // empty the cache
-                while (_tempCache.TryDequeue(out var kv))
-                    OnUpdate(session, kv.scope, kv.entry);
-                _isSyncing = false;
-            });
+                Task.Run(() =>
+                {
+                    var roots = _listener.GetLoggerRootNodes(session);
+                    // do traversal
+                    foreach (var newEntry in ParseScopeChildren(session.RootScopeAccessor))
+                        roots.Add(newEntry);
+                    var tempCache = _tempCache.GetOrAdd(session, k => []);
+                    // empty the cache
+                    while (tempCache.TryDequeue(out var kv))
+                        OnUpdate(session, kv.scope, kv.entry);
+                    _isSyncing = false;
+                });
+            }
         }
         private readonly LogManager _log;
-        private readonly ILogger _session;
-        private readonly ISessionStatefulLogListener<TScopeNode, TEntryNode> _listener;
+        private readonly IStatefulLogListener<TScopeNode, TEntryNode> _listener;
         private bool _isSyncing = true;
-        private readonly ConcurrentDictionary<IScopeAccessor, TScopeNode> _scopes = [];
-        private readonly ConcurrentQueue<(IScopeAccessor scope, IEntry entry)> _tempCache = [];
-        private TEntryNode ConvertToNewEntryNode(IEntry entry, out bool isScopeNode)
+        private readonly ConcurrentDictionary<ILogger, ConcurrentDictionary<IScopeAccessor, TScopeNode>> _scopes = [];
+        private readonly ConcurrentDictionary<ILogger, ConcurrentQueue<(IScopeAccessor scope, IEntry entry)>> _tempCache = [];
+        private TEntryNode ConvertToNewEntryNode(ILogger session, IEntry entry, out bool isScopeNode)
         {
             isScopeNode = false;
             if (entry is not IScopeAccessor scopeAccessor)
-                return _listener.BuildEntry(entry);
+                return _listener.BuildEntry(session, entry);
             isScopeNode = true;
-            var scope = _listener.BuildScope(scopeAccessor);
-            _scopes[scopeAccessor] = scope;
+            var scope = _listener.BuildScope(session, scopeAccessor);
+            var scopes = _scopes.GetOrAdd(session, k => []);
+            scopes[scopeAccessor] = scope;
             return scope;
         }
         private void OnUpdate(ILogger session, IScopeAccessor scopeAccessor, IEntry entry)
         {
-            if (session != _session) return;
+            var scopes = _scopes.GetOrAdd(session, k => []);
+            var tempCache = _tempCache.GetOrAdd(session, k => []);
+            var roots = _listener.GetLoggerRootNodes(session);
             if (_isSyncing)
-                _tempCache.Enqueue((scopeAccessor, entry));
+                tempCache.Enqueue((scopeAccessor, entry));
             else
             {
-                var newEntry = ConvertToNewEntryNode(entry, out _);
-                if (_scopes.TryGetValue(scopeAccessor, out var scopeNode)) 
+                var newEntry = ConvertToNewEntryNode(session, entry, out _);
+                if (scopes.TryGetValue(scopeAccessor, out var scopeNode)) 
                     scopeNode.AppendChild(newEntry);
                 else
-                    _listener.RootNodes.Add(newEntry);
+                    roots.Add(newEntry);
             }
         }
         private IEnumerable<TEntryNode> ParseScopeChildren(IScopeAccessor scope)
         {
             foreach (var child in scope.Entries)
             {
-                var newEntry = ConvertToNewEntryNode(child, out var isScopeNode);
+                var newEntry = ConvertToNewEntryNode(scope.Session, child, out var isScopeNode);
                 if (isScopeNode)
                 {
                     foreach (var _child in ParseScopeChildren((child as IScopeAccessor)!))
@@ -271,7 +278,7 @@ internal sealed class LogManager : ILogManager, IDisposable
     /// Registers a stateful listener that captures historical logs and transitions to real-time updates.
     /// </summary>
     /// <returns>A handle to unregister the listener.</returns>
-    public IDisposable RegisterListener<TScopeNode, TEntryNode>(ILogger session, ISessionStatefulLogListener<TScopeNode, TEntryNode> statefulListener)
+    public IDisposable RegisterListener<TScopeNode, TEntryNode>(IStatefulLogListener<TScopeNode, TEntryNode> statefulListener)
         where TScopeNode : class, IHandleChildAppend<TEntryNode>, TEntryNode
         where TEntryNode : class
     {
@@ -279,7 +286,7 @@ internal sealed class LogManager : ILogManager, IDisposable
         {
             if (!_registeredStatefuleListeners.TryGetValue(statefulListener, out var reg))
             {
-                reg = new StatefulRegistration<TScopeNode, TEntryNode>(this, session, statefulListener);
+                reg = new StatefulRegistration<TScopeNode, TEntryNode>(this, statefulListener);
                 _registeredStatefuleListeners[statefulListener] = reg;
             }
             return reg;
@@ -289,7 +296,7 @@ internal sealed class LogManager : ILogManager, IDisposable
     /// Removes a stateful listener and cleans up its synchronization resources.
     /// </summary>
     /// <returns><c>true</c> if successfully unregistered; otherwise, <c>false</c>.</returns>
-    public bool UnregisterListener<TScopeNode, TEntryNode>(ISessionStatefulLogListener<TScopeNode, TEntryNode> statefulListener)
+    public bool UnregisterListener<TScopeNode, TEntryNode>(IStatefulLogListener<TScopeNode, TEntryNode> statefulListener)
         where TScopeNode : class, IHandleChildAppend<TEntryNode>, TEntryNode
         where TEntryNode : class
         => UnregisterListenerInternal(statefulListener);

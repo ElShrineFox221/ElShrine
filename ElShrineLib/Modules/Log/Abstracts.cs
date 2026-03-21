@@ -29,18 +29,13 @@ public interface IHandleChildAppend<TChild>
 /// </summary>
 /// <typeparam name="TScopeNode">The node type representing a <see cref="LogScope"/>.</typeparam>
 /// <typeparam name="TEntryNode">The node type representing a standard <see cref="LogEntry"/>.</typeparam>
-public interface ISessionStatefulLogListener<TScopeNode, TEntryNode>
+public interface IStatefulLogListener<TScopeNode, TEntryNode>
     where TScopeNode : class, IHandleChildAppend<TEntryNode>, TEntryNode
     where TEntryNode : class
 {
-    /// <summary> Builds a custom scope node from a scope accessor. </summary>
-    TScopeNode BuildScope(IScopeAccessor accessor);
-
-    /// <summary> Builds a custom entry node from an entry accessor. </summary>
-    TEntryNode BuildEntry(IEntry entry);
-
-    /// <summary> Gets the collection of root nodes where top-level entries are stored. </summary>
-    ICollection<TEntryNode> RootNodes { get; }
+    TScopeNode BuildScope(ILogger logger, IScopeAccessor accessor);
+    TEntryNode BuildEntry(ILogger logger, IEntry entry);
+    ICollection<TEntryNode> GetLoggerRootNodes(ILogger logger);
 }
 #endregion
 
@@ -56,13 +51,13 @@ public interface ILogManager
     #region Listeners reg & unreg
     IDisposable RegisterListener(ILogListener globalListener);
     IDisposable RegisterListener(ILogger session, ILogSessionListener sessionListener);
-    IDisposable RegisterListener<TScopeNode, TEntryNode>(ILogger session, ISessionStatefulLogListener<TScopeNode, TEntryNode> statefulListener)
+    IDisposable RegisterListener<TScopeNode, TEntryNode>(IStatefulLogListener<TScopeNode, TEntryNode> statefulListener)
         where TScopeNode : class, IHandleChildAppend<TEntryNode>, TEntryNode
         where TEntryNode : class;
     
     bool UnregisterListener(ILogListener globalListener);
     bool UnregisterListener(ILogSessionListener sessionListener);
-    bool UnregisterListener<TScopeNode, TEntryNode>(ISessionStatefulLogListener<TScopeNode, TEntryNode> statefulListener)
+    bool UnregisterListener<TScopeNode, TEntryNode>(IStatefulLogListener<TScopeNode, TEntryNode> statefulListener)
         where TScopeNode : class, IHandleChildAppend<TEntryNode>, TEntryNode
         where TEntryNode : class;
     #endregion
