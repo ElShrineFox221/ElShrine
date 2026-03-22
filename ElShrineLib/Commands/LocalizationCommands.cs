@@ -5,7 +5,7 @@ using ElShrine.Modules.Localization;
 namespace ElShrine.Commands;
 
 [CommandCarrier]
-public static class LocalizationCommandsCarrier
+public static class LocalizationCommands
 {
     public const string Name = "Localization";
     private static ILocalizationManager Localization => field ??= CoreModuleAccessor.Localization;

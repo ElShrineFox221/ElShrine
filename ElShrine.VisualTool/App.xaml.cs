@@ -1,6 +1,5 @@
 ﻿using ElShrine.Modules;
 using ElShrine.VisualTool.PluginUI;
-using System.Runtime.CompilerServices;
 using System.Windows;
 
 namespace ElShrine.VisualTool;
@@ -12,10 +11,6 @@ public partial class App : Application
 {
     protected override void OnStartup(StartupEventArgs e)
     {
-        Bootstrapper.RegisterFinalization(() =>
-        {
-            _ = Bootstrapper.Resolve<PluginManagerUI>();
-        }, 0);
         Bootstrapper.Initialize(builder =>
         {
             builder.RegisterModule<IPluginManagerUI, PluginManagerUI>();

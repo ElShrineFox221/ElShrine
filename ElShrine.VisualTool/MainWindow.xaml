@@ -16,7 +16,7 @@
   <controls:EWindow.Resources>
     <DataTemplate x:Key="ModuleInfoDataTemplate" DataType="{x:Type pluginUI:PluginInfoVM}">
       <Grid>
-        <Border x:Name="rootBorder" CornerRadius="10" Padding="9,3" Width="150">
+        <Border x:Name="rootBorder" CornerRadius="10" Padding="9,3">
           <Grid>
             <Grid.RowDefinitions>
               <RowDefinition Height="auto"/>
@@ -45,14 +45,6 @@
           </Border.ToolTip>
         </Border>
       </Grid>
-      <DataTemplate.Triggers>
-        <DataTrigger Binding="{Binding IsEnabled}" Value="True">
-          <Setter TargetName="rootBorder" Property="Background" Value="#CCFFCC"/>
-        </DataTrigger>
-        <DataTrigger Binding="{Binding IsEnabled}" Value="False">
-          <Setter TargetName="rootBorder" Property="Background" Value="#FFCCCC"/>
-        </DataTrigger>
-      </DataTemplate.Triggers>
     </DataTemplate>
     <LinearGradientBrush x:Key="ColorGradientBrush" StartPoint="1,0" EndPoint="0,0">
       <GradientStop Color="#ff0000"/>
@@ -76,12 +68,12 @@
   <controls:EWindow.HeaderContent>
     <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
       <Grid>
-        <controls:EPopupExpander ExpandDirection="Down" EBorderThickness="0,0,0,1.5" StaysOpen="False">
+        <controls:EPopupExpander ExpandDirection="Down" EBorderThickness="0,0,0,1.5" StaysOpen="True">
           <controls:EPopupExpander.Header>
             <TextBlock Text="Config Modules" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right"/>
           </controls:EPopupExpander.Header>
           <Border>
-            <Grid Grid.Column="0" Width="360">
+            <Grid Grid.Column="0" Width="480">
               <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
@@ -104,7 +96,9 @@
               <TextBlock Grid.Row="1" Text="Disabled Modules" FontSize="14" HorizontalAlignment="Center"/>
               <TextBlock Grid.Row="1" Grid.Column="1" Text="Enabled Modules" FontSize="12" HorizontalAlignment="Center"/>
               <controls:EListView x:Name="DisabledModulesListView" Grid.Row="2" 
-ItemsSource="{Binding PluginManagerUI.Disableds}" ItemTemplate="{StaticResource ModuleInfoDataTemplate}" IsDraggable="True" DragItemDropped="DisabledModulesListView_DragItemDropped"/>
+                                  ItemsSource="{Binding PluginManagerUI.Disableds}" 
+                                  ItemTemplate="{StaticResource ModuleInfoDataTemplate}" 
+                                  IsDraggable="True" DragItemDropped="DisabledModulesListView_DragItemDropped"/>
               <controls:EListView x:Name="EnabledModulesListView" Grid.Row="2" Grid.Column="1" 
 ItemsSource="{Binding PluginManagerUI.Enableds}" ItemTemplate="{StaticResource ModuleInfoDataTemplate}" IsDraggable="True" DragItemDropped="EnabledModulesListView_DragItemDropped"/>
             </Grid>
