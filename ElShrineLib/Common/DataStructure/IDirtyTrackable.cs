@@ -10,13 +10,13 @@ public class IsDirtyChangedEventArgs(bool isDirty, bool isFromChild, string prop
     public bool IsFromChild { get; } = isFromChild;
     public string PropertyName { get; } = propertyName;
 }
-public class PropertyChangedEventArgs(string propertyName, object? oldValue, object? newValue) 
+public class EPropertyChangedEventArgs(string propertyName, object? oldValue, object? newValue) 
     : ValueChangedEventArgs<object?>(oldValue, newValue)
 {
     public string PropertyName { get; } = propertyName;
 }
 public delegate void IsDirtyChangedHandler(object? sender, IsDirtyChangedEventArgs e);
-public delegate void PropertyChangedHandler(object? sender, PropertyChangedEventArgs e);
+public delegate void PropertyChangedHandler(object? sender, EPropertyChangedEventArgs e);
 public interface IDirtyTrackable
 {
     event IsDirtyChangedHandler IsDirtyChanged;
@@ -41,7 +41,7 @@ public abstract class DirtyTrackableObject : IDirtyTrackable
         var oldValue = field;
         var propChanged = SetPropertyInternal(ref field, value, propertyName);
         if (propChanged)
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName, oldValue, value));
+            PropertyChanged?.Invoke(this, new EPropertyChangedEventArgs(propertyName, oldValue, value));
         return propChanged;
     }
     private bool SetPropertyInternal<T>(ref T field, T value, string propertyName)

@@ -14,7 +14,7 @@ namespace ElShrine.VisualTool.Pages.Console;
     Icon = "Console.png",
     IsHeaderComponent = true,
     IsTabComponent = false)]
-public class ConsoleWpfUI() : DataTemplatedPluginBase()
+public class ConsoleUI() : DataTemplatedPluginBase()
 {
     protected override ViewModelBase GetViewModel()
     {

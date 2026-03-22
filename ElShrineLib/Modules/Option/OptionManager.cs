@@ -157,7 +157,7 @@ internal sealed class OptionManager : PluginResourceTracker<OptionBase>, IOption
     #endregion
 
     #region callbacks
-    private void OnOptionChanged(object? sender, PropertyChangedEventArgs e)
+    private void OnOptionChanged(object? sender, EPropertyChangedEventArgs e)
     {
         var items = sender is not OptionBase option ? [] : Get(option.OptionCataName);
         var item = items.FirstOrDefault(i => i.ActualItemName == e.PropertyName);

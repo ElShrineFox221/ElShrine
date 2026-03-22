@@ -1,5 +1,6 @@
 ﻿using ElShrine;
 using ElShrine.Graphics;
+using ElShrine.Modules;
 using ElShrine.Modules.Log;
 using ElShrine.Wpf;
 using System.Windows;
@@ -22,7 +23,7 @@ public sealed class LineItemVM(LogItem model) : ViewModelBase<LogItem>(model)
             }
         }
     }
-    public MediaColor ForeColor => PaintModeToFontColor(ConsoleVM.Instance.BackColor, Model.Style);
+    public MediaColor ForeColor => PaintModeToFontColor(CoreModuleAccessor.Option.GetOption<ConsoleUIOption>().BackColor, Model.Style);
     public static MediaColor PaintModeToFontColor(MediaColor backColor, LogItemStyle paintMode)
     {
         bool isDarkBackground = backColor.ToColorData().GetGrayValue() < 128;

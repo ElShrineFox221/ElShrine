@@ -40,7 +40,7 @@ public static class LineItemsTextHelper
                     {
                         var run = new Run(textParts[i])
                         {
-                            Foreground = LineItemVM.PaintModeToFontColor(ConsoleVM.Instance.BackColor, item.Style).ToSolidBrush()
+                            Foreground = LineItemVM.PaintModeToFontColor(ConsoleVM.Instance.Option.BackColor, item.Style).ToSolidBrush()
                         };
                         textBlock.Inlines.Add(run);
                     }

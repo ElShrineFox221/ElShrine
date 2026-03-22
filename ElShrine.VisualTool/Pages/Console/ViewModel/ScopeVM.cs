@@ -1,10 +1,11 @@
 ﻿using ElShrine.Modules.Log;
+using System.Windows;
 
 namespace ElShrine.VisualTool.Pages.Console.ViewModel;
 
 public sealed class ScopeVM : EntryVM, IHandleChildAppend<EntryVM>
 {
-    public ScopeVM(SessionVM session, IScopeAccessor accessor) : base(session, accessor)
+    public ScopeVM(ConsoleVM console, SessionVM session, IScopeAccessor accessor) : base(console, session, accessor)
     {
         Model = accessor;
         Parent = session;
@@ -23,7 +24,10 @@ public sealed class ScopeVM : EntryVM, IHandleChildAppend<EntryVM>
             return;
         if (entry.IsEndLine) 
             DoClose(entry);
-        SubLines.Add(entry);
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            SubLines.Add(entry);
+        });
     }
     private void DoClose(EntryVM endEntry)
     {

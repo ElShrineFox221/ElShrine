@@ -1,4 +1,5 @@
-﻿using ElShrine.Modules.Log;
+﻿using ElShrine.Modules;
+using ElShrine.Modules.Log;
 using ElShrine.Wpf;
 using System.Collections.ObjectModel;
 using System.Text;
@@ -14,6 +15,7 @@ public class EntryVM : ViewModelBase<IEntry>
     public LineItemVM? ResultItemVM { get; protected set; }
     #endregion
 
+    public ConsoleVM Console { get; init; }
     public SessionVM Parent { get; init; }
     public bool IsEndLine { get; init; }
     public LogItem[] LineContent { get; init; }
@@ -22,9 +24,10 @@ public class EntryVM : ViewModelBase<IEntry>
     public LineItemVM TimestampVM { get; init; }
     public LineItemVM ThreadIdVM { get; init; }
 
-    public EntryVM(SessionVM session, IEntry entry) : base(entry)
+
+    public EntryVM(ConsoleVM console, SessionVM session, IEntry entry) : base(entry)
     {
-        ConsoleVM.Instance.LineVMRefs.Add(new(this));
+        Console = console;
         Parent = session;
         IsEndLine = entry.IsEndOfScope;
         LineContent = [.. entry.Content.LogItems];
@@ -45,19 +48,6 @@ public class EntryVM : ViewModelBase<IEntry>
         sb.AppendLine(text);
         return sb.ToString();
     }
-    protected static bool IsTimestampVisible => ConsoleVM.IsTimestampVisible;
-    protected static bool IsThreadIdVisible => ConsoleVM.IsThreadIdVisible;
-    protected static bool IsTimeconsumesVisible => ConsoleVM.IsTimeconsumesVisible;
-    protected static bool IsResultInfoVisible => ConsoleVM.IsResultInfoVisible;
-    protected override void NotifyPropertyChanged(object sender, string memberName)
-    {
-        base.NotifyPropertyChanged(sender, memberName);
-
-        /*switch (memberName)
-        {
-            case nameof(LineItemVM.ForeColor):
-                foreach (var item in LineContent) item.NotifyPropertiesChanged(nameof(LineItemVM.ForeColor));
-                break;
-        }*/
-    }
+    protected static bool IsTimestampVisible => CoreModuleAccessor.Option.GetOption<ConsoleUIOption>().IsTimestampVisible;
+    protected static bool IsThreadIdVisible => CoreModuleAccessor.Option.GetOption<ConsoleUIOption>().IsThreadIdVisible;
 }

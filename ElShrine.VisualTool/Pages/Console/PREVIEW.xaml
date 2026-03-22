@@ -4,14 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:controls="clr-namespace:ElShrine.Wpf.Controls;assembly=ElShrineLib.Wpf"
-             xmlns:local="clr-namespace:ElShrine.VisualTool.Pages.Console.ViewModel"
+             xmlns:vm="clr-namespace:ElShrine.VisualTool.Pages.Console.ViewModel"
              xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions;assembly=ElShrineLib.Wpf"
              xmlns:localExt="clr-namespace:ElShrine.VisualTool.Pages.Console"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance Type=local:ConsoleVM,IsDesignTimeCreatable=True}"
+             d:DataContext="{d:DesignInstance Type=vm:ConsoleVM,IsDesignTimeCreatable=True}"
              d:DesignHeight="450" d:DesignWidth="800">
   <UserControl.Resources>
-    <DataTemplate x:Key="LineItemTemplate" DataType="local:LineItemVM">
+    <DataTemplate x:Key="LineItemTemplate" DataType="vm:LineItemVM">
       <StackPanel>
         <TextBlock Visibility="{Binding Visibility}"
                    Text="{Binding Text}"
@@ -19,7 +19,7 @@
                    TextWrapping="WrapWithOverflow"/>
       </StackPanel>
     </DataTemplate>
-    <DataTemplate x:Key="CommandInputBarTemplate" DataType="local:CommandInputBarDataVM">
+    <DataTemplate x:Key="CommandInputBarTemplate" DataType="vm:CommandInputBarDataVM">
       <Grid>
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto"/>
@@ -64,10 +64,10 @@
               <Setter Property="EBorderThickness" Value="0"/>
             </Style>
           </StackPanel.Resources>
-          <controls:EToggleButton Style="{StaticResource ToggleButtonStyle}" Content="Show timestamp" IsChecked="{Binding Path=(local:ConsoleVM.IsTimestampVisible)}"/>
-          <controls:EToggleButton Style="{StaticResource ToggleButtonStyle}" Content="Show thread ID" IsChecked="{Binding Path=(local:ConsoleVM.IsThreadIdVisible)}"/>
-          <controls:EToggleButton Style="{StaticResource ToggleButtonStyle}" Content="Show time consumes" IsChecked="{Binding Path=(local:ConsoleVM.IsTimeconsumesVisible)}"/>
-          <controls:EToggleButton Style="{StaticResource ToggleButtonStyle}" Content="Show result" IsChecked="{Binding Path=(local:ConsoleVM.IsResultInfoVisible)}"/>
+          <controls:EToggleButton Style="{StaticResource ToggleButtonStyle}" Content="Show timestamp" IsChecked="{Binding Option.IsTimestampVisible}"/>
+          <controls:EToggleButton Style="{StaticResource ToggleButtonStyle}" Content="Show thread ID" IsChecked="{Binding Option.IsThreadIdVisible}"/>
+          <controls:EToggleButton Style="{StaticResource ToggleButtonStyle}" Content="Show time consumes" IsChecked="{Binding Option.IsTimeconsumesVisible}"/>
+          <controls:EToggleButton Style="{StaticResource ToggleButtonStyle}" Content="Show result" IsChecked="{Binding Option.IsResultInfoVisible}"/>
         </StackPanel>
       </Grid>
       <controls:ETabControl Grid.Row="1" ItemsSource="{Binding SessionByCombinedNameId}" SelectedItem="{Binding SelectedSession}" 
@@ -86,9 +86,9 @@
                   <Style TargetType="controls:ETreeViewItem">
                     <Setter Property="LeftColumnTemplate">
                       <Setter.Value>
-                        <DataTemplate DataType="local:ScopeVM">
+                        <DataTemplate DataType="vm:ScopeVM">
                           <Grid x:Name="LeftContentGrid" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,1,0,0" 
-                                                          ext:ControlUpdater.InvalidateArrangeSource="{Binding Path=(local:ConsoleVM.IsResultInfoVisible)}">
+                                                          ext:ControlUpdater.InvalidateArrangeSource="{Binding Console.Option.IsResultInfoVisible}">
                             <Grid.ColumnDefinitions>
                               <ColumnDefinition x:Name="C0" Width="Auto"/>
                               <ColumnDefinition x:Name="C1" Width="Auto"/>
@@ -96,13 +96,13 @@
                               <ColumnDefinition x:Name="C3" Width="0" SharedSizeGroup="ResultCol"/>
                             </Grid.ColumnDefinitions>
                             <ContentControl Grid.Column="0" Content="{Binding TimestampVM}" ContentTemplate="{StaticResource LineItemTemplate}"
-                                                                        Visibility="{Binding Path=(local:ConsoleVM.IsTimestampVisible), Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=collapsed}"/>
+                                                                        Visibility="{Binding Console.Option.IsTimestampVisible, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=collapsed}"/>
                             <ContentControl Grid.Column="1" Content="{Binding ThreadIdVM}" ContentTemplate="{StaticResource LineItemTemplate}"
-                                                                        Visibility="{Binding Path=(local:ConsoleVM.IsThreadIdVisible), Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=collapsed}"/>
+                                                                        Visibility="{Binding Console.Option.IsThreadIdVisible, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=collapsed}"/>
                             <ContentControl x:Name="CC2" Grid.Column="2" Content="{Binding TimeconsumesItemVM}" ContentTemplate="{StaticResource LineItemTemplate}" 
-                                                                        Visibility="{Binding Path=(local:ConsoleVM.IsTimeconsumesVisible), Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=collapsed}"/>
+                                                                        Visibility="{Binding Console.Option.IsTimeconsumesVisible, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=collapsed}"/>
                             <ContentControl x:Name="CC3" Grid.Column="3" Content="{Binding ResultItemVM}" ContentTemplate="{StaticResource LineItemTemplate}"
-                                                                        Visibility="{Binding Path=(local:ConsoleVM.IsResultInfoVisible), Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=collapsed}"
+                                                                        Visibility="{Binding Console.Option.IsResultInfoVisible, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=collapsed}"
                                                                         />
                           </Grid>
                           <DataTemplate.Triggers>
@@ -121,7 +121,7 @@
                   </Style>
                 </controls:ETreeView.Resources>
                 <controls:ETreeView.ItemTemplate>
-                  <HierarchicalDataTemplate DataType="local:ScopeVM" ItemsSource="{Binding SubLines}">
+                  <HierarchicalDataTemplate DataType="vm:ScopeVM" ItemsSource="{Binding SubLines}">
                     <TextBlock localExt:LineItemsTextHelper.LineItems="{Binding LineContent}" Margin="0,-1,0,0">
 
                     </TextBlock>
