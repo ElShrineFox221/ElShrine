@@ -46,11 +46,13 @@ public sealed class ConsoleVM : ViewModelBase, IStatefulLogListener<ScopeVM, Ent
         Application.Current.Dispatcher.Invoke(() =>
         {
             sessionVm.Roots.Add(entry);
+            CloseLasts(entry);
         });
     }
     #endregion
 
     #region Lines
+    internal readonly ConcurrentDictionary<EntryVM, ScopeVM?> _parents = [];
     private readonly ConcurrentDictionary<ILogger, SessionVM> _loggers = [];
     public ObservableCollection<SessionVM> SessionByCombinedNameId { get; } = [];
     public SessionVM? SelectedSession
@@ -86,12 +88,46 @@ public sealed class ConsoleVM : ViewModelBase, IStatefulLogListener<ScopeVM, Ent
         });
         return sessionVm;
     }
+
+    private IReadOnlyList<EntryVM> GetLastEntries(EntryVM curEntry, int lastCount) 
+    {
+        var roots = curEntry.Parent.Roots;
+        var collection = roots.ToList();
+        var parentScope = curEntry;
+        do
+        {
+            _parents.TryGetValue(parentScope, out var ps);
+            parentScope = ps;
+            if (parentScope is not null)
+            {
+                var li = parentScope.SubLines.ToList();
+                if (li.Count > lastCount)
+                {
+                    collection = li;
+                    break;
+                }
+            }
+        }
+        while (parentScope is not null);
+        //
+        if (collection.Count > lastCount)
+            return [.. collection.SkipLast(lastCount)];
+        return [];
+        /*static List<ScopeVM> toList(IEnumerable<EntryVM> entries)
+            => [.. entries.Where(static l => l is ScopeVM).Select(static l => (ScopeVM)l)];*/
+    }
+    public void CloseLasts(EntryVM entry, int count = 1)
+    {
+        var lastEntries = GetLastEntries(entry, count);
+        foreach (var e in lastEntries)
+            e.IsAutoExpanded = false;
+    }
     #endregion
 
     //CanInput
     //>CommandProcessing
     //>use error notice overlay
-    //more command: startwith'-'or'=', switch to another session/group/scope:
+    //more command: startwith'-'or'=', switch to another session/group/e:
     //>>-f, -v, (a, n),-s n;
 
     // Input
@@ -102,5 +138,7 @@ public sealed class ConsoleVM : ViewModelBase, IStatefulLogListener<ScopeVM, Ent
     public void Dispose()
     {
         _logManager.UnregisterListener(this);
+        _parents.Clear();
+        _loggers.Clear();
     }
 }

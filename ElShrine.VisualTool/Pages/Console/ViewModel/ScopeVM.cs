@@ -1,5 +1,6 @@
 ﻿using ElShrine.Modules.Log;
 using System.Windows;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace ElShrine.VisualTool.Pages.Console.ViewModel;
 
@@ -22,8 +23,10 @@ public sealed class ScopeVM : EntryVM, IHandleChildAppend<EntryVM>
     {
         if (IsClosed) 
             return;
+        Console._parents[entry] = this;
         if (entry.IsEndLine) 
             DoClose(entry);
+        Console.CloseLasts(entry);
         Application.Current.Dispatcher.Invoke(() =>
         {
             SubLines.Add(entry);
@@ -46,7 +49,9 @@ public sealed class ScopeVM : EntryVM, IHandleChildAppend<EntryVM>
             NotifyPropertiesChanged(nameof(ResultItemVM));
         }
         NotifyPropertiesChanged(nameof(IsClosed));
+        
     }
+    
     #endregion
 
     #region User interface extend
