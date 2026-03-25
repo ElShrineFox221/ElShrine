@@ -97,17 +97,22 @@ public static class Bootstrapper
     public static TInstance InstanceConstructorInvoker<TInstance>(
         IDictionary<Type, object> cachedInstances,
         IReadOnlyDictionary<Type, Type>? typeMap = null, 
-        bool cacheUnregistered = true)
-        => (TInstance)InstanceConstructorInvoker(typeof(TInstance), cachedInstances, typeMap, cacheUnregistered);
+        bool cacheUnregistered = true,
+        bool useTemporaryCache = true)
+        => (TInstance)InstanceConstructorInvoker(typeof(TInstance), cachedInstances, typeMap, cacheUnregistered, useTemporaryCache);
     public static object InstanceConstructorInvoker(
         Type instanceType,
         IDictionary<Type, object> cachedInstances,
         IReadOnlyDictionary<Type, Type>? typeMap = null, 
-        bool cacheUnregistered = true)
+        bool cacheUnregistered = true,
+        bool useTemporaryCache = true)
     {
         var resolvingStack = new Stack<Type>();
+        var temporaryCache = new Dictionary<Type, object>();
         object Resolve(Type type)
         {
+            if (useTemporaryCache && temporaryCache.TryGetValue(type, out var temporaryCached))
+                return temporaryCached;
             if (cachedInstances.TryGetValue(type, out var cached))
                 return cached;
             if (resolvingStack.Contains(type))
@@ -145,8 +150,13 @@ public static class Bootstrapper
                             }
                         }
                         var instance = Activator.CreateInstance(implementationType, args)!;
+
+                        if (useTemporaryCache)
+                            temporaryCache[type] = instance;
+
                         if ((typeMap?.ContainsKey(type) ?? false) || cacheUnregistered)
                             cachedInstances[type] = instance;
+                        
                         return instance;
                     }
                     catch { }
@@ -171,7 +181,7 @@ public static class Bootstrapper
         #region IServiceProvider implementations
         public object? GetService(Type serviceType)
         {
-            return InstanceConstructorInvoker(serviceType, _instancesCached, _servicesRegistered, false);
+            return InstanceConstructorInvoker(serviceType, _instancesCached, _servicesRegistered, false, true);
         }
         #endregion
 
