@@ -2,119 +2,119 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
                     xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions">
-    <Style TargetType="{x:Type controls:EToggleButton}">
-        <Setter Property="IsChecked" Value="True"/>
-        <Setter Property="ToggleSignSize" Value="16"/>
-        <Setter Property="ToggleSignMargin" Value="-3,2"/>
-        <Setter Property="Padding" Value="5,2"/>
-        <Setter Property="HorizontalContentAlignment" Value="Left"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="EBorderThickness" Value="1"/>
-        <Setter Property="EBorderCornerRadius" Value="2"/>
-
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type controls:EToggleButton}">
-                    <Border x:Name="PART_EToggleButtonRoot" 
-                            BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}" Padding="{TemplateBinding Padding}"
-                            ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EToggleButton}}">
-                        <ext:StateListener.Rules>
-                            <ext:RuleCollection>
-                                <ext:Rule Target="{Binding ElementName=PART_EToggleButtonRoot}" StateMap="
-                                    MouseOut=>Back=BC, Border=PR;
-                                    MouseIn=>Back=Lerp(BC, SE, 0.1), Border=SE;
-                                    MouseDown=>Back=Lerp(BC, SE, 0.2)"/>
-                            </ext:RuleCollection>
-                        </ext:StateListener.Rules>
-                        <Border.OpacityMask>
-                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EToggleButtonRoot}"/>
-                        </Border.OpacityMask>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition x:Name="r0" Height="auto"/>
-                                <RowDefinition x:Name="r1" Height="auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition x:Name="c0" Width="auto"/>
-                                <ColumnDefinition x:Name="c1" Width="auto"/>
-                            </Grid.ColumnDefinitions>
-                            <controls:ScaleController ScaleTarget="{Binding ElementName=PART_ToggleSignBorderScaleTransform}" Scale="0.8"
-                                                      BeTriggered="{Binding RelativeSource={RelativeSource AncestorType=controls:EToggleButton}, Path=IsPressed}"
-                                                      IsShakeMode="False"/>
-                            <controls:ScaleController ScaleTarget="{Binding ElementName=PART_ToggleSignScaleTransform}" Scale="0"
-                                                      BeTriggered="{Binding RelativeSource={RelativeSource AncestorType=controls:EToggleButton}, Path=IsChecked, Converter={StaticResource CommonModifyConverter}}"
-                                                      IsShakeMode="False" IsPersistantScale="True"/>
-                            <Border x:Name="PART_ToggleSignContainer" Grid.Column="1" Margin="{TemplateBinding Padding}">
-                                <Border x:Name="PART_ToggleSignOuterline" 
-                                        Margin="{TemplateBinding ToggleSignMargin}" BorderThickness="1" Width="{TemplateBinding ToggleSignSize}" Height="{Binding Width,RelativeSource={RelativeSource Mode=Self}}" CornerRadius="{TemplateBinding EBorderCornerRadius}" RenderTransformOrigin="0.5,0.5" UseLayoutRounding="False"
-                                         BorderBrush="{Binding ElementName=PART_EToggleButtonRoot,Path=BorderBrush}">
-                                    <Border.CacheMode>
-                                        <BitmapCache EnableClearType="True" RenderAtScale="1" SnapsToDevicePixels="False"/>
-                                    </Border.CacheMode>
-                                    <Border.RenderTransform>
-                                        <ScaleTransform x:Name="PART_ToggleSignBorderScaleTransform"/>
-                                    </Border.RenderTransform>
-                                    <Border x:Name="PART_ToggleSignInnerChunk" 
-                                            Width="{TemplateBinding ToggleSignSize, Converter={StaticResource CommonModifyConverter},ConverterParameter=*0.7}" Height="{Binding Width,RelativeSource={RelativeSource Mode=Self}}" CornerRadius="{TemplateBinding EBorderCornerRadius}" BorderThickness="0" BorderBrush="Transparent" RenderTransformOrigin="0.5,0.5" UseLayoutRounding="False">
-                                        <Border.Background>
-                                            <SolidColorBrush Color="{Binding ElementName=PART_EToggleButtonRoot,Path=BorderBrush, Converter={StaticResource CommonConverter}}" Opacity="1"/>
-                                        </Border.Background>
-                                        <Border.CacheMode>
-                                            <BitmapCache EnableClearType="True" RenderAtScale="1" SnapsToDevicePixels="False"/>
-                                        </Border.CacheMode>
-                                        <Border.RenderTransform>
-                                            <ScaleTransform x:Name="PART_ToggleSignScaleTransform"/>
-                                        </Border.RenderTransform>
-                                    </Border>
-                                </Border>
-                            </Border>
-                            <ContentPresenter x:Name="PART_ContentContainer" Margin="{TemplateBinding Padding}" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                        </Grid>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="ContentPlacement" Value="Right">
-                            <Setter TargetName="r0" Property="Height" Value="*"/>
-                            <Setter TargetName="r1" Property="Height" Value="auto"/>
-                            <Setter TargetName="c0" Property="Width" Value="auto"/>
-                            <Setter TargetName="c1" Property="Width" Value="*"/>
-                            <Setter TargetName="PART_ContentContainer" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_ContentContainer" Property="Grid.Column" Value="1"/>
-                            <Setter TargetName="PART_ToggleSignContainer" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_ToggleSignContainer" Property="Grid.Column" Value="0"/>
-                        </Trigger>
-                        <Trigger Property="ContentPlacement" Value="Left">
-                            <Setter TargetName="r0" Property="Height" Value="*"/>
-                            <Setter TargetName="r1" Property="Height" Value="auto"/>
-                            <Setter TargetName="c0" Property="Width" Value="*"/>
-                            <Setter TargetName="c1" Property="Width" Value="auto"/>
-                            <Setter TargetName="PART_ContentContainer" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_ContentContainer" Property="Grid.Column" Value="0"/>
-                            <Setter TargetName="PART_ToggleSignContainer" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_ToggleSignContainer" Property="Grid.Column" Value="1"/>
-                        </Trigger>
-                        <Trigger Property="ContentPlacement" Value="Down">
-                            <Setter TargetName="r0" Property="Height" Value="auto"/>
-                            <Setter TargetName="r1" Property="Height" Value="*"/>
-                            <Setter TargetName="c0" Property="Width" Value="*"/>
-                            <Setter TargetName="c1" Property="Width" Value="auto"/>
-                            <Setter TargetName="PART_ContentContainer" Property="Grid.Row" Value="1"/>
-                            <Setter TargetName="PART_ContentContainer" Property="Grid.Column" Value="0"/>
-                            <Setter TargetName="PART_ToggleSignContainer" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_ToggleSignContainer" Property="Grid.Column" Value="0"/>
-                        </Trigger>
-                        <Trigger Property="ContentPlacement" Value="Up">
-                            <Setter TargetName="r0" Property="Height" Value="*"/>
-                            <Setter TargetName="r1" Property="Height" Value="auto"/>
-                            <Setter TargetName="c0" Property="Width" Value="*"/>
-                            <Setter TargetName="c1" Property="Width" Value="auto"/>
-                            <Setter TargetName="PART_ContentContainer" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_ContentContainer" Property="Grid.Column" Value="0"/>
-                            <Setter TargetName="PART_ToggleSignContainer" Property="Grid.Row" Value="1"/>
-                            <Setter TargetName="PART_ToggleSignContainer" Property="Grid.Column" Value="0"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+  <ControlTemplate x:Key="EToggleButton_BaseTemplate" TargetType="controls:EToggleButton">
+    <Border x:Name="PART_EToggleButtonRoot" 
+            BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}" Padding="{TemplateBinding Padding}"
+            ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EToggleButton}}">
+      <ext:StateListener.Rules>
+        <ext:RuleCollection>
+          <ext:Rule Target="{Binding ElementName=PART_EToggleButtonRoot}" StateMap="
+                    MouseOut=>Back=BC, Border=PR;
+                    MouseIn=>Back=Lerp(BC, SE, 0.1), Border=SE;
+                    MouseDown=>Back=Lerp(BC, SE, 0.2)"/>
+        </ext:RuleCollection>
+      </ext:StateListener.Rules>
+      <Border.OpacityMask>
+        <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EToggleButtonRoot}"/>
+      </Border.OpacityMask>
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition x:Name="r0" Height="auto"/>
+          <RowDefinition x:Name="r1" Height="auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition x:Name="c0" Width="auto"/>
+          <ColumnDefinition x:Name="c1" Width="auto"/>
+        </Grid.ColumnDefinitions>
+        <controls:ScaleController ScaleTarget="{Binding ElementName=PART_ToggleSignBorderScaleTransform}" Scale="0.8"
+                                      BeTriggered="{Binding RelativeSource={RelativeSource AncestorType=controls:EToggleButton}, Path=IsPressed}"
+                                      IsShakeMode="False"/>
+        <controls:ScaleController ScaleTarget="{Binding ElementName=PART_ToggleSignScaleTransform}" Scale="0"
+                                      BeTriggered="{Binding RelativeSource={RelativeSource AncestorType=controls:EToggleButton}, Path=IsChecked, Converter={StaticResource CommonModifyConverter}}"
+                                      IsShakeMode="False" IsPersistantScale="True"/>
+        <Border x:Name="PART_ToggleSignContainer" Grid.Column="1" Margin="{TemplateBinding Padding}">
+          <Border x:Name="PART_ToggleSignOuterline" 
+                        Margin="{TemplateBinding ToggleSignMargin}" BorderThickness="1" Width="{TemplateBinding ToggleSignSize}" Height="{Binding Width,RelativeSource={RelativeSource Mode=Self}}" CornerRadius="{TemplateBinding EBorderCornerRadius}" RenderTransformOrigin="0.5,0.5" UseLayoutRounding="False"
+                         BorderBrush="{Binding ElementName=PART_EToggleButtonRoot,Path=BorderBrush}">
+            <Border.CacheMode>
+              <BitmapCache EnableClearType="True" RenderAtScale="1" SnapsToDevicePixels="False"/>
+            </Border.CacheMode>
+            <Border.RenderTransform>
+              <ScaleTransform x:Name="PART_ToggleSignBorderScaleTransform"/>
+            </Border.RenderTransform>
+            <Border x:Name="PART_ToggleSignInnerChunk" 
+                            Width="{TemplateBinding ToggleSignSize, Converter={StaticResource CommonModifyConverter},ConverterParameter=*0.7}" Height="{Binding Width,RelativeSource={RelativeSource Mode=Self}}" CornerRadius="{TemplateBinding EBorderCornerRadius}" BorderThickness="0" BorderBrush="Transparent" RenderTransformOrigin="0.5,0.5" UseLayoutRounding="False">
+              <Border.Background>
+                <SolidColorBrush Color="{Binding ElementName=PART_EToggleButtonRoot,Path=BorderBrush, Converter={StaticResource CommonConverter}}" Opacity="1"/>
+              </Border.Background>
+              <Border.CacheMode>
+                <BitmapCache EnableClearType="True" RenderAtScale="1" SnapsToDevicePixels="False"/>
+              </Border.CacheMode>
+              <Border.RenderTransform>
+                <ScaleTransform x:Name="PART_ToggleSignScaleTransform"/>
+              </Border.RenderTransform>
+            </Border>
+          </Border>
+        </Border>
+        <ContentPresenter x:Name="PART_ContentContainer" Margin="{TemplateBinding Padding}" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+      </Grid>
+    </Border>
+    <ControlTemplate.Triggers>
+      <Trigger Property="ContentPlacement" Value="Right">
+        <Setter TargetName="r0" Property="Height" Value="*"/>
+        <Setter TargetName="r1" Property="Height" Value="auto"/>
+        <Setter TargetName="c0" Property="Width" Value="auto"/>
+        <Setter TargetName="c1" Property="Width" Value="*"/>
+        <Setter TargetName="PART_ContentContainer" Property="Grid.Row" Value="0"/>
+        <Setter TargetName="PART_ContentContainer" Property="Grid.Column" Value="1"/>
+        <Setter TargetName="PART_ToggleSignContainer" Property="Grid.Row" Value="0"/>
+        <Setter TargetName="PART_ToggleSignContainer" Property="Grid.Column" Value="0"/>
+      </Trigger>
+      <Trigger Property="ContentPlacement" Value="Left">
+        <Setter TargetName="r0" Property="Height" Value="*"/>
+        <Setter TargetName="r1" Property="Height" Value="auto"/>
+        <Setter TargetName="c0" Property="Width" Value="*"/>
+        <Setter TargetName="c1" Property="Width" Value="auto"/>
+        <Setter TargetName="PART_ContentContainer" Property="Grid.Row" Value="0"/>
+        <Setter TargetName="PART_ContentContainer" Property="Grid.Column" Value="0"/>
+        <Setter TargetName="PART_ToggleSignContainer" Property="Grid.Row" Value="0"/>
+        <Setter TargetName="PART_ToggleSignContainer" Property="Grid.Column" Value="1"/>
+      </Trigger>
+      <Trigger Property="ContentPlacement" Value="Down">
+        <Setter TargetName="r0" Property="Height" Value="auto"/>
+        <Setter TargetName="r1" Property="Height" Value="*"/>
+        <Setter TargetName="c0" Property="Width" Value="*"/>
+        <Setter TargetName="c1" Property="Width" Value="auto"/>
+        <Setter TargetName="PART_ContentContainer" Property="Grid.Row" Value="1"/>
+        <Setter TargetName="PART_ContentContainer" Property="Grid.Column" Value="0"/>
+        <Setter TargetName="PART_ToggleSignContainer" Property="Grid.Row" Value="0"/>
+        <Setter TargetName="PART_ToggleSignContainer" Property="Grid.Column" Value="0"/>
+      </Trigger>
+      <Trigger Property="ContentPlacement" Value="Up">
+        <Setter TargetName="r0" Property="Height" Value="*"/>
+        <Setter TargetName="r1" Property="Height" Value="auto"/>
+        <Setter TargetName="c0" Property="Width" Value="*"/>
+        <Setter TargetName="c1" Property="Width" Value="auto"/>
+        <Setter TargetName="PART_ContentContainer" Property="Grid.Row" Value="0"/>
+        <Setter TargetName="PART_ContentContainer" Property="Grid.Column" Value="0"/>
+        <Setter TargetName="PART_ToggleSignContainer" Property="Grid.Row" Value="1"/>
+        <Setter TargetName="PART_ToggleSignContainer" Property="Grid.Column" Value="0"/>
+      </Trigger>
+    </ControlTemplate.Triggers>
+  </ControlTemplate>
+  <Style TargetType="controls:EToggleButton">
+    <Setter Property="IsChecked" Value="True"/>
+    <Setter Property="ToggleSignSize" Value="16"/>
+    <Setter Property="ToggleSignMargin" Value="-3,2"/>
+    <Setter Property="Padding" Value="5,2"/>
+    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="EBorderThickness" Value="1"/>
+    <Setter Property="EBorderCornerRadius" Value="2"/>
+    <Setter Property="Template" Value="{StaticResource EToggleButton_BaseTemplate}"/>
+  </Style>
+  <Style x:Key="EToggleButton_LightStyle" TargetType="controls:EToggleButton" BasedOn="{StaticResource {x:Type controls:EToggleButton}}">
+    <Setter Property="EBorderThickness" Value="0"/>
+    <Setter Property="Padding" Value="3,0"/>
+  </Style>
 </ResourceDictionary>
