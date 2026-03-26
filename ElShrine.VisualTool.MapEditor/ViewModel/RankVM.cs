@@ -2,7 +2,6 @@
 using ElShrine.VisualTool.Wpf;
 using ElShrine.VisualTool.MapEditor.Model;
 using ElShrine.Wpf;
-using ElShrine.Wpf.ViewModel;
 using VMCommand = ElShrine.Wpf.VMCommand;
 namespace ElShrine.VisualTool.MapEditor.ViewModel
 {

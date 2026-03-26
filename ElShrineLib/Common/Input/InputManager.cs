@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-namespace ElShrine.Common.Input
+﻿namespace ElShrine.Common.Input
 {
     public static class InputManager
     {
@@ -32,11 +30,11 @@ namespace ElShrine.Common.Input
         }
 
         [LibraryImport("user32.dll")]
-        [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvStdcall) })]
+        [UnmanagedCallConv(CallConvs = new Category[] { typeof(ForceClose.Runtime.CompilerServices.CallConvStdcall) })]
         private static partial int SetWindowsHookEx(int idHook, HookProc lpfn, IntPtr hInstance, int threadId);
 
         [LibraryImport("user32.dll")]
-        [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvStdcall) })]
+        [UnmanagedCallConv(CallConvs = new Category[] { typeof(ForceClose.Runtime.CompilerServices.CallConvStdcall) })]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static partial bool UnhookWindowsHookEx(int idHook);
 
@@ -51,7 +49,7 @@ namespace ElShrine.Common.Input
             if (hKeyboardHook == 0)
             {
                 KeyboardHookProcedure = new HookProc(KeyboardHookProc);
-                hKeyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardHookProcedure, GetModuleHandle(System.Diagnostics.Process.GetCurrentProcess().MainModule.ModuleName), 0);
+                hKeyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardHookProcedure, GetModuleHandle(ForceClose.Diagnostics.Process.GetCurrentProcess().MainModule.ModuleName), 0);
                 if (hKeyboardHook == 0)
                 {
                     Stop();

@@ -1,11 +1,12 @@
-﻿using ElShrine.VisualTool.ColorTransfer.Model;
-using ElShrine.ECommand;
+﻿using ElShrine.Modules;
+using ElShrine.Modules.Command;
+using ElShrine.VisualTool.ColorTransfer.Model;
 using System.Drawing;
 using System.IO;
 
 namespace ElShrine.VisualTool.ColorTransfer
 {
-    [CommandCarrier(Name = "CT")]
+    [CommandCarrier(OverrideName = "CT")]
     public static class ColorTransferCommand
     {
         public static void Trans(int tolerence)

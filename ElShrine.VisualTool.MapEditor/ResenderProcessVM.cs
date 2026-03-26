@@ -1,5 +1,5 @@
 ﻿using ElShrine.VisualTool.MapEditor.Common;
-using ElShrine.Wpf.ViewModel;
+using ElShrine.Wpf;
 using System.Drawing;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;

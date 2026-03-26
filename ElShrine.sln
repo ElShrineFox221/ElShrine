@@ -16,13 +16,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决�
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElShrine.VisualTool.OptionHub", "ElShrine.VisualTool.OptionHub\ElShrine.VisualTool.OptionHub.csproj", "{83B7C16E-50AD-407C-9179-81EF56EE3D29}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElShrine.VisualTool.MapEditor", "ElShrine.VisualTool.MapEditor\ElShrine.VisualTool.MapEditor.csproj", "{0B0EC30D-DB6C-4A82-AD17-ED84A809B813}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElShrine.VisualTool.ProcessLauncher", "ElShrine.VisualTool.ProcessLauncher\ElShrine.VisualTool.ProcessLauncher.csproj", "{87530E21-3188-4DB8-B966-387B0CDA6A46}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElShrine.VisualTool.DebugPage", "ElShrine.VisualTool.DebugPage\ElShrine.VisualTool.DebugPage.csproj", "{04B6C8B2-9132-4492-81C4-A410BC9ACB3D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElShrineLib.Wpf.Generators", "ElShrine.Wpf.Generators\ElShrineLib.Wpf.Generators.csproj", "{F41931D4-8D61-45E1-B1D8-367DAC4872E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElShrineLib.Wpf.Generators.Attributes", "ElShrineLib.Wpf.Generators.Attributes\ElShrineLib.Wpf.Generators.Attributes.csproj", "{4CEA932A-E0E8-46D4-9AD0-87700717AD46}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestPlugin", "TestPlugin\TestPlugin.csproj", "{337EB138-2DA7-49B2-8B31-A868463481D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,10 +48,6 @@ Global
 		{AA0D6D3A-53BF-87B6-24DA-458832CC6C4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA0D6D3A-53BF-87B6-24DA-458832CC6C4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA0D6D3A-53BF-87B6-24DA-458832CC6C4E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{83B7C16E-50AD-407C-9179-81EF56EE3D29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{83B7C16E-50AD-407C-9179-81EF56EE3D29}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{83B7C16E-50AD-407C-9179-81EF56EE3D29}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{83B7C16E-50AD-407C-9179-81EF56EE3D29}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0B0EC30D-DB6C-4A82-AD17-ED84A809B813}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0B0EC30D-DB6C-4A82-AD17-ED84A809B813}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B0EC30D-DB6C-4A82-AD17-ED84A809B813}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -58,10 +56,18 @@ Global
 		{87530E21-3188-4DB8-B966-387B0CDA6A46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87530E21-3188-4DB8-B966-387B0CDA6A46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87530E21-3188-4DB8-B966-387B0CDA6A46}.Release|Any CPU.Build.0 = Release|Any CPU
-		{04B6C8B2-9132-4492-81C4-A410BC9ACB3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{04B6C8B2-9132-4492-81C4-A410BC9ACB3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{04B6C8B2-9132-4492-81C4-A410BC9ACB3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{04B6C8B2-9132-4492-81C4-A410BC9ACB3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F41931D4-8D61-45E1-B1D8-367DAC4872E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F41931D4-8D61-45E1-B1D8-367DAC4872E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F41931D4-8D61-45E1-B1D8-367DAC4872E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F41931D4-8D61-45E1-B1D8-367DAC4872E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CEA932A-E0E8-46D4-9AD0-87700717AD46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CEA932A-E0E8-46D4-9AD0-87700717AD46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CEA932A-E0E8-46D4-9AD0-87700717AD46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CEA932A-E0E8-46D4-9AD0-87700717AD46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{337EB138-2DA7-49B2-8B31-A868463481D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{337EB138-2DA7-49B2-8B31-A868463481D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{337EB138-2DA7-49B2-8B31-A868463481D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{337EB138-2DA7-49B2-8B31-A868463481D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

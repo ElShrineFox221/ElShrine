@@ -5,23 +5,38 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <RootNamespace>ElShrine</RootNamespace>
-    <BaseOutputPath>..\bin</BaseOutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<LangVersion>preview</LangVersion>
+	<PackageOutputPath>..\bin\Packages</PackageOutputPath>
+	  <DebugType>embedded</DebugType>
+	  
+	  <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-  </ItemGroup>
+    <ItemGroup>
+		<AssemblyAttribute Include="System.Windows.ThemeInfoAttribute">
+			<_Parameter1>System.Windows.ResourceDictionaryLocation.None</_Parameter1>
+			<_Parameter1_IsLiteral>true</_Parameter1_IsLiteral>
 
+			<_Parameter2>System.Windows.ResourceDictionaryLocation.SourceAssembly</_Parameter2>
+			<_Parameter2_IsLiteral>true</_Parameter2_IsLiteral>
+		</AssemblyAttribute>
+	</ItemGroup>
+	
+  
+	
+  <ItemGroup>
+    <Folder Include="Themes\" />
+  </ItemGroup>
+	
+  
+	
+  <ItemGroup>
+    <PackageReference Include="ElShrineLib.Wpf.Generators" Version="1.0.0" />
+  </ItemGroup>
+	
   <ItemGroup>
     <ProjectReference Include="..\ElShrineLib.Graphics\ElShrineLib.Graphics.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Wpf\Controls\EExpander.xaml.cs">
-      <Generator>MSBuild:Compile</Generator>
-    </Compile>
   </ItemGroup>
 
 </Project>

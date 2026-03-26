@@ -1,0 +1,66 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
+                    xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions">
+    <ControlTemplate x:Key="EHeaderControl_BaseTemplate" TargetType="controls:EHeaderControl">
+        <Grid x:Name="PART_EHeaderControl">
+            <Grid.OpacityMask>
+                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EHeaderControl}"/>
+            </Grid.OpacityMask>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="C0" Width="Auto"/>
+                <ColumnDefinition x:Name="C1" Width="*"/>
+                <ColumnDefinition x:Name="C2" Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="R0" Height="Auto"/>
+                <RowDefinition x:Name="R1" Height="*"/>
+                <RowDefinition x:Name="R2" Height="Auto"/>
+            </Grid.RowDefinitions>
+            <ContentControl x:Name="PART_Content" Grid.Column="1" Grid.Row="1"
+                            Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            <ContentControl x:Name="PART_Header" Grid.Column="0" Grid.Row="1"
+                            Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}"
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="HeaderPlacement" Value="R0C0">
+                <Setter TargetName="PART_Header" Property="Grid.Column" Value="0"/>
+                <Setter TargetName="PART_Header" Property="Grid.Row" Value="0"/>
+            </Trigger>
+            <Trigger Property="HeaderPlacement" Value="R0C1">
+                <Setter TargetName="PART_Header" Property="Grid.Column" Value="1"/>
+                <Setter TargetName="PART_Header" Property="Grid.Row" Value="0"/>
+            </Trigger>
+            <Trigger Property="HeaderPlacement" Value="R0C2">
+                <Setter TargetName="PART_Header" Property="Grid.Column" Value="2"/>
+                <Setter TargetName="PART_Header" Property="Grid.Row" Value="0"/>
+            </Trigger>
+            <Trigger Property="HeaderPlacement" Value="R1C0">
+                <Setter TargetName="PART_Header" Property="Grid.Column" Value="0"/>
+                <Setter TargetName="PART_Header" Property="Grid.Row" Value="1"/>
+            </Trigger>
+            <Trigger Property="HeaderPlacement" Value="R1C2">
+                <Setter TargetName="PART_Header" Property="Grid.Column" Value="2"/>
+                <Setter TargetName="PART_Header" Property="Grid.Row" Value="1"/>
+            </Trigger>
+            <Trigger Property="HeaderPlacement" Value="R2C0">
+                <Setter TargetName="PART_Header" Property="Grid.Column" Value="0"/>
+                <Setter TargetName="PART_Header" Property="Grid.Row" Value="2"/>
+            </Trigger>
+            <Trigger Property="HeaderPlacement" Value="R2C1">
+                <Setter TargetName="PART_Header" Property="Grid.Column" Value="1"/>
+                <Setter TargetName="PART_Header" Property="Grid.Row" Value="2"/>
+            </Trigger>
+            <Trigger Property="HeaderPlacement" Value="R2C2">
+                <Setter TargetName="PART_Header" Property="Grid.Column" Value="2"/>
+                <Setter TargetName="PART_Header" Property="Grid.Row" Value="2"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+    <Style TargetType="controls:EHeaderControl">
+        <Setter Property="Template" Value="{StaticResource EHeaderControl_BaseTemplate}"/>
+    </Style>
+</ResourceDictionary>

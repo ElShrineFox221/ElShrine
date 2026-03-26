@@ -2,237 +2,71 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:theme="clr-namespace:ElShrine.Wpf.UITheme"
                     xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
-                    xmlns:extensions="clr-namespace:ElShrine.Wpf.Controls.Extensions"
+                    xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions"
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
     <Style TargetType="{x:Type controls:ETextBox}">
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Padding" Value="1.5"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="BorderCornerRadius" Value="{Binding CurrentTheme.CornerRadius, Source={StaticResource ThemeProvider}}"/>
-        <Setter Property="BorderBrush" Value="{Binding CurrentTheme.BorderColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-        <Setter Property="SelectionBrush" Value="{Binding CurrentTheme.SelectionColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-        <Setter Property="ClickBrush" Value="{Binding CurrentTheme.ClickColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-        <Setter Property="Foreground" Value="{Binding CurrentTheme.FontColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-        <Setter Property="Background" Value="{Binding CurrentTheme.BackColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
-        <Setter Property="FontSize" Value="{Binding CurrentTheme.FontSizeNormal, Source={StaticResource ThemeProvider}}"/>
-        <Setter Property="FontBrush" Value="{Binding CurrentTheme.FontColor, Source={StaticResource ThemeProvider}, Converter={StaticResource ColorToSolidBrushConverter}}"/>
+        <Setter Property="EBorderThickness" Value="1"/>
+        <Setter Property="EBorderCornerRadius" Value="2"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:ETextBox}">
                     <ControlTemplate.Resources>
                         <system:Double x:Key="halfDouble">0.5</system:Double>
                     </ControlTemplate.Resources>
-                    <Grid x:Name="controlRoot">
-                        <Grid.RowDefinitions>
-                            <RowDefinition x:Name="r0" Height="auto"/>
-                            <RowDefinition x:Name="r1" Height="auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition x:Name="c0" Width="auto"/>
-                            <ColumnDefinition x:Name="c1" Width="auto"/>
-                        </Grid.ColumnDefinitions>
-                        <ContentPresenter x:Name="headerContainer" Grid.Row="0" Grid.Column="0"
-                                          Content="{TemplateBinding Header}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
-                        <Grid x:Name="contentContainer" Grid.Row="1" Grid.Column="1">
-                            <Border x:Name="decorationBorder" 
-                                    BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" CornerRadius="{TemplateBinding BorderCornerRadius}">
-                                <Border.BorderBrush>
-                                    <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}" ConverterParameter="max">
-                                        <Binding Path="BorderBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
-                                        <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="decorationBorder"/>
-                                        <Binding Path="(extensions:AnimationProperitiesExtension.ForeColorRate)" ElementName="controlRoot"/>
-                                        <Binding Path="SelectionBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
-                                    </MultiBinding>
-                                </Border.BorderBrush>
-                                <Border.Background>
-                                    <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}" ConverterParameter="max">
-                                        <Binding Path="Background" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
-                                        <Binding Path="(extensions:AnimationProperitiesExtension.BackColorRate)" ElementName="contentContainer"/>
-                                        <Binding Path="(extensions:AnimationProperitiesExtension.BackColorRate)" ElementName="controlRoot"/>
-                                        <Binding Path="SelectionBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
-                                    </MultiBinding>
-                                </Border.Background>
-                                <Grid>
-                                    <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center" Foreground="Red"/>
-                                    <TextBlock x:Name="NoticeText" 
-                                               Text="{TemplateBinding NoticeInfo}" IsHitTestVisible="False" Margin="3,0" VerticalAlignment="Center">
-                                        <TextBlock.Foreground>
-                                            <MultiBinding Converter="{StaticResource ColorLerpToSolidBrushConverter}">
-                                                <Binding Path="FontBrush" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
-                                                <Binding Source="{StaticResource halfDouble}"/>
-                                                <Binding Path="Background" RelativeSource="{RelativeSource Mode=TemplatedParent}"/>
-                                            </MultiBinding>
-                                        </TextBlock.Foreground>
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                <Style.Triggers>
-                                                    <MultiDataTrigger>
-                                                        <MultiDataTrigger.Conditions>
-                                                            <Condition Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value=""/>
-                                                            <Condition Binding="{Binding IsFocused, RelativeSource={RelativeSource TemplatedParent}}" Value="False"/>
-                                                        </MultiDataTrigger.Conditions>
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </MultiDataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </Grid>
-                            </Border>
-                            <Popup x:Name="PART_SuggestionPopup" Grid.Row="1" Grid.Column="1"
-                                   PlacementTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}" StaysOpen="False" VerticalOffset="2" Focusable="False" AllowsTransparency="True" PopupAnimation="Fade">
-                                <controls:EListBox x:Name="PART_SuggestionListBox" 
-                                                   MaxHeight="150" ItemPadding="5,2" Padding="2" ItemMargin="0,-1.5,-2,-1.5" ItemBorderCornerRadius="0" SelectedItemLineWidth="0" ItemBorderThickness="0" VerticalScrollBarBtnVisibility="None" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="2" SelectionBrush="{TemplateBinding SelectionBrush}"/>
-                            </Popup>
-                        </Grid>
+                    <Grid x:Name="PART_ETextBoxRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:ETextBox}}">
+                        <Grid.OpacityMask>
+                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_ETextBoxRoot}"/>
+                        </Grid.OpacityMask>
+                        <controls:EHeaderControl HeaderPlacement="{TemplateBinding HeaderPlacement}" Header="{TemplateBinding Header}" HeaderTemplate="{TemplateBinding HeaderTemplate}"
+                                                 HorizontalAlignment="{TemplateBinding HorizontalAlignment}" HorizontalContentAlignment="{TemplateBinding HorizontalAlignment}">
+                            <Grid x:Name="PART_ContentContainer">
+                                <Border x:Name="PART_DecorationBorder" BorderThickness="{TemplateBinding EBorderThickness}" Padding="{TemplateBinding Padding}" CornerRadius="{TemplateBinding EBorderCornerRadius}">
+                                    <Grid>
+                                        <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center" Foreground="Red"/>
+                                        <TextBlock x:Name="PART_NoticeText" Text="{TemplateBinding NoticeInfo}" IsHitTestVisible="False" Margin="3,0" VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value=""/>
+                                                                <Condition Binding="{Binding IsFocused, RelativeSource={RelativeSource TemplatedParent}}" Value="False"/>
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </MultiDataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Grid>
+                                </Border>
+                                <Popup x:Name="PART_SuggestionPopup" PlacementTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}" StaysOpen="False" VerticalOffset="2" Focusable="False" AllowsTransparency="True" PopupAnimation="Fade">
+                                    <Border Background="Transparent">
+                                        <controls:EListBox x:Name="PART_SuggestionListBox" Margin="0,0,5,5" 
+                                                       IsMoveButtonVisibile="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarMargin="0,0,0,3.5"
+                                                       MaxHeight="150" ItemPadding="5,2" Padding="2,2,2,-4" ItemMargin="0,-1.5,-2,-1.5" ItemBorderCornerRadius="0" SelectedItemLineWidth="0" ItemBorderThickness="0" EBorderThickness="1">
+                                            <controls:EListBox.Effect>
+                                                <DropShadowEffect BlurRadius="4" Opacity="0.3" Direction="315" Color="Black"/>
+                                            </controls:EListBox.Effect>
+                                        </controls:EListBox>
+                                    </Border>
+                                    
+                                </Popup>
+                            </Grid>
+                        </controls:EHeaderControl>
+                        <ext:StateListener.Rules>
+                            <ext:RuleCollection>
+                                <ext:Rule Target="{Binding ElementName=PART_DecorationBorder}" StateMap="
+                                          MouseOut=>Back=BC, Border=PR;
+                                          MouseIn=>Back=Lerp(BC,SE,0.1), Border=SE;
+                                          MouseDown=>Back=Lerp(BC,SE,0.2), Border=Lerp(SE,BC,0.4);"/>
+                                <ext:Rule Target="{Binding ElementName=PART_NoticeText}" StateMap="MouseOut=>Fore=Lerp(FT,BC,0.5)"/>
+                            </ext:RuleCollection>
+                        </ext:StateListener.Rules>
                     </Grid>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsEnabled" Value="True">
-                            <Trigger.EnterActions>
-                                <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="controlRoot"
-                                                         Storyboard.TargetProperty="Opacity" To="1"  Duration="0:0:0.16">
-                                            <DoubleAnimation.EasingFunction>
-                                                <SineEase/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                        </Trigger>
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Trigger.EnterActions>
-                                <BeginStoryboard HandoffBehavior="SnapshotAndReplace">
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="controlRoot" 
-                                                         Storyboard.TargetProperty="Opacity" To="0.57" BeginTime="0:0:0.05" Duration="0:0:0.16">
-                                            <DoubleAnimation.EasingFunction>
-                                                <SineEase/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                        </Trigger>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Trigger.EnterActions>
-                                <BeginStoryboard HandoffBehavior="Compose">
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="decorationBorder" 
-                                                         Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
-                                            <DoubleAnimation.EasingFunction>
-                                                <SineEase/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                        <DoubleAnimation Storyboard.TargetName="contentContainer" 
-                 Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0.15" Duration="0:0:0.2">
-                                            <DoubleAnimation.EasingFunction>
-                                                <SineEase/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard HandoffBehavior="Compose">
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="decorationBorder" 
-                                                         Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
-                                            <DoubleAnimation.EasingFunction>
-                                                <SineEase/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                        <DoubleAnimation Storyboard.TargetName="contentContainer" 
-Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0" Duration="0:0:0.2">
-                                            <DoubleAnimation.EasingFunction>
-                                                <SineEase/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
-                        </Trigger>
-                        <Trigger Property="IsFocused" Value="True">
-                            <Trigger.EnterActions>
-                                <BeginStoryboard HandoffBehavior="Compose">
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="controlRoot" 
-                                                         Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="1" Duration="0:0:0.2">
-                                            <DoubleAnimation.EasingFunction>
-                                                <SineEase/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                        <DoubleAnimation Storyboard.TargetName="controlRoot" 
-                 Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0.05" Duration="0:0:0.2">
-                                            <DoubleAnimation.EasingFunction>
-                                                <SineEase/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard HandoffBehavior="Compose">
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="controlRoot" 
-                                                         Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.ForeColorRate)" To="0" Duration="0:0:0.2">
-                                            <DoubleAnimation.EasingFunction>
-                                                <SineEase/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                        <DoubleAnimation Storyboard.TargetName="controlRoot" 
-Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRate)" To="0" Duration="0:0:0.2">
-                                            <DoubleAnimation.EasingFunction>
-                                                <SineEase/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
-                        </Trigger>
-                        <Trigger Property="HeaderPlacement" Value="Left">
-                            <Setter TargetName="r0" Property="Height" Value="*"/>
-                            <Setter TargetName="r1" Property="Height" Value="auto"/>
-                            <Setter TargetName="c0" Property="Width" Value="auto"/>
-                            <Setter TargetName="c1" Property="Width" Value="*"/>
-                            <Setter TargetName="contentContainer" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="contentContainer" Property="Grid.Column" Value="1"/>
-                            <Setter TargetName="headerContainer" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="headerContainer" Property="Grid.Column" Value="0"/>
-                        </Trigger>
-                        <Trigger Property="HeaderPlacement" Value="Right">
-                            <Setter TargetName="r0" Property="Height" Value="*"/>
-                            <Setter TargetName="r1" Property="Height" Value="auto"/>
-                            <Setter TargetName="c0" Property="Width" Value="*"/>
-                            <Setter TargetName="c1" Property="Width" Value="auto"/>
-                            <Setter TargetName="contentContainer" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="contentContainer" Property="Grid.Column" Value="0"/>
-                            <Setter TargetName="headerContainer" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="headerContainer" Property="Grid.Column" Value="1"/>
-                        </Trigger>
-                        <Trigger Property="HeaderPlacement" Value="Up">
-                            <Setter TargetName="r0" Property="Height" Value="auto"/>
-                            <Setter TargetName="r1" Property="Height" Value="*"/>
-                            <Setter TargetName="c0" Property="Width" Value="*"/>
-                            <Setter TargetName="c1" Property="Width" Value="auto"/>
-                            <Setter TargetName="contentContainer" Property="Grid.Row" Value="1"/>
-                            <Setter TargetName="contentContainer" Property="Grid.Column" Value="0"/>
-                            <Setter TargetName="headerContainer" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="headerContainer" Property="Grid.Column" Value="0"/>
-                        </Trigger>
-                        <Trigger Property="HeaderPlacement" Value="Down">
-                            <Setter TargetName="r0" Property="Height" Value="*"/>
-                            <Setter TargetName="r1" Property="Height" Value="auto"/>
-                            <Setter TargetName="c0" Property="Width" Value="*"/>
-                            <Setter TargetName="c1" Property="Width" Value="auto"/>
-                            <Setter TargetName="contentContainer" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="contentContainer" Property="Grid.Column" Value="0"/>
-                            <Setter TargetName="headerContainer" Property="Grid.Row" Value="1"/>
-                            <Setter TargetName="headerContainer" Property="Grid.Column" Value="0"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -247,8 +81,8 @@ Storyboard.TargetProperty="(extensions:AnimationProperitiesExtension.BackColorRa
            TargetType="{x:Type controls:ETextBox}" BasedOn="{StaticResource {x:Type controls:ETextBox}}">
         <Style.Setters>
             <Setter Property="Padding" Value="3,1"/>
-            <Setter Property="BorderCornerRadius" Value="{Binding ActualHeight, Converter={StaticResource QuadruplesConverter}, ConverterParameter=LTRB_L0.5+-1, RelativeSource={RelativeSource Self}}"/>
-            <Setter Property="Background" Value="{Binding BorderBrush, RelativeSource={RelativeSource Self}}"/>
+            <Setter Property="EBorderCornerRadius" Value="{Binding ActualHeight, Converter={StaticResource CommonModifyConverter}, ConverterParameter=LTRB_L0.5+-1, RelativeSource={RelativeSource Self}}"/>
+            <Setter Property="Background" Value="{Binding PrimaryBrush, RelativeSource={RelativeSource Self}}"/>
         </Style.Setters>
     </Style>
 </ResourceDictionary>

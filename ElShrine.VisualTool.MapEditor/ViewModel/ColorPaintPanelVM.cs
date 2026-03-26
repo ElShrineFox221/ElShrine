@@ -1,7 +1,7 @@
 ﻿using ElShrine.EGraphic;
+using ElShrine.Old.Wpf.ViewModel;
 using ElShrine.VisualTool.MapEditor.Model;
 using ElShrine.Wpf;
-using ElShrine.Wpf.ViewModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;

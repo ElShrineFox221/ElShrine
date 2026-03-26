@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
+	<LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
@@ -10,10 +11,19 @@
     <RootNamespace>$(MSBuildProjectName)</RootNamespace>
     <BaseOutputPath>..\bin</BaseOutputPath>
     <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <StartupObject></StartupObject>
+	<PackageOutputPath>..\bin\Packages</PackageOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ElShrineLib.Wpf\ElShrineLib.Wpf.csproj" />
   </ItemGroup>
 
+
+	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
+		<Compile Remove="..\ElShrine.VisualTool\Pages\OptionsHub\*.*" />
+		<Compile Remove="..\ElShrine.VisualTool\Pages\OptionsHub\*\*.*" />
+		<Page Remove="..\ElShrine.VisualTool\Pages\OptionsHub\*\*.*" />
+		<Page Remove="..\ElShrine.VisualTool\Pages\OptionsHub\*.*" />
+	</ItemGroup>
 </Project>

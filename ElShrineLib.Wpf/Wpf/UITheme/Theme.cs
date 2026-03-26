@@ -1,156 +1,120 @@
-﻿using ElShrine.EGraphic;
-using ElShrine.Wpf.ViewModel;
+﻿using ElShrine.Graphics;
 using System.Runtime.Serialization;
-using System.Windows;
 using Color = System.Drawing.Color;
 
 namespace ElShrine.Wpf.UITheme
 {
     [DataContract]
-    public class Theme : ViewModelBase
+    public class Theme(string themeName) : ViewModelBase
     {
-        [DataMember] private string themeName = string.Empty;
-        [IgnoreDataMember] public string ThemeName
-        {
-            get => themeName;
-            set 
-            {
-                themeName = value;
-                NoticePropertyChanged(nameof(ThemeName));
-            }
-        }
+        [DataMember] public string ThemeName { get; init; } = themeName;
 
-
-        [DataMember] private ColorData foreColor = Color.LightSlateGray.ToColorData();
-        [IgnoreDataMember] public ColorData ForeColor
+        #region colors
+        [DataMember] public ColorData PrimaryColor
         {
-            get => foreColor;
+            get => field;
             set
             {
-                foreColor = value;
-                NoticePropertyChanged(nameof(ForeColor));
+                field = value;
+                NotifyPropertiesChanged(nameof(PrimaryColor));
             }
-        }
+        } = Color.LightSlateGray.ToColorData();
 
 
-        [DataMember] private ColorData backColor = Color.White.ToColorData();
-        [IgnoreDataMember] public ColorData BackColor
+        [DataMember] public ColorData BackColor
         {
-            get => backColor;
+            get => field;
             set
             {
-                backColor = value;
-                NoticePropertyChanged(nameof(BackColor));
+                field = value;
+                NotifyPropertiesChanged(nameof(BackColor));
             }
-        }
+        } = Color.White.ToColorData();
 
 
-        [DataMember] private ColorData borderColor = Color.LightSlateGray.ToColorData();
-        [IgnoreDataMember] public ColorData BorderColor
+        [DataMember] public ColorData SecondaryColor
         {
-            get => borderColor;
+            get => field;
             set
             {
-                borderColor = value;
-                NoticePropertyChanged(nameof(BorderColor));
+                field = value;
+                NotifyPropertiesChanged(nameof(SecondaryColor));
             }
-        }
+        } = Color.Purple.ToColorData();
 
-
-        [DataMember] private ColorData selectionColor = Color.DodgerBlue.ToColorData();
-        [IgnoreDataMember] public ColorData SelectionColor
+        [DataMember] public ColorData FontColor
         {
-            get => selectionColor;
+            get => field;
             set
             {
-                selectionColor = value;
-                NoticePropertyChanged(nameof(SelectionColor));
+                field = value;
+                NotifyPropertiesChanged(nameof(FontColor));
             }
-        }
-
-
-        [DataMember] private ColorData clickColor = Color.DodgerBlue.Lerp(Color.White, 0.5, false).ToColorData();
-        [IgnoreDataMember] public ColorData ClickColor
+        } = Color.Black.ToColorData();
+        #endregion
+        
+        #region font
+        [DataMember] public int FontSizeLarge
         {
-            get => clickColor;
+            get => field;
             set
             {
-                clickColor = value;
-                NoticePropertyChanged(nameof(ClickColor));
+                field = value;
+                NotifyPropertiesChanged(nameof(FontSizeLarge));
             }
-        }
-
-        [DataMember] private ColorData fontColor = Color.Black.ToColorData();
-        [IgnoreDataMember] public ColorData FontColor
+        } = 24;
+        [DataMember] public int FontSizeMedium
         {
-            get => fontColor;
+            get => field;
             set
             {
-                fontColor = value;
-                NoticePropertyChanged(nameof(FontColor));
+                field = value;
+                NotifyPropertiesChanged(nameof(FontSizeMedium));
             }
-        }
-
-
-        [DataMember] private int fontSizeLarge = 24;
-        [IgnoreDataMember] public int FontSizeLarge
+        } = 16;
+        [DataMember] public int FontSizeNormal
         {
-            get => fontSizeLarge;
+            get => field;
             set
             {
-                fontSizeLarge = value;
-                NoticePropertyChanged(nameof(FontSizeLarge));
+                field = value;
+                NotifyPropertiesChanged(nameof(FontSizeNormal));
             }
-        }
-
-        [DataMember] private int fontSizeMedium = 16;
-        [IgnoreDataMember] public int FontSizeMedium
+        } = 12;
+        [DataMember] public int FontSizeSmall
         {
-            get => fontSizeMedium;
+            get => field;
             set
             {
-                fontSizeMedium = value;
-                NoticePropertyChanged(nameof(FontSizeMedium));
+                field = value;
+                NotifyPropertiesChanged(nameof(FontSizeSmall));
             }
-        }
-
-
-        [DataMember] private int fontSizeNormal = 12; [IgnoreDataMember]
-        public int FontSizeNormal
+        } = 10;
+        #endregion
+        
+        #region animations
+        public const double ANIMA_DEFAULTDURA = 0.2d;
+        [DataMember] public double AnimDurationIn
         {
-            get => fontSizeNormal;
+            get => field;
             set
             {
-                fontSizeNormal = value;
-                NoticePropertyChanged(nameof(FontSizeNormal));
+                field = value;
+                NotifyPropertiesChanged(nameof(AnimDurationIn));
             }
-        }
-
-
-        [DataMember] private int fontSizeSmall = 10;
-        [IgnoreDataMember] public int FontSizeSmall
+        } = ANIMA_DEFAULTDURA;
+        [DataMember] public double AnimDurationOut
         {
-            get => fontSizeSmall;
+            get => field;
             set
             {
-                fontSizeSmall = value;
-                NoticePropertyChanged(nameof(FontSizeSmall));
+                field = value;
+                NotifyPropertiesChanged(nameof(AnimDurationOut));
             }
-        }
+        } = ANIMA_DEFAULTDURA;
+        #endregion
 
 
-        [DataMember] private CornerRadius cornerRadius = new(2);
-        [IgnoreDataMember] public CornerRadius CornerRadius
-        {
-            get => cornerRadius;
-            set
-            {
-                cornerRadius = value;
-                NoticePropertyChanged(nameof(CornerRadius));
-            }
-        }
-
-
-        public readonly static Theme Default = new() { ThemeName = nameof(Default) };
+        public readonly static Theme Default = new(nameof(Default));
     }
 }

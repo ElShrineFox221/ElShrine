@@ -100,13 +100,21 @@ namespace ElShrine.Wpf.Controls
                 }
             }
         }
-        private void Update() => HostElement = this.FindVisualParent(dobj =>
+        private void Update()
         {
-            var parentType = OverlayParentType;
-            var parentName = OverlayParentName;
-            var r = (dobj is UIElement uie && uie.ClipToBounds) || (dobj.GetType().IsSubclassOf(parentType) && (parentName is null || (dobj is FrameworkElement ele && ele.Name == parentName)));
-            return r;
-        }, false);
+            var root = this.GetRootDependencyObject();
+            
+            HostElement = root.FindChild(dobj =>
+            {
+                var parentType = OverlayParentType;
+                var parentName = OverlayParentName;
+                var typeMatched = parentType.IsAssignableFrom(dobj.GetType());
+                var nameMatched = parentName is null || (dobj is FrameworkElement ele && ele.Name == parentName);
+                var r = typeMatched && nameMatched;
+                return r;
+            });
+            HostElement ??= root as FrameworkElement;
+        }
 
         private void UpdatePositionAndSize(bool forceUpdate = false)
         {
@@ -127,7 +135,7 @@ namespace ElShrine.Wpf.Controls
         private void HostWindowStateChanged(object? sender, EventArgs e) => UpdatePositionAndSize();
         private void OnOverlayMaskMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (CloseOnClickOutside && IsOpen) IsOpen = false;
+            if (CloseOnClickOutside && IsOpen) SetCurrentValue(IsOpenProperty, false);
         }
         #endregion
 
@@ -158,7 +166,7 @@ namespace ElShrine.Wpf.Controls
 
             var maskFadeIn = new DoubleAnimation
             {
-                To = 0.7,
+                To = 1,
                 Duration = TimeSpan.FromMilliseconds(300),
                 EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
             };
@@ -199,7 +207,7 @@ namespace ElShrine.Wpf.Controls
             maskFadeOut.Completed += (s, e) =>
             {
                 isAnimating = false;
-                if (overlayRoot is not null) overlayRoot.Visibility = Visibility.Collapsed;
+                overlayRoot?.Visibility = Visibility.Collapsed;
             };
 
             OverlayMask.BeginAnimation(OpacityProperty, maskFadeOut);

@@ -1,0 +1,76 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
+                    xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions">
+    <ControlTemplate x:Key="ENumInput_BaseTemplate" TargetType="controls:ENumInput">
+        <controls:EHeaderControl HeaderPlacement="{TemplateBinding HeaderPlacement}" HeaderTemplate="{TemplateBinding HeaderTemplate}" Header="{TemplateBinding Header}">
+            <Border x:Name="PART_ENumInputRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:ENumInput}}"
+        BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}">
+                <Border.OpacityMask>
+                    <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_ENumInputRoot}"/>
+                </Border.OpacityMask>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <controls:ETextBox Grid.Column="0" x:Name="PART_Input" Header=""
+                               Padding="{TemplateBinding Padding}"
+                               Text="{TemplateBinding Value,Converter={StaticResource CommonConverter}}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                               EBorderThickness="0" EBorderCornerRadius="{TemplateBinding EBorderCornerRadius, Converter={StaticResource CommonModifyConverter},ConverterParameter=L_L1|R_R0|T_T0|B_B1}">
+                        <controls:ETextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{x:Static controls:ENumInput.ConfrimInputCommand}" CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </controls:ETextBox.InputBindings>
+                    </controls:ETextBox>
+                    <Grid Grid.Column="1" x:Name="PART_ArrowBtns">
+                        <Grid.Resources>
+                            <Style TargetType="controls:ERepeatButton" BasedOn="{StaticResource {x:Type controls:ERepeatButton}}">
+                                <Setter Property="EBorderThickness" Value="0"/>
+                                <Setter Property="CommandParameter" Value="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
+                            </Style>
+                            <Style TargetType="controls:EArrowControl">
+                                <Setter Property="ArrowSize" Value="10"/>
+                                <Setter Property="ArrowMargin" Value="-2,0,-2,0"/>
+                                <Setter Property="Foreground" Value="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=Border}}"/>
+                            </Style>
+                        </Grid.Resources>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <controls:ERepeatButton Grid.Row="0" Command="{x:Static controls:ENumInput.StepIncreaseCommand}"
+                        IsEnabled="{Binding CanIncrese, RelativeSource={RelativeSource TemplatedParent}}"
+                        EBorderCornerRadius="{TemplateBinding EBorderCornerRadius, Converter={StaticResource CommonModifyConverter},ConverterParameter=L_L0|R_R0|T_T1|B_B0}">
+                            <controls:EArrowControl ArrowBasicAngle="180" ArrowTargetAngle="0"/>
+                        </controls:ERepeatButton>
+                        <controls:ERepeatButton Grid.Row="1" Command="{x:Static controls:ENumInput.StepDecreaseCommand}"
+                        IsEnabled="{Binding CanDecrease, RelativeSource={RelativeSource TemplatedParent}}"
+                        EBorderCornerRadius="{TemplateBinding EBorderCornerRadius, Converter={StaticResource CommonModifyConverter},ConverterParameter=L_L0|R_R1|T_T0|B_B0}">
+                            <controls:EArrowControl ArrowBasicAngle="0" ArrowTargetAngle="180"/>
+                        </controls:ERepeatButton>
+                    </Grid>
+                </Grid>
+                <ext:StateListener.Rules>
+                    <ext:RuleCollection>
+                        <ext:Rule Target="{Binding ElementName=PART_ENumInputRoot}" StateMap="MouseOut=>Border=PR; MouseIn=>Border=SE;"/>
+                    </ext:RuleCollection>
+                </ext:StateListener.Rules>
+            </Border>
+        </controls:EHeaderControl>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsStepRepeatBtnVisible" Value="False">
+                <Setter TargetName="PART_ArrowBtns" Property="Visibility" Value="Collapsed"/>
+                <Setter TargetName="PART_Input" Property="EBorderCornerRadius" Value="{Binding EBorderCornerRadius, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource CommonModifyConverter}}"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+    <Style TargetType="controls:ENumInput">
+        <Setter Property="Padding" Value="2,0"/>
+        <Setter Property="Margin" Value="1"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="EBorderThickness" Value="1"/>
+        <Setter Property="EBorderCornerRadius" Value="2"/>
+        <Setter Property="Template" Value="{StaticResource ENumInput_BaseTemplate}"/>
+    </Style>
+</ResourceDictionary>

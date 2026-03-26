@@ -1,0 +1,189 @@
+﻿<UserControl x:Class="ElShrine.VisualTool.Pages.OptionsHub.OptionItemEditors.UIThemeEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:controls="clr-namespace:ElShrine.Wpf.Controls;assembly=ElShrineLib.Wpf"
+             xmlns:graphics="clr-namespace:ElShrine.Graphics;assembly=ElShrineLib.Graphics"
+             xmlns:local="clr-namespace:ElShrine.VisualTool.Pages.OptionsHub.OptionItemEditors"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:theme="clr-namespace:ElShrine.Wpf.UITheme;assembly=ElShrineLib.Wpf"
+             local:OptionItemEditorManager.TarType="{x:Type theme:Theme}"
+             mc:Ignorable="d" 
+             d:DesignHeight="25" d:DesignWidth="100">
+    <UserControl.Resources>
+
+    </UserControl.Resources>
+    <Grid Margin="15,0,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <controls:EComboBox x:Name="PART_ThemeSelectionBox" MinWidth="100">
+                    <controls:EComboBox.ItemTemplate>
+                        <DataTemplate DataType="theme:Theme">
+                            <TextBlock Text="{Binding ThemeName}"/>
+                        </DataTemplate>
+                    </controls:EComboBox.ItemTemplate>
+                </controls:EComboBox>
+                <controls:ETextBox x:Name="PART_NewThemeNameBox" NoticeInfo="New theme name" Grid.Column="1" HorizontalAlignment="Stretch"/>
+            </Grid>
+            <controls:EButton x:Name="PART_NewThemeBtn" Grid.Column="3" Content="New Theme" Width="100" Margin="1,0"/>
+        </Grid>
+        <Grid x:Name="PART_SubEditorsGrid" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <ContentControl Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="4" Content="{Binding SelectedItem, ElementName=PART_ThemeSelectionBox}">
+                <ContentControl.ContentTemplate>
+                    <DataTemplate DataType="theme:Theme">
+                        <Grid Grid.IsSharedSizeScope="True">
+                            <Grid.Resources>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Margin" Value="4,0"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                                <DataTemplate x:Key="ColorDataTemplate" DataType="graphics:ColorData">
+                                    <Border MinWidth="30" HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="14" CornerRadius="2" Background="{Binding Converter={StaticResource CommonConverter}}"/>
+                                </DataTemplate>
+                                <Style TargetType="controls:EHeaderControl">
+                                    <Setter Property="HeaderPlacement" Value="Left"/>
+                                    <Setter Property="HorizontalAlignment" Value="Left"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                </Style>
+                            </Grid.Resources>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <controls:EHeaderControl Grid.Row="0" Grid.Column="0">
+                                <controls:EHeaderControl.Header>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition SharedSizeGroup="HeaderTextBlockCol"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Color: Primary"/>
+                                    </Grid>
+                                </controls:EHeaderControl.Header>
+                                <ContentControl Content="{Binding PrimaryColor}" ContentTemplate="{StaticResource ColorDataTemplate}"
+                    MouseUp="PART_ColorContainer_MouseUp" PreviewMouseDown="PART_ColorContainer_PreMouseDown"/>
+                            </controls:EHeaderControl>
+                            <controls:ENumInput x:Name="PART_LargeFontSizeInput" Grid.Row="0" Grid.Column="1"
+                    Value="{Binding FontSizeLarge}">
+                                <controls:ENumInput.Header>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition SharedSizeGroup="HeaderTextBlockCol"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Font size: Large"/>
+                                    </Grid>
+                                </controls:ENumInput.Header>
+                            </controls:ENumInput>
+
+                            <controls:EHeaderControl Grid.Row="1" Grid.Column="0">
+                                <controls:EHeaderControl.Header>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition SharedSizeGroup="HeaderTextBlockCol"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Color: Secondary"/>
+                                    </Grid>
+                                </controls:EHeaderControl.Header>
+                                <ContentControl Content="{Binding SecondaryColor}" ContentTemplate="{StaticResource ColorDataTemplate}"
+                    MouseUp="PART_ColorContainer_MouseUp" PreviewMouseDown="PART_ColorContainer_PreMouseDown"/>
+                            </controls:EHeaderControl>
+                            <controls:ENumInput x:Name="PART_MediumFontSizeInput" Grid.Row="1" Grid.Column="1"
+                    Value="{Binding FontSizeMedium}">
+                                <controls:ENumInput.Header>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition SharedSizeGroup="HeaderTextBlockCol"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Font size: Medium"/>
+                                    </Grid>
+                                </controls:ENumInput.Header>
+                            </controls:ENumInput>
+
+                            <controls:EHeaderControl Grid.Row="2" Grid.Column="0">
+                                <controls:EHeaderControl.Header>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition SharedSizeGroup="HeaderTextBlockCol"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Color: Back"/>
+                                    </Grid>
+                                </controls:EHeaderControl.Header>
+                                <ContentControl Content="{Binding BackColor}" ContentTemplate="{StaticResource ColorDataTemplate}"
+                    MouseUp="PART_ColorContainer_MouseUp" PreviewMouseDown="PART_ColorContainer_PreMouseDown"/>
+                            </controls:EHeaderControl>
+                            <controls:ENumInput x:Name="PART_NormalFontSizeInput" Grid.Row="2" Grid.Column="1"
+                    Value="{Binding FontSizeNormal}">
+                                <controls:ENumInput.Header>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition SharedSizeGroup="HeaderTextBlockCol"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Font size: Normal"/>
+                                    </Grid>
+                                </controls:ENumInput.Header>
+                            </controls:ENumInput>
+
+                            <controls:EHeaderControl Grid.Row="3" Grid.Column="0">
+                                <controls:EHeaderControl.Header>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition SharedSizeGroup="HeaderTextBlockCol"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Color: Font"/>
+                                    </Grid>
+                                </controls:EHeaderControl.Header>
+                                <ContentControl Content="{Binding FontColor}" ContentTemplate="{StaticResource ColorDataTemplate}"
+                    MouseUp="PART_ColorContainer_MouseUp" PreviewMouseDown="PART_ColorContainer_PreMouseDown"/>
+                            </controls:EHeaderControl>
+                            <controls:ENumInput x:Name="PART_SmallFontSizeInput" Grid.Row="3" Grid.Column="1"
+                    Value="{Binding FontSizeSmall}">
+                                <controls:ENumInput.Header>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition SharedSizeGroup="HeaderTextBlockCol"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Font size: Small"/>
+                                    </Grid>
+                                </controls:ENumInput.Header>
+                            </controls:ENumInput>
+                        </Grid>
+                    </DataTemplate>
+                </ContentControl.ContentTemplate>
+            </ContentControl>
+        </Grid>
+        <Popup x:Name="PART_PalettePopup" Placement="Bottom" AllowsTransparency="True" PopupAnimation="Fade" StaysOpen="False">
+            <Border>
+                <Border Margin="0,0,5,5">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="4" Opacity="0.3" Direction="315" Color="Black"/>
+                    </Border.Effect>
+                    <controls:EColorPalette x:Name="PART_Palette"/>
+                </Border>
+            </Border>
+        </Popup>
+    </Grid>
+</UserControl>
+

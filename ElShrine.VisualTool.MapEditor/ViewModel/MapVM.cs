@@ -1,8 +1,8 @@
 ﻿using ElShrine.Common.Interface;
-using ElShrine.Wpf.ViewModel;
 using Int32Size = System.Drawing.Size;
 using VMCommand = ElShrine.Wpf.VMCommand;
 using ElShrine.VisualTool.MapEditor.Model;
+using ElShrine.Wpf;
 
 namespace ElShrine.VisualTool.MapEditor.ViewModel
 {

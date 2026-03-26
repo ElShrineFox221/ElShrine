@@ -1,0 +1,38 @@
+﻿namespace ElShrine.Modules.Localization;
+
+public enum Language
+{
+    None = 0,
+    English = 1,
+    French = 2,
+    German = 3,
+    Italian = 4,
+    Korean = 5,
+    Spanish = 6,
+    SimplifiedChinese = 7,
+    TraditionalChinese = 8,
+    Russian = 9,
+    Portuguese = 10,
+    Polish = 11,
+    Thai = 12,
+    Japanese = 13,
+    Turkish = 14,
+    Hungarian = 15,
+    Greek = 16,
+    Czech = 17,
+    Danish = 18,
+    Dutch = 19,
+    Finnish = 20,
+    Norwegian = 21,
+    Swedish = 22,
+    Romanian = 23,
+    Bulgarian = 24,
+    Ukrainian = 25,
+    SpanishLatam = 26,
+    Vietnamese = 27,
+    Indonesian = 28,
+    Arabic = 29,
+    Filipino = 30,
+    Malay = 31,
+    Max = 32
+}

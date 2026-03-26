@@ -1,0 +1,22 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
+                    xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions">
+    <Style TargetType="{x:Type controls:ETreeView}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type controls:ETreeView}">
+                    <Border Name="Bd" BorderThickness="{TemplateBinding EBorderThickness}">
+                        <controls:EScrollViewer Focusable="False" CanContentScroll="False" 
+                                                HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}"
+                                                VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}"
+                                                HorizontalScrollBarMargin="{TemplateBinding HorizontalScrollBarMargin}"
+                                                VerticalScrollBarMargin="{TemplateBinding VerticalScrollBarMargin}">
+                            <ItemsPresenter />
+                        </controls:EScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

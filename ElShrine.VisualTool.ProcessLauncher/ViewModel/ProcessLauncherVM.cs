@@ -3,7 +3,7 @@ using ElShrine.EFile;
 using ElShrine.EOption;
 using ElShrine.ETimer;
 using ElShrine.VisualTool.ProcessLauncher.Model;
-using ElShrine.Wpf.ViewModel;
+using ElShrine.Wpf;
 using System.Collections;
 using System.Collections.ObjectModel;
 using VMC = ElShrine.Wpf.VMCommand;

@@ -77,8 +77,8 @@ namespace ElShrine.VisualTool.MapEditor
                 string[] names = [.. mapfis.Select(fi => fi.Name.Replace(fi.Extension, Const.EmptyStr))];
                 foreach ( string name in names )
                 {
-                    var fid = new FileDetail($"{directory}\\{name}");
-                    var result = DataHandler.Read<Map>(fileDetail: fid);
+                    var fid = new FileDetails($"{directory}\\{name}");
+                    var result = DataHandler.Read<Map>(fileDetails: fid);
                     //out Map map, name, directory, Serialization.Xml, nameof(Map), false
                     if(result.Success && result.Data is not null)
                     {

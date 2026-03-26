@@ -2,7 +2,7 @@
 using ElShrine.EFile;
 using ElShrine.VisualTool.ProcessLauncher.EFile;
 using ElShrine.VisualTool.ProcessLauncher.Model;
-using ElShrine.Wpf.ViewModel;
+using ElShrine.Wpf;
 using System.Drawing;
 using System.IO;
 using System.Windows;
