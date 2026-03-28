@@ -333,6 +333,11 @@ public partial class EImage : Control, IThemeControlBase
 
         if (GetVisualChild(0) is UIElement ele) ele.Measure(imgDesiredSize);
 
+        if (double.IsInfinity(finalW))
+            finalW = 0;
+        if (double.IsInfinity(finalH))
+            finalH = 0;
+
         return new Size(finalW, finalH);
     }
 

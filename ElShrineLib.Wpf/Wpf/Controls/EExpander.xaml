@@ -16,6 +16,9 @@
                             BorderThickness="{TemplateBinding EBorderThickness}" 
                             Padding="{TemplateBinding Padding}" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EExpander}}">
                         <Grid>
+                            <Grid.OpacityMask>
+                                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EExpanderRoot}"/>
+                            </Grid.OpacityMask>
                             <Grid.RowDefinitions>
                                 <RowDefinition x:Name="r0" Height="auto"/>
                                 <RowDefinition x:Name="r1" Height="auto"/>
