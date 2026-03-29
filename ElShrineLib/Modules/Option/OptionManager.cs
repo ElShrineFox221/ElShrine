@@ -86,7 +86,7 @@ internal sealed class OptionDataSet
     [OnDeserializing]
     private void OnDeserializing(StreamingContext context)
     {
-        _serializer = new XmlSerializer();
+        _serializer = new JsonSerializer();
         _cachedRawData = [];
     }
     [OnDeserialized]
@@ -103,7 +103,7 @@ internal sealed class OptionManager : PluginResourceTracker<OptionBase>, IOption
     private readonly ILogManager _log;
     private readonly ILogger _logger;
     private readonly ConcurrentDictionary<AssemblyLoadContext, List<OptionItem>> _optionItems;
-    private readonly OptionDataSet _optionDataSet;
+    private OptionDataSet _optionDataSet;
     private CataItemIndexer<OptionItem> _optionItemsIndexer;
     public event ValueChangedHandler<object?>? OptionChanged;
 
@@ -116,6 +116,7 @@ internal sealed class OptionManager : PluginResourceTracker<OptionBase>, IOption
         _optionItemsIndexer = new([]);
         //
         DoCollectResources(AssemblyLoadContext.Default);
+        Load();
     }
 
     #region overrides
@@ -263,6 +264,7 @@ internal sealed class OptionManager : PluginResourceTracker<OptionBase>, IOption
         }
         else
         {
+            _optionDataSet = r.Data!;
             var sucReadCount = LoadInternal();
             endMsg = $"Loaded {GetOptionItemsText(sucReadCount)} from option file.";
         }
