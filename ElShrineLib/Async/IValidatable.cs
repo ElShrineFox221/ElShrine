@@ -2,6 +2,6 @@
 
 public interface IValidatable
 {
-    public void InitializeValidator();
+    public void UpdateValidator();
     public bool IsValidated { get; }
 }

@@ -24,8 +24,5 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'" />
-  <ItemGroup>
-    <Folder Include="Async\" />
-  </ItemGroup>
 
 </Project>
