@@ -2,161 +2,52 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
                     xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions">
-    <Style TargetType="controls:EExpander">
-        <Setter Property="Padding" Value="2"/>
-        <Setter Property="ArrowMargin" Value="5"/>
-        <Setter Property="EBorderThickness" Value="1"/>
-        <Setter Property="EBorderCornerRadius" Value="2"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="controls:EExpander">
-                    <Border x:Name="PART_EExpanderRoot" 
+  <Style TargetType="controls:EExpander">
+    <Setter Property="Padding" Value="2"/>
+    <Setter Property="ArrowMargin" Value="5"/>
+    <Setter Property="EBorderThickness" Value="1"/>
+    <Setter Property="EBorderCornerRadius" Value="2"/>
+    <Setter Property="ArrowPlacement" Value="Right"/>
+    <Setter Property="HeaderPlacement" Value="Top"/>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="controls:EExpander">
+          <Border x:Name="PART_EExpanderRoot" 
                             Background="{TemplateBinding BackBrush}" 
                             CornerRadius="{TemplateBinding EBorderCornerRadius}" 
                             BorderThickness="{TemplateBinding EBorderThickness}" 
                             Padding="{TemplateBinding Padding}" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EExpander}}">
-                        <Grid>
-                            <Grid.OpacityMask>
-                                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EExpanderRoot}"/>
-                            </Grid.OpacityMask>
-                            <Grid.RowDefinitions>
-                                <RowDefinition x:Name="r0" Height="auto"/>
-                                <RowDefinition x:Name="r1" Height="auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition x:Name="c0" Width="auto"/>
-                                <ColumnDefinition x:Name="c1" Width="auto"/>
-                            </Grid.ColumnDefinitions>
-                            <ToggleButton x:Name="PART_HeaderBtn"
-                                          IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
-                                <ToggleButton.Template>
-                                    <ControlTemplate TargetType="ToggleButton">
-                                        <ContentPresenter Content="{TemplateBinding Content}"/>
-                                    </ControlTemplate>
-                                </ToggleButton.Template>
-                                <Grid Background="Transparent" Margin="4,0" >
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition x:Name="sr0" Height="auto"/>
-                                        <RowDefinition x:Name="sr1" Height="auto"/>
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition x:Name="sc0"  Width="auto"/>
-                                        <ColumnDefinition x:Name="sc1" Width="auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <ContentPresenter x:Name="PART_HeaderContent" Content="{TemplateBinding Header}" Margin="{TemplateBinding Padding}"/>
-                                    <Border x:Name="PART_HeaderArrowContainer" Grid.Row="0" Grid.Column="1" 
-                                            Margin="{TemplateBinding ArrowMargin}">
-                                        <Viewbox Grid.Column="1">
-                                            <Path x:Name="PART_Arrow" Width="11" Height="6" Stretch="Uniform" Data="M0,0 L5,5 L10,0"  StrokeThickness="2">
-                                                <Path.RenderTransform>
-                                                    <TransformGroup>
-                                                        <RotateTransform CenterX="5" CenterY="3" Angle="{Binding ArrowAngle, RelativeSource={RelativeSource AncestorType=controls:EExpander}}"/>
-                                                        <RotateTransform x:Name="PART_ArrowAnimRotateTransform" CenterX="5" CenterY="3" Angle="0"/>
-                                                    </TransformGroup>
-                                                </Path.RenderTransform>
-                                            </Path>
-                                        </Viewbox>
-                                    </Border>
-                                </Grid>
-                            </ToggleButton>
-                            <ContentPresenter x:Name="PART_ContentHost" Grid.Row="1" Grid.Column="0" 
-                                              Margin="{TemplateBinding Padding}" ContentSource="Content" RenderTransformOrigin="0,0" Visibility="Collapsed"/>
-                        </Grid>
-                        <ext:StateListener.Rules>
-                            <ext:RuleCollection>
-                                <ext:Rule Target="{Binding ElementName=PART_EExpanderRoot}" StateMap="MouseOut=>Border=PR;MouseIn=>Border=SE"/>
-                                <ext:Rule Target="{Binding ElementName=PART_Arrow}" StateMap="MouseOut=>Stroke=PR;MouseIn=>Stroke=SE"/>
-                            </ext:RuleCollection>
-                        </ext:StateListener.Rules>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="ExpandDirection" Value="Left">
-                            <Setter TargetName="PART_HeaderBtn" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_HeaderBtn" Property="Grid.Column" Value="1"/>
-                            <Setter TargetName="r0" Property="Height" Value="*"/>
-                            <Setter TargetName="r1" Property="Height" Value="auto"/>
-                            <Setter TargetName="c0" Property="Width" Value="*"/>
-                            <Setter TargetName="c1" Property="Width" Value="auto"/>
-                            <Setter TargetName="PART_ContentHost" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_ContentHost" Property="Grid.Column" Value="0"/>
-                        </Trigger>
-                        <Trigger Property="ExpandDirection" Value="Right">
-                            <Setter TargetName="PART_HeaderBtn" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_HeaderBtn" Property="Grid.Column" Value="0"/>
-                            <Setter TargetName="r0" Property="Height" Value="*"/>
-                            <Setter TargetName="r1" Property="Height" Value="auto"/>
-                            <Setter TargetName="c0" Property="Width" Value="auto"/>
-                            <Setter TargetName="c1" Property="Width" Value="*"/>
-                            <Setter TargetName="PART_ContentHost" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_ContentHost" Property="Grid.Column" Value="1"/>
-                        </Trigger>
-                        <Trigger Property="ExpandDirection" Value="Up">
-                            <Setter TargetName="PART_HeaderBtn" Property="Grid.Row" Value="1"/>
-                            <Setter TargetName="PART_HeaderBtn" Property="Grid.Column" Value="0"/>
-                            <Setter TargetName="r0" Property="Height" Value="*"/>
-                            <Setter TargetName="r1" Property="Height" Value="auto"/>
-                            <Setter TargetName="c0" Property="Width" Value="*"/>
-                            <Setter TargetName="c1" Property="Width" Value="auto"/>
-                            <Setter TargetName="PART_ContentHost" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_ContentHost" Property="Grid.Column" Value="0"/>
-                        </Trigger>
-                        <Trigger Property="ExpandDirection" Value="Down">
-                            <Setter TargetName="PART_HeaderBtn" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_HeaderBtn" Property="Grid.Column" Value="0"/>
-                            <Setter TargetName="r0" Property="Height" Value="auto"/>
-                            <Setter TargetName="r1" Property="Height" Value="*"/>
-                            <Setter TargetName="c0" Property="Width" Value="*"/>
-                            <Setter TargetName="c1" Property="Width" Value="auto"/>
-                            <Setter TargetName="PART_ContentHost" Property="Grid.Row" Value="1"/>
-                            <Setter TargetName="PART_ContentHost" Property="Grid.Column" Value="0"/>
-                        </Trigger>
-                        <Trigger Property="HeaderPlacement" Value="Left">
-                            <Setter TargetName="sr0" Property="Height" Value="*"/>
-                            <Setter TargetName="sr1" Property="Height" Value="auto"/>
-                            <Setter TargetName="sc0" Property="Width" Value="*"/>
-                            <Setter TargetName="sc1" Property="Width" Value="auto"/>
-                            <Setter TargetName="PART_HeaderArrowContainer" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_HeaderArrowContainer" Property="Grid.Column" Value="1"/>
-                            <Setter TargetName="PART_HeaderContent" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_HeaderContent" Property="Grid.Column" Value="0"/>
-                            <Setter Property="ArrowAngle" Value="90"/>
-                        </Trigger>
-                        <Trigger Property="HeaderPlacement" Value="Right">
-                            <Setter TargetName="sr0" Property="Height" Value="*"/>
-                            <Setter TargetName="sr1" Property="Height" Value="auto"/>
-                            <Setter TargetName="sc0" Property="Width" Value="auto"/>
-                            <Setter TargetName="sc1" Property="Width" Value="*"/>
-                            <Setter TargetName="PART_HeaderArrowContainer" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_HeaderArrowContainer" Property="Grid.Column" Value="0"/>
-                            <Setter TargetName="PART_HeaderContent" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_HeaderContent" Property="Grid.Column" Value="1"/>
-                            <Setter Property="ArrowAngle" Value="270"/>
-                        </Trigger>
-                        <Trigger Property="HeaderPlacement" Value="Up">
-                            <Setter TargetName="sr0" Property="Height" Value="*"/>
-                            <Setter TargetName="sr1" Property="Height" Value="auto"/>
-                            <Setter TargetName="sc0" Property="Width" Value="*"/>
-                            <Setter TargetName="sc1" Property="Width" Value="auto"/>
-                            <Setter TargetName="PART_HeaderArrowContainer" Property="Grid.Row" Value="1"/>
-                            <Setter TargetName="PART_HeaderArrowContainer" Property="Grid.Column" Value="0"/>
-                            <Setter TargetName="PART_HeaderContent" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_HeaderContent" Property="Grid.Column" Value="0"/>
-                            <Setter Property="ArrowAngle" Value="180"/>
-                        </Trigger>
-                        <Trigger Property="HeaderPlacement" Value="Down">
-                            <Setter TargetName="sr0" Property="Height" Value="auto"/>
-                            <Setter TargetName="sr1" Property="Height" Value="*"/>
-                            <Setter TargetName="sc0" Property="Width" Value="*"/>
-                            <Setter TargetName="sc1" Property="Width" Value="auto"/>
-                            <Setter TargetName="PART_HeaderArrowContainer" Property="Grid.Row" Value="0"/>
-                            <Setter TargetName="PART_HeaderArrowContainer" Property="Grid.Column" Value="0"/>
-                            <Setter TargetName="PART_HeaderContent" Property="Grid.Row" Value="1"/>
-                            <Setter TargetName="PART_HeaderContent" Property="Grid.Column" Value="0"/>
-                            <Setter Property="ArrowAngle" Value="0"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+            <controls:EHeaderControl HeaderPlacement="{TemplateBinding HeaderPlacement}">
+              <controls:EHeaderControl.Header>
+                <ToggleButton x:Name="PART_HeaderBtn" 
+IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" 
+Background="Transparent" Style="{StaticResource ToggleButton_EmptyStyle}">
+                  <Grid Margin="{TemplateBinding Padding}">
+                    <controls:EHeaderControl HeaderPlacement="{TemplateBinding ArrowPlacement}"
+                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                   VerticalAlignment="Stretch" VerticalContentAlignment="Stretch"
+                   Content="{TemplateBinding Header}" HeaderTemplate="{TemplateBinding HeaderTemplate}">
+                      <controls:EHeaderControl.Header>
+                        <controls:EArrowControl x:Name="PART_ArrowContainer" Grid.Row="0" Grid.Column="0" 
+                          ArrowTargetAngle="{Binding HeaderPlacement, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource PlacementAngleConverter}, ConverterParameter=+180}"
+                          ArrowBasicAngle="{Binding ArrowPlacement, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource PlacementAngleConverter}, ConverterParameter=+180}"
+                          Foreground="{Binding BorderBrush, ElementName=PART_EExpanderRoot}"/>
+                      </controls:EHeaderControl.Header>
+                    </controls:EHeaderControl>
+                  </Grid>
+                </ToggleButton>
+              </controls:EHeaderControl.Header>
+              <ContentPresenter x:Name="PART_ContentHost" Grid.Row="1" Grid.Column="0" 
+                                 Margin="{TemplateBinding Padding}" ContentSource="Content" RenderTransformOrigin="0,0" Visibility="Collapsed"/>
+            </controls:EHeaderControl>
+            <ext:StateListener.Rules>
+              <ext:RuleCollection>
+                <ext:Rule Target="{Binding ElementName=PART_EExpanderRoot}" StateMap="MouseOut=>Border=PR;MouseIn=>Border=SE"/>
+              </ext:RuleCollection>
+            </ext:StateListener.Rules>
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
 </ResourceDictionary>

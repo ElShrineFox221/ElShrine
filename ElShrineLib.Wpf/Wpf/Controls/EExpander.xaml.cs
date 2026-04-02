@@ -2,14 +2,13 @@
 using ElShrine.Modules;
 using ElShrine.Wpf.Controls.Extensions;
 using ElShrine.Wpf.UITheme;
-using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace ElShrine.Wpf.Controls
 {
-    public partial class EExpander : Expander, IThemeControlBase
+    public partial class EExpander : Expander, IThemeControlBase, IItemRenderControlBase, IHeaderControlBase, IArrowControllerBase
     {
         #region Implements
         static EExpander()
@@ -23,22 +22,6 @@ namespace ElShrine.Wpf.Controls
         #endregion
 
         #region DPs
-
-        public Thickness ArrowMargin
-        {
-            get => (Thickness)GetValue(ArrowMarginProperty); 
-            set => SetValue(ArrowMarginProperty, value);
-        }
-        public double ArrowAngle
-        {
-            get => (double)GetValue(ArrowAngleProperty);
-            set => SetValue(ArrowAngleProperty, value);
-        }
-        public ExpandDirection HeaderPlacement
-        {
-            get => (ExpandDirection)GetValue(HeaderPlacementProperty);
-            set => SetValue(HeaderPlacementProperty, value);
-        }
         public double SlideDistance
         {
             get => (double)GetValue(SlideDistanceProperty);
@@ -49,21 +32,24 @@ namespace ElShrine.Wpf.Controls
             get => (bool)GetValue(IsCollapseContraryProperty);
             set => SetValue(IsCollapseContraryProperty, value);
         }
+        public HeaderPlacement ArrowPlacement
+        {
+            get => (HeaderPlacement)GetValue(ArrowPlacementProperty);
+            set => SetValue(ArrowPlacementProperty, value);
+        }
 
-        public static readonly DependencyProperty ArrowMarginProperty = DependencyProperty.Register(nameof(ArrowMargin),  typeof(Thickness), typeof(EExpander), new(new Thickness(0)));
-        public static readonly DependencyProperty ArrowAngleProperty = DependencyProperty.Register(nameof(ArrowAngle),  typeof(double), typeof(EExpander), new(0d));
-        public static readonly DependencyProperty HeaderPlacementProperty = DependencyProperty.Register(nameof(HeaderPlacement),  typeof(ExpandDirection), typeof(EExpander), new(ExpandDirection.Left));
         public static readonly DependencyProperty SlideDistanceProperty = DependencyProperty.Register(nameof(SlideDistance),  typeof(double), typeof(EExpander), new (20d));
         public static readonly DependencyProperty IsCollapseContraryProperty = DependencyProperty.Register(nameof(IsCollapseContrary),  typeof(bool), typeof(EExpander), new(false));
+        public static readonly DependencyProperty ArrowPlacementProperty = DependencyProperty.Register(nameof(ArrowPlacement), typeof(HeaderPlacement), typeof(EExpander), new(HeaderPlacement.Right));
         #endregion
 
+        private EArrowControl? PART_ArrowContainer;
         private ContentPresenter? PART_ContentHost;
-        private RotateTransform? PART_ArrowAnimRotateTransform;
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
+            PART_ArrowContainer = GetTemplateChild(nameof(PART_ArrowContainer)) as EArrowControl;
             PART_ContentHost = GetTemplateChild(nameof(PART_ContentHost)) as ContentPresenter;
-            PART_ArrowAnimRotateTransform = GetTemplateChild(nameof(PART_ArrowAnimRotateTransform)) as RotateTransform;
             if (PART_ContentHost is not null)
             {
                 TranslateTransform transform;
@@ -102,7 +88,11 @@ namespace ElShrine.Wpf.Controls
         }
         private static void IsExpandedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is EExpander expander && ((bool)e.NewValue ^ (bool)e.OldValue)) expander.StartAnimation((bool)e.NewValue);
+            if (d is EExpander expander && ((bool)e.NewValue ^ (bool)e.OldValue))
+            {
+                expander.StartAnimation((bool)e.NewValue);
+                expander.PART_ArrowContainer?.DoRotate((bool)e.NewValue ? expander.PART_ArrowContainer.ArrowTargetAngle : expander.PART_ArrowContainer.ArrowBasicAngle);
+            }
         }
         private void StartAnimation(bool expand)
         {
@@ -119,8 +109,7 @@ namespace ElShrine.Wpf.Controls
             var slideX = tc.ToDoubleAnimation(toValue, expand);
             var slideY = tc.ToDoubleAnimation(toValue, expand);
             var fade = tc.ToDoubleAnimation(toValue, expand);
-            var rotate = tc.ToDoubleAnimation(toValue, expand);
-            int rotatedNow = getDirectionAngle(HeaderPlacement), rotateTo = 0;
+
             if (expand)
             {
                 transform.X = isXProperty ? toValue : 0;
@@ -129,7 +118,6 @@ namespace ElShrine.Wpf.Controls
                 slideX.To = 0;
                 slideY.To = 0;
                 fade.To = 1;
-                rotateTo = getDirectionAngle(ExpandDirection) - rotatedNow;
             }
             else
             {
@@ -142,9 +130,6 @@ namespace ElShrine.Wpf.Controls
             transform.BeginAnimation(TranslateTransform.XProperty, slideX);
             transform.BeginAnimation(TranslateTransform.YProperty, slideY);
             PART_ContentHost.BeginAnimation(OpacityProperty, fade);
-            if (Math.Abs(rotateTo) > 180) rotateTo = rotateTo.Shift(0, 360, 0);
-            rotate.To = rotateTo;
-            PART_ArrowAnimRotateTransform?.BeginAnimation(RotateTransform.AngleProperty, rotate);
 
             double getValue(bool expand)
             {
@@ -158,14 +143,6 @@ namespace ElShrine.Wpf.Controls
                 };
                 return result;
             }
-            int getDirectionAngle(ExpandDirection direction)
-                => direction switch
-                {
-                    ExpandDirection.Down => 0,
-                    ExpandDirection.Up => 180,
-                    ExpandDirection.Left => 90,
-                    _ => 270, //Right
-                };
         }
     }
 }

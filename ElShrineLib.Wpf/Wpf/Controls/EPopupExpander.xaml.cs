@@ -21,7 +21,7 @@ public partial class EPopupExpander : Expander, IThemeControlBase, IItemRenderCo
     public HeaderPlacement ArrowPlacement
     {
         get => (HeaderPlacement)GetValue(ArrowPlacementProperty);
-        protected set => SetValue(ArrowPlacementProperty, value);
+        set => SetValue(ArrowPlacementProperty, value);
     }
 
     public static readonly DependencyProperty StaysOpenProperty = DependencyProperty.Register(nameof(StaysOpen), typeof(bool), typeof(EPopupExpander), new(false));
@@ -33,24 +33,6 @@ public partial class EPopupExpander : Expander, IThemeControlBase, IItemRenderCo
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(EPopupExpander), new FrameworkPropertyMetadata(typeof(EPopupExpander)));
         IsExpandedProperty.OverrideMetadata(typeof(EPopupExpander), new FrameworkPropertyMetadata(defaultValue: false, propertyChangedCallback: IsExpandedChanged));
-        HeaderPlacementProperty.OverrideMetadata(typeof(EPopupExpander), new FrameworkPropertyMetadata(defaultValue: HeaderPlacement.Left, propertyChangedCallback: (s, e) =>
-        {
-            if (s is EPopupExpander expander && e.NewValue is HeaderPlacement hPlacement)
-            {
-                expander.ArrowPlacement = hPlacement switch
-                {
-                    HeaderPlacement.Left => HeaderPlacement.Right,
-                    HeaderPlacement.Right => HeaderPlacement.Left,
-                    HeaderPlacement.Top => HeaderPlacement.Bottom,
-                    HeaderPlacement.Bottom => HeaderPlacement.Top,
-                    HeaderPlacement.LeftTop => HeaderPlacement.RightBottom,
-                    HeaderPlacement.RightTop => HeaderPlacement.LeftBottom,
-                    HeaderPlacement.LeftBottom => HeaderPlacement.RightTop,
-                    HeaderPlacement.RightBottom => HeaderPlacement.LeftTop,
-                    _ => HeaderPlacement.Right,
-                };
-            }
-        }));
     }
     public EPopupExpander() => WpfModuleAccessor.UITheme.RegisterCoerceThemeDPs(this);
     public void GlobalThemeChanged(object? sender, ValueChangedEventArgs<Theme> e) => TransHelper.CoerceValue(this);

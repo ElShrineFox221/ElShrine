@@ -85,7 +85,7 @@ namespace ElShrine.Wpf.Converters
             return value;
         }
 
-        private static double DoParameterCalculation(double v, string? paraStr)
+        public static double DoParameterCalculation(double v, string? paraStr)
         {
             if (!string.IsNullOrWhiteSpace(paraStr))
             {

@@ -2,49 +2,61 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:modules="clr-namespace:ElShrine.Modules.UITheme"
                     xmlns:converters="clr-namespace:ElShrine.Wpf.Converters">
-    <!--Common resources-->
-    <Style x:Key="TextBlock_IconStyle" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="FontSize" Value="12"/>
-        <Setter Property="FontStyle" Value="Normal"/>
-        <Setter Property="FontWeight" Value="Regular"/>
-    </Style>
-    <Style x:Key="RepeatButton_TransparentStyle" TargetType="RepeatButton">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="RepeatButton">
-                    <Grid Background="Transparent"/>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-    <Style x:Key="RepeatButton_EmptyStyle" TargetType="RepeatButton">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="RepeatButton">
-                    <ContentPresenter Content="{TemplateBinding Content}"/>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-    
-    <!-- Normal converter: directly convert value to another value type-->
-    <!-- only: num, color(data), bool, sign(enum), string, quadruple-->
-    <converters:CommonConverter x:Key="CommonConverter"/>
-    <converters:CommonModifyConverter x:Key="CommonModifyConverter"/>
-    <converters:ExpressionConverter x:Key="ExpressionConverter"/>
-    <!--Gemometry converters-->
-    <converters:CircularProgressToPathConverter x:Key="CircularProgressToPathConverter"/>
-    <!--Localization converters-->
-    <converters:LocalizeConverter x:Key="LocalizeConverter"/>
+  <!--Common resources-->
+  <Style x:Key="ToggleButton_EmptyStyle" TargetType="ToggleButton">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ToggleButton">
+          <Grid Background="Transparent">
+            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="TextBlock_IconStyle" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="FontStyle" Value="Normal"/>
+    <Setter Property="FontWeight" Value="Regular"/>
+  </Style>
+  <Style x:Key="RepeatButton_TransparentStyle" TargetType="RepeatButton">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="RepeatButton">
+          <Grid Background="Transparent"/>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="RepeatButton_EmptyStyle" TargetType="RepeatButton">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="RepeatButton">
+          <ContentPresenter Content="{TemplateBinding Content}"/>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- Normal converter: directly convert value to another value type-->
+  <!-- only: num, color(data), bool, sign(enum), string, quadruple-->
+  <converters:CommonConverter x:Key="CommonConverter"/>
+  <converters:CommonModifyConverter x:Key="CommonModifyConverter"/>
+  <converters:ExpressionConverter x:Key="ExpressionConverter"/>
+  <!--Gemometry converters-->
+  <converters:CircularProgressToPathConverter x:Key="CircularProgressToPathConverter"/>
+  <!--Localization converters-->
+  <converters:LocalizeConverter x:Key="LocalizeConverter"/>
 
 
-    <converters:EnumTextLocalizeConverter x:Key="EnumTextLocalizeConverter"/>
-    <DataTemplate x:Key="EnumComboBoxDataTemplate">
-        <TextBlock Text="{Binding Converter={StaticResource EnumTextLocalizeConverter}}"/>
-    </DataTemplate>
-    <converters:ImageSourceCoverter x:Key="ImageSourceCoverter"/>
-    <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+  <converters:EnumTextLocalizeConverter x:Key="EnumTextLocalizeConverter"/>
+  <DataTemplate x:Key="EnumComboBoxDataTemplate">
+    <TextBlock Text="{Binding Converter={StaticResource EnumTextLocalizeConverter}}"/>
+  </DataTemplate>
+  <converters:ImageSourceCoverter x:Key="ImageSourceCoverter"/>
+  <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+  <converters:PlacementAngleConverter x:Key="PlacementAngleConverter"/>
 </ResourceDictionary>

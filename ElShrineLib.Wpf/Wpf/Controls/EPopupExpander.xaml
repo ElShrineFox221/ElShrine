@@ -2,134 +2,95 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
                     xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions">
-    <Style TargetType="controls:EPopupExpander">
-        <Setter Property="HeaderPlacement" Value="Left"/>
-        <Setter Property="ExpandDirection" Value="Down"/>
-        <Setter Property="EBorderCornerRadius" Value="2"/>
-        <Setter Property="EBorderThickness" Value="1"/>
-        <Setter Property="ItemBorderCornerRadius" Value="2"/>
-        <Setter Property="ItemMargin" Value="0"/>
-        <Setter Property="ItemBorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="5,2,0,2"/>
-        <Setter Property="ArrowSize" Value="12"/>
-        <Setter Property="ArrowMargin" Value="3,0"/>
-        <Setter Property="StaysOpen" Value="False"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="controls:EPopupExpander">
-                    <Grid x:Name="PART_EPopupExpanderRoot">
-                        <Border x:Name="PART_HeaderBTNContainer"
+  <Style TargetType="controls:EPopupExpander">
+    <Setter Property="ArrowPlacement" Value="Right"/>
+    <Setter Property="ExpandDirection" Value="Down"/>
+    <Setter Property="EBorderCornerRadius" Value="2"/>
+    <Setter Property="EBorderThickness" Value="1"/>
+    <Setter Property="ItemBorderCornerRadius" Value="2"/>
+    <Setter Property="ItemMargin" Value="0"/>
+    <Setter Property="ItemBorderThickness" Value="1"/>
+    <Setter Property="Padding" Value="5,2,0,2"/>
+    <Setter Property="ArrowSize" Value="12"/>
+    <Setter Property="ArrowMargin" Value="3,0"/>
+    <Setter Property="StaysOpen" Value="False"/>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="controls:EPopupExpander">
+          <Grid x:Name="PART_EPopupExpanderRoot">
+            <Border x:Name="PART_HeaderBTNContainer"
                                 ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EPopupExpander}}"
                                 BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}">
-                            <Border.OpacityMask>
+              <Border.OpacityMask>
                 <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_HeaderBTNContainer}"/>
-                            </Border.OpacityMask>
-                            <ToggleButton x:Name="PART_TOGBTN" 
+              </Border.OpacityMask>
+              <ToggleButton x:Name="PART_TOGBTN" 
                                           IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" 
-                                          Background="Transparent">
-                                <ToggleButton.Style>
-                                    <Style TargetType="ToggleButton">
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="ToggleButton">
-                                                    <Grid Background="Transparent">
-                                                        <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-                                                    </Grid>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </ToggleButton.Style>
-                                <Grid Margin="{TemplateBinding Padding}">
-                                    <controls:EHeaderControl HeaderPlacement="{TemplateBinding ArrowPlacement}" 
+                                          Background="Transparent" Style="{StaticResource ToggleButton_EmptyStyle}">
+                <Grid Margin="{TemplateBinding Padding}">
+                  <controls:EHeaderControl HeaderPlacement="{TemplateBinding ArrowPlacement}" 
                                                              HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
                                                              VerticalAlignment="Stretch" VerticalContentAlignment="Stretch"
                                                              Content="{TemplateBinding Header}" HeaderTemplate="{TemplateBinding HeaderTemplate}">
-                                        <controls:EHeaderControl.Header>
-                                            <controls:EArrowControl x:Name="PART_ArrowContainer" Grid.Row="0" Grid.Column="0" 
-                                                                    ArrowBasicAngle="90"
-                                                                    ArrowTargetAngle="0"
+                    <controls:EHeaderControl.Header>
+                      <controls:EArrowControl x:Name="PART_ArrowContainer" Grid.Row="0" Grid.Column="0"               
+                                              ArrowTargetAngle="{Binding ExpandDirection, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource PlacementAngleConverter}}"
+                                              ArrowBasicAngle="{Binding ArrowPlacement, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource PlacementAngleConverter}, ConverterParameter=+180}"
                                                                     Foreground="{Binding BorderBrush, ElementName=PART_HeaderBTNContainer}"/>
-                                        </controls:EHeaderControl.Header>
-                                    </controls:EHeaderControl>
-                                </Grid>
-                            </ToggleButton>
-                            <ext:StateListener.Rules>
-                                <ext:RuleCollection>
-                                    <ext:Rule Target="{Binding ElementName=PART_HeaderBTNContainer}" StateMap="
+                    </controls:EHeaderControl.Header>
+                  </controls:EHeaderControl>
+                </Grid>
+              </ToggleButton>
+              <ext:StateListener.Rules>
+                <ext:RuleCollection>
+                  <ext:Rule Target="{Binding ElementName=PART_HeaderBTNContainer}" StateMap="
                                               MouseOut=>Back=BC,Border=PR;
                                               MouseIn=>Back=Lerp(BC,SE,0.1),Border=SE;
                                               MouseDown=>Back=Lerp(BC,SE,0.2);"/>
-                                    <ext:Rule Target="{Binding ElementName=PART_ContentContainerBorder}" StateMap="
+                  <ext:Rule Target="{Binding ElementName=PART_ContentContainerBorder}" StateMap="
                                               MouseOut=>Border=PR;
                                               MouseIn=>Border=SE;"/>
-                                </ext:RuleCollection>
-                            </ext:StateListener.Rules>
-                        </Border>
-                        <Popup x:Name="PART_ContentPopup" AllowsTransparency="True"
+                </ext:RuleCollection>
+              </ext:StateListener.Rules>
+            </Border>
+            <Popup x:Name="PART_ContentPopup" AllowsTransparency="True"
                                PlacementTarget="{Binding ElementName=PART_TOGBTN}"
                                Placement="Bottom"
                                IsOpen="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" 
                                StaysOpen="{TemplateBinding StaysOpen}" 
                                PopupAnimation="Fade">
-                            <Border Margin="{TemplateBinding ItemMargin}" >
-                                <Border x:Name="PART_ContentContainerBorder" 
+              <Border Margin="{TemplateBinding ItemMargin}" >
+                <Border x:Name="PART_ContentContainerBorder" 
                                         Background="{TemplateBinding BackBrush}" 
                                         Margin="0,0,5,5"
                                         BorderThickness="{TemplateBinding ItemBorderThickness}" 
                                         CornerRadius="{TemplateBinding ItemBorderCornerRadius}"
                                         Padding="{TemplateBinding ItemPadding}">
-                                    <Border.Effect>
-                                        <DropShadowEffect BlurRadius="4" Opacity="0.3" Direction="315" Color="Black"/>
-                                    </Border.Effect>
-                                    <ContentControl x:Name="PART_ContentContainer" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"/>
-                                </Border>
-                            </Border>
-                        </Popup>
-                    </Grid>
-                    
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="ExpandDirection" Value="Down">
-                            <Setter TargetName="PART_ContentPopup" Property="Placement" Value="Bottom"/>
-                            <Setter TargetName="PART_ArrowContainer" Property="ArrowTargetAngle" Value="0"/>
-                        </Trigger>
-                        <Trigger Property="ExpandDirection" Value="Up">
-                            <Setter TargetName="PART_ContentPopup" Property="Placement" Value="Top"/>
-                            <Setter TargetName="PART_ArrowContainer" Property="ArrowTargetAngle" Value="180"/>
-                        </Trigger>
-                        <Trigger Property="ExpandDirection" Value="Left">
-                            <Setter TargetName="PART_ContentPopup" Property="Placement" Value="Left"/>
-                            <Setter TargetName="PART_ArrowContainer" Property="ArrowTargetAngle" Value="90"/>
-                        </Trigger>
-                        <Trigger Property="ExpandDirection" Value="Right">
-                            <Setter TargetName="PART_ContentPopup" Property="Placement" Value="Right"/>
-                            <Setter TargetName="PART_ArrowContainer" Property="ArrowTargetAngle" Value="-90"/>
-                        </Trigger>
-                        
-                        <Trigger Property="HeaderPlacement" Value="Top">
-                            <Setter TargetName="PART_ArrowContainer" Property="ArrowBasicAngle" Value="180"/>
-                        </Trigger>
-                        <Trigger Property="HeaderPlacement" Value="Bottom">
-                            <Setter TargetName="PART_ArrowContainer" Property="ArrowBasicAngle" Value="0"/>
-                        </Trigger>
-                        <Trigger Property="HeaderPlacement" Value="Right">
-                            <Setter TargetName="PART_ArrowContainer" Property="ArrowBasicAngle" Value="-90"/>
-                        </Trigger>
-                        <Trigger Property="HeaderPlacement" Value="LeftTop">
-                            <Setter TargetName="PART_ArrowContainer" Property="ArrowBasicAngle" Value="135"/>
-                        </Trigger>
-                        <Trigger Property="HeaderPlacement" Value="RightTop">
-                            <Setter TargetName="PART_ArrowContainer" Property="ArrowBasicAngle" Value="225"/>
-                        </Trigger>
-                        <Trigger Property="HeaderPlacement" Value="LeftBottom">
-                            <Setter TargetName="PART_ArrowContainer" Property="ArrowBasicAngle" Value="45"/>
-                        </Trigger>
-                        <Trigger Property="HeaderPlacement" Value="RightBottom">
-                            <Setter TargetName="PART_ArrowContainer" Property="ArrowBasicAngle" Value="-45"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+                  <Border.Effect>
+                    <DropShadowEffect BlurRadius="4" Opacity="0.3" Direction="315" Color="Black"/>
+                  </Border.Effect>
+                  <ContentControl x:Name="PART_ContentContainer" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                </Border>
+              </Border>
+            </Popup>
+          </Grid>
+
+          <ControlTemplate.Triggers>
+            <Trigger Property="ExpandDirection" Value="Down">
+              <Setter TargetName="PART_ContentPopup" Property="Placement" Value="Bottom"/>
+            </Trigger>
+            <Trigger Property="ExpandDirection" Value="Up">
+              <Setter TargetName="PART_ContentPopup" Property="Placement" Value="Top"/>
+            </Trigger>
+            <Trigger Property="ExpandDirection" Value="Left">
+              <Setter TargetName="PART_ContentPopup" Property="Placement" Value="Left"/>
+            </Trigger>
+            <Trigger Property="ExpandDirection" Value="Right">
+              <Setter TargetName="PART_ContentPopup" Property="Placement" Value="Right"/>
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
 </ResourceDictionary>
