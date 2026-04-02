@@ -6,7 +6,7 @@
     <ControlTemplate x:Key="EImage_BaseTemplate" TargetType="controls:EImage">
         <Grid x:Name="PART_EImageRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EImage}}">
             <Grid.OpacityMask>
-                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EImageRoot}"/>
+                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EImageRoot}"/>
             </Grid.OpacityMask>
             <Grid Margin="{TemplateBinding Padding}">
                 <Image x:Name="PART_Image" 
@@ -70,7 +70,7 @@
     <ControlTemplate x:Key="EImage_SimpleTemplate" TargetType="controls:EImage">
         <Grid x:Name="PART_EImageRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EImage}}">
             <Grid.OpacityMask>
-                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EImageRoot}"/>
+                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EImageRoot}"/>
             </Grid.OpacityMask>
             <Grid Margin="{TemplateBinding Padding}">
                 <Image x:Name="PART_Image"

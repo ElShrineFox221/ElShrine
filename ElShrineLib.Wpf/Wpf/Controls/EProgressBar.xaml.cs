@@ -3,10 +3,9 @@ using ElShrine.Modules;
 using ElShrine.Wpf.Controls.Extensions;
 using ElShrine.Wpf.UITheme;
 using System;
-using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 
 
@@ -33,12 +32,19 @@ public partial class EProgressBar : ContentControl, IThemeControlBase
     }
     public static readonly DependencyProperty IsIndeterminateProperty = DependencyProperty.Register(nameof(IsIndeterminate), typeof(bool), typeof(EProgressBar), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnIsIndeterminateChanged));
 
+    public double IndeterminateProgressRate
+    {
+        get => (double)GetValue(IndeterminateProgressRateProperty);
+        set => SetValue(IndeterminateProgressRateProperty, value);
+    }
+    public static readonly DependencyProperty IndeterminateProgressRateProperty = DependencyProperty.Register(nameof(IndeterminateProgressRate), typeof(double), typeof(EProgressBar), new PropertyMetadata(0.3d, OnIndeterminateProgressRateChanged));
+
     public double TransXNorm
     {
         get => (double)GetValue(TransXNormProperty);
         set => SetValue(TransXNormProperty, value);
     }
-    public static readonly DependencyProperty TransXNormProperty = DependencyProperty.Register(nameof(TransXNorm), typeof(double), typeof(EProgressBar), new PropertyMetadata(0d));
+    public static readonly DependencyProperty TransXNormProperty = DependencyProperty.Register(nameof(TransXNorm), typeof(double), typeof(EProgressBar), new PropertyMetadata(0d, OnTransXNormChanged));
 
     public double Progress
     {
@@ -66,7 +72,8 @@ public partial class EProgressBar : ContentControl, IThemeControlBase
         get => (double)GetValue(AnimatedProgressProperty);
         private set => SetValue(AnimatedProgressProperty, value);
     }
-    public static readonly DependencyProperty AnimatedProgressProperty = DependencyProperty.Register(nameof(AnimatedProgress), typeof(double), typeof(EProgressBar), new FrameworkPropertyMetadata(0.0));
+    public static readonly DependencyProperty AnimatedProgressProperty = DependencyProperty.Register(nameof(AnimatedProgress), typeof(double), typeof(EProgressBar), new FrameworkPropertyMetadata(0.0, OnAnimatedProgressChanged));
+    
     #endregion
 
     #region Property Change Handlers
@@ -88,11 +95,59 @@ public partial class EProgressBar : ContentControl, IThemeControlBase
     {
         if (d is EProgressBar control)
         {
-            if ((bool)e.NewValue) control.StartIndeterminateAnimation();
-            else control.StopIndeterminateAnimation();
+            if ((bool)e.NewValue)
+                control.StartIndeterminateAnimation();
+            else
+                control.StopIndeterminateAnimation();
+            control.UpdateProgress();
+        }
+    }
+    private static void OnTransXNormChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if(d is EProgressBar control && control.IsIndeterminate)
+        {
+            control.UpdateProgress();
+        }
+    }
+    private static void OnIndeterminateProgressRateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if(d is EProgressBar control)
+        {
+            control.UpdateProgress();
+        }
+    }
+    private static void OnAnimatedProgressChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if(d is EProgressBar control && !control.IsIndeterminate)
+        {
+            control.UpdateProgress();
         }
     }
     #endregion
+
+    private Border? PART_ProgressIndicator;
+    private Border? PART_Background;
+    private TranslateTransform? _trans;
+    public override void OnApplyTemplate()
+    {
+        base.OnApplyTemplate();
+        PART_ProgressIndicator = GetTemplateChild(nameof(PART_ProgressIndicator)) as Border;
+        PART_Background = GetTemplateChild(nameof(PART_Background)) as Border;
+        //
+        PART_Background?.SizeChanged+= (s, e) =>
+        {
+            UpdateProgress();
+        };
+        if (PART_Background is not null)
+        {
+            _trans = new TranslateTransform();
+            PART_Background.RenderTransform = _trans;
+        }
+        
+
+        //
+        UpdateProgress();
+    }
 
     #region Animation Logic
 
@@ -141,39 +196,50 @@ public partial class EProgressBar : ContentControl, IThemeControlBase
         }
     }
     #endregion
-}
-internal class EProgressBarAnimationValueCoverter : IMultiValueConverter
-{
-    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+
+    private void UpdateProgress()
     {
-        // 0: totalWidth (L), 1: transX (0~1), 2: barWidthRatio (B_ratio)
-        if (values.Length < 3 ||
-            values[0] is not double L ||
-            values[1] is not double transXNorm ||
-            (values[2] is not double B_ratio && !double.TryParse(values[2].ToString(), out B_ratio)) ||
-            L <= 0 || B_ratio <= 0) return DependencyProperty.UnsetValue;
-        if (parameter is not string targetOutput) return DependencyProperty.UnsetValue;
-        if (targetOutput.EqualIgnoreCase("Opacity"))
+        if (IsIndeterminate)
+            UpdateProgressInterminate();
+        else
         {
-            double normalizedDistance = Math.Abs(transXNorm - 0.5);
-            double scaledDistance = 2.0 * normalizedDistance; 
-            double opacityInverse = Math.Pow(scaledDistance, 4.0);
-            double opacity = 1.0 - opacityInverse;
-            return Math.Max(0.0, Math.Min(1.0, opacity));
+            if (PART_ProgressIndicator is null || PART_Background is null)
+                return;
+            var totalWidth = PART_Background.ActualWidth;
+            PART_ProgressIndicator.Width = totalWidth * AnimatedProgress;
+            PART_ProgressIndicator.Opacity = 1;
+            _trans?.X = 0;
         }
-        double tx = (transXNorm * (1.0 + B_ratio) - B_ratio) * L;
+    }
+    private void UpdateProgressInterminate()
+    {
+        if (PART_ProgressIndicator is null || PART_Background is null) 
+            return;
+        var totalWidth = PART_Background.ActualWidth;
+        var transX = TransXNorm;
+        var barWidthRatio = IndeterminateProgressRate;
+        if (totalWidth <= 0 || barWidthRatio <= 0 || barWidthRatio >= 1)
+        {
+            PART_ProgressIndicator.Visibility = Visibility.Hidden;
+            return;
+        }
+        PART_ProgressIndicator.Visibility = Visibility.Visible;
+        // do calculation
+        //
+        double normalizedDistance = Math.Abs(transX - 0.5);
+        double scaledDistance = 2.0 * normalizedDistance;
+        double opacityInverse = Math.Pow(scaledDistance, 4.0);
+        double opacity = 1.0 - opacityInverse;
+        PART_ProgressIndicator.Opacity = opacity;
+        //
+        double tx = (transX * (1.0 + barWidthRatio) - barWidthRatio) * totalWidth;
+
+        double right_clamp = Math.Min(tx + barWidthRatio * totalWidth, totalWidth);
 
         double x_geom = Math.Max(tx, 0);
-        if (targetOutput.EqualIgnoreCase("X")) return x_geom;
-        double right_clamp = Math.Min(tx + B_ratio * L, L);
         double w_geom = Math.Max(0, right_clamp - x_geom);
-        if (targetOutput.EqualIgnoreCase("Width")) return w_geom;
 
-        return DependencyProperty.UnsetValue;
-    }
-
-    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
+        _trans?.X = x_geom;
+        PART_ProgressIndicator.Width = w_geom;
     }
 }

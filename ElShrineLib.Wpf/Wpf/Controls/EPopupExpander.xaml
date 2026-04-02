@@ -22,7 +22,7 @@
                                 ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EPopupExpander}}"
                                 BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}">
                             <Border.OpacityMask>
-                                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_HeaderBTNContainer}"/>
+                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_HeaderBTNContainer}"/>
                             </Border.OpacityMask>
                             <ToggleButton x:Name="PART_TOGBTN" 
                                           IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" 

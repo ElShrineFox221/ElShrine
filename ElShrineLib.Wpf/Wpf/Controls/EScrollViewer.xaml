@@ -9,7 +9,7 @@
                 <ControlTemplate TargetType="{x:Type controls:EScrollViewer}">
                     <Grid x:Name="PART_EScrollViewerRoot" Background="{TemplateBinding Background}">
                         <Grid.OpacityMask>
-                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EScrollViewerRoot}"/>
+                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EScrollViewerRoot}"/>
                         </Grid.OpacityMask>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>

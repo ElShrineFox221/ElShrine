@@ -61,7 +61,7 @@
                 Background="{TemplateBinding BackBrush}" BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}" 
                 BorderBrush="{TemplateBinding PrimaryBrush}">
             <Border.OpacityMask>
-                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EColorPaletteRoot}"/>
+                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EColorPaletteRoot}"/>
             </Border.OpacityMask>
             <Grid>
                 <Grid.RowDefinitions>

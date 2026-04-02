@@ -5,7 +5,7 @@
     <ControlTemplate x:Key="EButton_BaseTemplate" TargetType="controls:EButton">
         <Grid x:Name="PART_EButtonRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EButton}}">
             <Grid.OpacityMask>
-                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EButtonRoot}"/>
+                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EButtonRoot}"/>
             </Grid.OpacityMask>
             <Border x:Name="PART_MainBorder" BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}" CacheMode="BitmapCache" RenderOptions.BitmapScalingMode="HighQuality" TextOptions.TextFormattingMode="Ideal">
                 <ContentControl x:Name="PART_ContentContainer"
@@ -44,7 +44,7 @@
     <ControlTemplate x:Key="EButton_BackColorTemplate" TargetType="controls:EButton">
         <Grid x:Name="PART_EButtonRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EButton}}">
             <Grid.OpacityMask>
-                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EButtonRoot}"/>
+                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EButtonRoot}"/>
             </Grid.OpacityMask>
             <Border x:Name="PART_MainBorder" BorderThickness="0" CornerRadius="{TemplateBinding EBorderCornerRadius}" CacheMode="BitmapCache">
                 <ContentControl x:Name="PART_ContentContainer"

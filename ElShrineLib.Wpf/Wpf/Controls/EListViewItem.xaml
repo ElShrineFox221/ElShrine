@@ -7,7 +7,7 @@
         <Border x:Name="controlRoot" BorderThickness="1" CornerRadius="2">
             <Grid x:Name="PART_EListViewItemRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EListViewItem}}">
                 <Grid.OpacityMask>
-                    <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EListViewItemRoot}"/>
+                    <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EListViewItemRoot}"/>
                 </Grid.OpacityMask>
                 <Grid.RowDefinitions>
                     <RowDefinition x:Name="R0" Height="*"/>

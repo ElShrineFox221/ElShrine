@@ -61,7 +61,7 @@
                                 </ext:StateListener.Rules>
                                 <Grid>
                                     <Grid.OpacityMask>
-                                        <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EScrollBarRoot}"/>
+                                        <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EScrollBarRoot}"/>
                                     </Grid.OpacityMask>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="auto"/>
@@ -146,7 +146,7 @@
                                 </ext:StateListener.Rules>
                                 <Grid>
                                     <Grid.OpacityMask>
-                                        <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EScrollBarRoot}"/>
+                                        <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EScrollBarRoot}"/>
                                     </Grid.OpacityMask>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="auto"/>

@@ -134,7 +134,7 @@ ItemsSource="{Binding PluginManagerUI.Enableds}" ItemTemplate="{StaticResource M
     </controls:ETabControl>
 
     <StackPanel Grid.Column="1" Grid.Row="1" VerticalAlignment="Center">
-
+      
     </StackPanel>
   </Grid>
 </controls:EWindow>

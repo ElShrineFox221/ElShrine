@@ -19,7 +19,7 @@
                 <ControlTemplate TargetType="controls:ESlider">
                     <Border x:Name="PART_ESliderRoot" RenderTransformOrigin="0.5,0.5" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:ESlider}}">
                         <Border.OpacityMask>
-                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_ESliderRoot}"/>
+                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_ESliderRoot}"/>
                         </Border.OpacityMask>
                         <ext:StateListener.Rules>
                             <ext:RuleCollection>
@@ -122,7 +122,7 @@
                         <ControlTemplate TargetType="controls:ESlider">
                             <Border x:Name="PART_ESliderRoot" RenderTransformOrigin="0.5,0.5" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:ESlider}}">
                                 <Border.OpacityMask>
-                                    <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_ESliderRoot}"/>
+                                    <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_ESliderRoot}"/>
                                 </Border.OpacityMask>
                                 <ext:StateListener.Rules>
                                     <ext:RuleCollection>
@@ -203,7 +203,7 @@
                 <ControlTemplate TargetType="controls:ESlider">
                     <Border x:Name="PART_ESliderRoot" RenderTransformOrigin="0.5,0.5">
                         <Border.OpacityMask>
-                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_ESliderRoot}"/>
+                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_ESliderRoot}"/>
                         </Border.OpacityMask>
                         <Grid Height="{TemplateBinding SliderTrackSize}" Grid.IsSharedSizeScope="True">
                             <Canvas>
@@ -282,7 +282,7 @@
                         <ControlTemplate TargetType="controls:ESlider">
                             <Border x:Name="PART_ESliderRoot" RenderTransformOrigin="0.5,0.5">
                                 <Border.OpacityMask>
-                                    <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_ESliderRoot}"/>
+                                    <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_ESliderRoot}"/>
                                 </Border.OpacityMask>
                                 <Grid Width="{TemplateBinding SliderTrackSize}" Grid.IsSharedSizeScope="True">
                                     <Canvas>

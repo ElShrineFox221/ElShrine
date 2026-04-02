@@ -7,7 +7,7 @@
         <Border x:Name="PART_ESelectedIndicatorRoot" CornerRadius="{TemplateBinding EBorderCornerRadius}"
                 ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:ESelectedIndicator}}">
             <Border.OpacityMask>
-                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_ESelectedIndicatorRoot}"/>
+                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_ESelectedIndicatorRoot}"/>
             </Border.OpacityMask>
             <Grid>
                 <Grid.ColumnDefinitions>

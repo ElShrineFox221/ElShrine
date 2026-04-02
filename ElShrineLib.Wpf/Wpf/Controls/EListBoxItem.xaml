@@ -8,7 +8,7 @@
         <Border x:Name="controlRoot" BorderThickness="1" CornerRadius="2">
             <Grid x:Name="PART_EListBoxItemRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EListBoxItem}}">
                 <Grid.OpacityMask>
-                    <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EListBoxItemRoot}"/>
+                    <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EListBoxItemRoot}"/>
                 </Grid.OpacityMask>
                 <Grid.RowDefinitions>
                     <RowDefinition x:Name="R0" Height="*"/>

@@ -3,161 +3,115 @@
                     xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
                     xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
-    <ControlTemplate x:Key="EProgressBar_CircularTemplate" TargetType="{x:Type controls:EProgressBar}">
-        <ControlTemplate.Resources>
-            <sys:Double x:Key="Value1">1.0</sys:Double>
-            <sys:Double x:Key="CirInterminateBarAngle">108</sys:Double>
-            <sys:Double x:Key="Angle270">270.0</sys:Double>
-            <sys:Double x:Key="Angle360">360.0</sys:Double>
-            <controls:EProgressBarAnimationValueCoverter x:Key="EProgressBarAnimationValueCoverter"/>
-        </ControlTemplate.Resources>
-        <Border x:Name="PART_EProgressBarRoot" Background="Transparent">
-            <Border.OpacityMask>
-                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EProgressBarRoot}"/>
-            </Border.OpacityMask>
-            <Grid x:Name="PART_CircularProgress" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+  <ControlTemplate x:Key="EProgressBar_CircularTemplate" TargetType="{x:Type controls:EProgressBar}">
+    <ControlTemplate.Resources>
+      <sys:Double x:Key="Value1">1.0</sys:Double>
+      <sys:Double x:Key="CirInterminateBarAngle">108</sys:Double>
+      <sys:Double x:Key="Angle270">270.0</sys:Double>
+      <sys:Double x:Key="Angle360">360.0</sys:Double>
+    </ControlTemplate.Resources>
+    <Border x:Name="PART_EProgressBarRoot" Background="Transparent">
+      <Border.OpacityMask>
+        <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EProgressBarRoot}"/>
+      </Border.OpacityMask>
+      <Grid x:Name="PART_CircularProgress" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                   ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EProgressBar}}">
-                <ext:StateListener.Rules>
-                    <ext:RuleCollection>
-                        <ext:Rule Target="{Binding ElementName=PART_CircularIndicator}" StateMap="MouseOut=>Stroke=PR; MouseIn=>Stroke=SE"/>
-                        <ext:Rule Target="{Binding ElementName=PART_CircularIndicatorBackground}" StateMap="MouseOut=>Stroke=Lerp(BC,PR,0.2); MouseIn=>Stroke=Lerp(BC,SE,0.2)"/>
-                    </ext:RuleCollection>
-                </ext:StateListener.Rules>
-                <Grid HorizontalAlignment="Center">
-                    <Grid.Height>
-                        <MultiBinding Converter="{StaticResource ExpressionConverter}" ConverterParameter="Min(V0,V1)">
-                            <Binding Path="ActualHeight" RelativeSource="{RelativeSource TemplatedParent}"/>
-                            <Binding Path="ActualWidth" RelativeSource="{RelativeSource TemplatedParent}"/>
-                        </MultiBinding>
-                    </Grid.Height>
-                    <Grid.Width>
-                        <MultiBinding Converter="{StaticResource ExpressionConverter}" ConverterParameter="Min(V0,V1)">
-                            <Binding Path="ActualHeight" RelativeSource="{RelativeSource TemplatedParent}"/>
-                            <Binding Path="ActualWidth" RelativeSource="{RelativeSource TemplatedParent}"/>
-                        </MultiBinding>
-                    </Grid.Width>
-                    <Path x:Name="PART_CircularIndicatorBackground" StrokeThickness="{TemplateBinding RingThickness}">
-                        <Path.Data>
-                            <MultiBinding Converter="{StaticResource CircularProgressToPathConverter}" ConverterParameter="rwidth">
-                                <Binding Source="{StaticResource Value1}"/>
-                                <Binding Path="ActualHeight" ElementName="PART_CircularProgress" Converter="{StaticResource CommonModifyConverter}" ConverterParameter="*0.5"/>
-                                <Binding Path="RingThickness" RelativeSource="{RelativeSource TemplatedParent}"/>
-                                <Binding Source="{StaticResource Angle270}"/>
-                                <Binding Source="{StaticResource Angle360}"/>
-                            </MultiBinding>
-                        </Path.Data>
-                    </Path>
-                    <Path x:Name="PART_CircularIndicator" StrokeEndLineCap="Round" StrokeStartLineCap="Round" StrokeThickness="{TemplateBinding RingThickness}">
-                        <Path.Data>
-                            <MultiBinding Converter="{StaticResource CircularProgressToPathConverter}" ConverterParameter="rwidth">
-                                <Binding Path="AnimatedProgress" RelativeSource="{RelativeSource TemplatedParent}"/>
-                                <Binding Path="ActualHeight" ElementName="PART_CircularProgress" Converter="{StaticResource CommonModifyConverter}" ConverterParameter="*0.5"/>
-                                <Binding Path="RingThickness" RelativeSource="{RelativeSource TemplatedParent}"/>
-                                <Binding Source="{StaticResource Angle360}"/>
-                                <Binding Source="{StaticResource Angle360}"/>
-                            </MultiBinding>
-                        </Path.Data>
-                    </Path>
-                </Grid>
-                <ContentPresenter x:Name="PART_ContentContainer" 
-                                  Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" ContentTemplate="{TemplateBinding ContentTemplate}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="{TemplateBinding Padding}"/>
-            </Grid>
-        </Border>
-        <ControlTemplate.Triggers>
-            <Trigger Property="IsIndeterminate" Value="True">
-
-                <Setter TargetName="PART_CircularIndicator" Property="Data">
-                    <Setter.Value>
-                        <MultiBinding Converter="{StaticResource CircularProgressToPathConverter}" ConverterParameter="rwidth">
-                            <Binding Path="TransXNorm" RelativeSource="{RelativeSource TemplatedParent}" Converter="{StaticResource CommonModifyConverter}" ConverterParameter="sin2"/>
-                            <Binding Path="ActualHeight" ElementName="PART_CircularProgress" Converter="{StaticResource CommonModifyConverter}" ConverterParameter="*0.5"/>
-                            <Binding Path="RingThickness" RelativeSource="{RelativeSource TemplatedParent}"/>
-                            <Binding Path="TransXNorm" RelativeSource="{RelativeSource TemplatedParent}" Converter="{StaticResource CommonModifyConverter}" ConverterParameter="*360"/>
-                            <Binding Source="{StaticResource CirInterminateBarAngle}"/>
-                        </MultiBinding>
-                    </Setter.Value>
-                </Setter>
-            </Trigger>
-        </ControlTemplate.Triggers>
-    </ControlTemplate>
-    <ControlTemplate x:Key="EProgressBar_HorizontalTemplate" TargetType="{x:Type controls:EProgressBar}">
-        <ControlTemplate.Resources>
-            <controls:EProgressBarAnimationValueCoverter x:Key="EProgressBarAnimationValueCoverter"/>
-        </ControlTemplate.Resources>
-        <Grid x:Name="PART_EProgressBarRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EProgressBar}}">
-            <Grid.OpacityMask>
-                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EProgressBarRoot}"/>
-            </Grid.OpacityMask>
-            <Border x:Name="PART_Background" CornerRadius="{TemplateBinding EBorderCornerRadius}" BorderThickness="0">
-                <Grid>
-                    <Border x:Name="PART_ProgressIndicator" 
-                            HorizontalAlignment="Left" CornerRadius="{TemplateBinding EBorderCornerRadius}" Background="{Binding ElementName=PART_Background, Path=BorderBrush}" IsHitTestVisible="False">
-                        <Border.Width>
-                            <MultiBinding Converter="{StaticResource ExpressionConverter}" ConverterParameter="V0*V1">
-                                <Binding Path="AnimatedProgress" RelativeSource="{RelativeSource TemplatedParent}" />
-                                <Binding ElementName="PART_Background" Path="ActualWidth" />
-                            </MultiBinding>
-                        </Border.Width>
-                    </Border>
-                    <ContentPresenter x:Name="PART_ContentContainer"
-                                      Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" ContentTemplate="{TemplateBinding ContentTemplate}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="{TemplateBinding Padding}" />
-                </Grid>
-            </Border>
-            <ext:StateListener.Rules>
-                <ext:RuleCollection>
-                    <ext:Rule Target="{Binding ElementName=PART_Background}" StateMap="MouseOut=>Border=PR; MouseIn=>Border=SE"/>
-                </ext:RuleCollection>
-            </ext:StateListener.Rules>
+        <ext:StateListener.Rules>
+          <ext:RuleCollection>
+            <ext:Rule Target="{Binding ElementName=PART_CircularIndicator}" StateMap="MouseOut=>Stroke=PR; MouseIn=>Stroke=SE"/>
+            <ext:Rule Target="{Binding ElementName=PART_CircularIndicatorBackground}" StateMap="MouseOut=>Stroke=Lerp(BC,PR,0.2); MouseIn=>Stroke=Lerp(BC,SE,0.2)"/>
+          </ext:RuleCollection>
+        </ext:StateListener.Rules>
+        <Grid HorizontalAlignment="Center">
+          <Grid.Height>
+            <MultiBinding Converter="{StaticResource ExpressionConverter}" ConverterParameter="Min(V0,V1)">
+              <Binding Path="ActualHeight" RelativeSource="{RelativeSource TemplatedParent}"/>
+              <Binding Path="ActualWidth" RelativeSource="{RelativeSource TemplatedParent}"/>
+            </MultiBinding>
+          </Grid.Height>
+          <Grid.Width>
+            <MultiBinding Converter="{StaticResource ExpressionConverter}" ConverterParameter="Min(V0,V1)">
+              <Binding Path="ActualHeight" RelativeSource="{RelativeSource TemplatedParent}"/>
+              <Binding Path="ActualWidth" RelativeSource="{RelativeSource TemplatedParent}"/>
+            </MultiBinding>
+          </Grid.Width>
+          <Path x:Name="PART_CircularIndicatorBackground" StrokeThickness="{TemplateBinding RingThickness}">
+            <Path.Data>
+              <MultiBinding Converter="{StaticResource CircularProgressToPathConverter}" ConverterParameter="rwidth">
+                <Binding Source="{StaticResource Value1}"/>
+                <Binding Path="ActualHeight" ElementName="PART_CircularProgress" Converter="{StaticResource CommonModifyConverter}" ConverterParameter="*0.5"/>
+                <Binding Path="RingThickness" RelativeSource="{RelativeSource TemplatedParent}"/>
+                <Binding Source="{StaticResource Angle270}"/>
+                <Binding Source="{StaticResource Angle360}"/>
+              </MultiBinding>
+            </Path.Data>
+          </Path>
+          <Path x:Name="PART_CircularIndicator" StrokeEndLineCap="Round" StrokeStartLineCap="Round" StrokeThickness="{TemplateBinding RingThickness}">
+            <Path.Data>
+              <MultiBinding Converter="{StaticResource CircularProgressToPathConverter}" ConverterParameter="rwidth">
+                <Binding Path="AnimatedProgress" RelativeSource="{RelativeSource TemplatedParent}"/>
+                <Binding Path="ActualHeight" ElementName="PART_CircularProgress" Converter="{StaticResource CommonModifyConverter}" ConverterParameter="*0.5"/>
+                <Binding Path="RingThickness" RelativeSource="{RelativeSource TemplatedParent}"/>
+                <Binding Source="{StaticResource Angle360}"/>
+                <Binding Source="{StaticResource Angle360}"/>
+              </MultiBinding>
+            </Path.Data>
+          </Path>
         </Grid>
-        <ControlTemplate.Triggers> 
-            <Trigger Property="IsIndeterminate" Value="True">
-                <Setter TargetName="PART_ProgressIndicator" Property="Opacity">
-                    <Setter.Value>
-                        <MultiBinding Converter="{StaticResource EProgressBarAnimationValueCoverter}" ConverterParameter="opacity">
-                            <Binding Path="ActualWidth" ElementName="PART_Background" />
-                            <Binding Path="TransXNorm" RelativeSource="{RelativeSource TemplatedParent}"/>
-                            <Binding Source="0.3"/>
-                        </MultiBinding>
-                    </Setter.Value>
-                </Setter>
-                <Setter TargetName="PART_ProgressIndicator" Property="Width">
-                    <Setter.Value>
-                        <MultiBinding Converter="{StaticResource EProgressBarAnimationValueCoverter}" ConverterParameter="width">
-                            <Binding Path="ActualWidth" ElementName="PART_Background" />
-                            <Binding Path="TransXNorm" RelativeSource="{RelativeSource TemplatedParent}"/>
-                            <Binding Source="0.3"/>
-                        </MultiBinding>
-                    </Setter.Value>
-                </Setter>
-                <Setter TargetName="PART_ProgressIndicator" Property="RenderTransform">
-                    <Setter.Value>
-                        <TranslateTransform>
-                            <TranslateTransform.X>
-                                <MultiBinding Converter="{StaticResource EProgressBarAnimationValueCoverter}" ConverterParameter="x">
-                                    <Binding Path="ActualWidth" ElementName="PART_Background" />
-                                    <Binding Path="TransXNorm" RelativeSource="{RelativeSource TemplatedParent}"/>
-                                    <Binding Source="0.3"/>
-                                </MultiBinding>
-                            </TranslateTransform.X>
-                        </TranslateTransform>
-                    </Setter.Value>
-                </Setter>
-            </Trigger>
-        </ControlTemplate.Triggers>
-    </ControlTemplate>
-    <Style TargetType="{x:Type controls:EProgressBar}">
-        <Setter Property="EBorderThickness" Value="0"/>
-        <Setter Property="EBorderCornerRadius" Value="5"/>
-        <Setter Property="MinHeight" Value="10"/>
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="IsIndeterminate" Value="False"/>
-        <Setter Property="RingThickness" Value="5"/>
-        <Setter Property="Template" Value="{StaticResource EProgressBar_HorizontalTemplate}"/>
-        <Style.Triggers>
-            <Trigger Property="ProgressBarStyle" Value="Circular">
-                <Setter Property="Template" Value="{StaticResource EProgressBar_CircularTemplate}"/>
-            </Trigger>
-        </Style.Triggers>
-    </Style>
+        <ContentPresenter x:Name="PART_ContentContainer" 
+                                  Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" ContentTemplate="{TemplateBinding ContentTemplate}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="{TemplateBinding Padding}"/>
+      </Grid>
+    </Border>
+    <ControlTemplate.Triggers>
+      <Trigger Property="IsIndeterminate" Value="True">
+        <Setter TargetName="PART_CircularIndicator" Property="Data">
+          <Setter.Value>
+            <MultiBinding Converter="{StaticResource CircularProgressToPathConverter}" ConverterParameter="rwidth">
+              <Binding Path="TransXNorm" RelativeSource="{RelativeSource TemplatedParent}" Converter="{StaticResource CommonModifyConverter}" ConverterParameter="sin2"/>
+              <Binding Path="ActualHeight" ElementName="PART_CircularProgress" Converter="{StaticResource CommonModifyConverter}" ConverterParameter="*0.5"/>
+              <Binding Path="RingThickness" RelativeSource="{RelativeSource TemplatedParent}"/>
+              <Binding Path="TransXNorm" RelativeSource="{RelativeSource TemplatedParent}" Converter="{StaticResource CommonModifyConverter}" ConverterParameter="*360"/>
+              <Binding Source="{StaticResource CirInterminateBarAngle}"/>
+            </MultiBinding>
+          </Setter.Value>
+        </Setter>
+      </Trigger>
+    </ControlTemplate.Triggers>
+  </ControlTemplate>
+  <ControlTemplate x:Key="EProgressBar_HorizontalTemplate" TargetType="{x:Type controls:EProgressBar}">
+    <Grid x:Name="PART_EProgressBarRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EProgressBar}}">
+      <Grid.OpacityMask>
+        <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EProgressBarRoot}"/>
+      </Grid.OpacityMask>
+      <Border x:Name="PART_Background" CornerRadius="{TemplateBinding EBorderCornerRadius}" BorderThickness="0">
+        <Grid>
+          <Border x:Name="PART_ProgressIndicator" 
+                            HorizontalAlignment="Left" CornerRadius="{TemplateBinding EBorderCornerRadius}" Background="{Binding ElementName=PART_Background, Path=BorderBrush}" IsHitTestVisible="False">
+          </Border>
+          <ContentPresenter x:Name="PART_ContentContainer"
+                                      Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" ContentTemplate="{TemplateBinding ContentTemplate}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="{TemplateBinding Padding}" />
+        </Grid>
+      </Border>
+      <ext:StateListener.Rules>
+        <ext:RuleCollection>
+          <ext:Rule Target="{Binding ElementName=PART_Background}" StateMap="MouseOut=>Border=PR; MouseIn=>Border=SE"/>
+        </ext:RuleCollection>
+      </ext:StateListener.Rules>
+    </Grid>
+  </ControlTemplate>
+  <Style TargetType="{x:Type controls:EProgressBar}">
+    <Setter Property="EBorderThickness" Value="0"/>
+    <Setter Property="EBorderCornerRadius" Value="5"/>
+    <Setter Property="MinHeight" Value="10"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="IsIndeterminate" Value="False"/>
+    <Setter Property="RingThickness" Value="5"/>
+    <Setter Property="Template" Value="{StaticResource EProgressBar_HorizontalTemplate}"/>
+    <Style.Triggers>
+      <Trigger Property="ProgressBarStyle" Value="Circular">
+        <Setter Property="Template" Value="{StaticResource EProgressBar_CircularTemplate}"/>
+      </Trigger>
+    </Style.Triggers>
+  </Style>
 </ResourceDictionary>

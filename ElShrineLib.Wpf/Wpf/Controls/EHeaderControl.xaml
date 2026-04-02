@@ -5,7 +5,7 @@
     <ControlTemplate x:Key="EHeaderControl_BaseTemplate" TargetType="controls:EHeaderControl">
         <Grid x:Name="PART_EHeaderControl">
             <Grid.OpacityMask>
-                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EHeaderControl}"/>
+                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EHeaderControl}"/>
             </Grid.OpacityMask>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition x:Name="C0" Width="Auto"/>

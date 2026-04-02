@@ -5,7 +5,7 @@
     <ControlTemplate x:Key="ERepeatButton_BaseTemplate" TargetType="controls:ERepeatButton">
         <Grid x:Name="PART_ERepeatButtonRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:ERepeatButton}}">
             <Grid.OpacityMask>
-                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_ERepeatButtonRoot}"/>
+                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_ERepeatButtonRoot}"/>
             </Grid.OpacityMask>
             <ext:StateListener.Rules>
                 <ext:RuleCollection>

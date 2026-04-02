@@ -17,7 +17,7 @@
                             Padding="{TemplateBinding Padding}" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EExpander}}">
                         <Grid>
                             <Grid.OpacityMask>
-                                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EExpanderRoot}"/>
+                                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EExpanderRoot}"/>
                             </Grid.OpacityMask>
                             <Grid.RowDefinitions>
                                 <RowDefinition x:Name="r0" Height="auto"/>

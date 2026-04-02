@@ -7,7 +7,7 @@
             <Border x:Name="PART_ENumInputRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:ENumInput}}"
         BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}">
                 <Border.OpacityMask>
-                    <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_ENumInputRoot}"/>
+                    <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_ENumInputRoot}"/>
                 </Border.OpacityMask>
                 <Grid>
                     <Grid.ColumnDefinitions>

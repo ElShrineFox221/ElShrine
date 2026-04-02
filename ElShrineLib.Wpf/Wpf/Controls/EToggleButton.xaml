@@ -15,7 +15,7 @@
         </ext:RuleCollection>
       </ext:StateListener.Rules>
       <Border.OpacityMask>
-        <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EToggleButtonRoot}"/>
+        <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EToggleButtonRoot}"/>
       </Border.OpacityMask>
       <Grid>
         <Grid.RowDefinitions>

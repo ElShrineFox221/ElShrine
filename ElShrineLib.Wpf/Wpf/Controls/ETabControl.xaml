@@ -16,7 +16,7 @@
                 <ControlTemplate TargetType="{x:Type controls:ETabControl}">
                     <Border x:Name="PART_ETabControlRoot" BorderThickness="0" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:ETabControl}}" Background="Transparent">
                         <Border.OpacityMask>
-                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_ETabControlRoot}"/>
+                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_ETabControlRoot}"/>
                         </Border.OpacityMask>
                         <Grid>
                             <Grid.ColumnDefinitions>

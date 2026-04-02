@@ -17,7 +17,7 @@
                     </ControlTemplate.Resources>
                     <Grid x:Name="PART_ETextBoxRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:ETextBox}}">
                         <Grid.OpacityMask>
-                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_ETextBoxRoot}"/>
+                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_ETextBoxRoot}"/>
                         </Grid.OpacityMask>
                         <controls:EHeaderControl HeaderPlacement="{TemplateBinding HeaderPlacement}" Header="{TemplateBinding Header}" HeaderTemplate="{TemplateBinding HeaderTemplate}"
                                                  HorizontalAlignment="{TemplateBinding HorizontalAlignment}" HorizontalContentAlignment="{TemplateBinding HorizontalAlignment}">

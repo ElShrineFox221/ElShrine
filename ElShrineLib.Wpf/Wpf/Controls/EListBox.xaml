@@ -30,7 +30,7 @@
                             </ext:RuleCollection>
                         </ext:StateListener.Rules>
                         <Border.OpacityMask>
-                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EListBoxRoot}"/>
+                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EListBoxRoot}"/>
                         </Border.OpacityMask>
                         <controls:EScrollViewer x:Name="PART_ContentContainer" Margin="{TemplateBinding Padding}"
                                                 Focusable="false" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 

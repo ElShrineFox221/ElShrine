@@ -25,7 +25,7 @@
                 <ControlTemplate TargetType="{x:Type controls:EComboBox}">
                     <Grid x:Name="PART_EComboBoxRoot" SnapsToDevicePixels="True" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EComboBox}}">
                         <Grid.OpacityMask>
-                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EComboBoxRoot}"/>
+                            <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EComboBoxRoot}"/>
                         </Grid.OpacityMask>
                         <Border x:Name="PART_MainBorder" BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}">
                             <Grid>

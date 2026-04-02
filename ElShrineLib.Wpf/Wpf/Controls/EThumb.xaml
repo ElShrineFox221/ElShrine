@@ -5,7 +5,7 @@
     <ControlTemplate x:Key="EThumb_BaseTemplate" TargetType="controls:EThumb">
         <Grid x:Name="PART_EThumbRoot" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EThumb}}">
             <Grid.OpacityMask>
-                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{Binding ElementName=PART_EThumbRoot}"/>
+                <SolidColorBrush Color="Black" ext:EnabledTrans.EnabledSource="{x:Reference PART_EThumbRoot}"/>
             </Grid.OpacityMask>
             <Border x:Name="PART_MainBorder" BorderThickness="{TemplateBinding EBorderThickness}" CornerRadius="{TemplateBinding EBorderCornerRadius}" />
             <ext:StateListener.Rules>
