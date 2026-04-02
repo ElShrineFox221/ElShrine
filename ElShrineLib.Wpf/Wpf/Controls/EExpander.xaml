@@ -3,12 +3,17 @@
                     xmlns:controls="clr-namespace:ElShrine.Wpf.Controls"
                     xmlns:ext="clr-namespace:ElShrine.Wpf.Controls.Extensions">
   <Style TargetType="controls:EExpander">
-    <Setter Property="Padding" Value="2"/>
-    <Setter Property="ArrowMargin" Value="5"/>
-    <Setter Property="EBorderThickness" Value="1"/>
-    <Setter Property="EBorderCornerRadius" Value="2"/>
     <Setter Property="ArrowPlacement" Value="Right"/>
+    <Setter Property="ExpandDirection" Value="Down"/>
     <Setter Property="HeaderPlacement" Value="Top"/>
+    <Setter Property="EBorderCornerRadius" Value="2"/>
+    <Setter Property="EBorderThickness" Value="1"/>
+    <Setter Property="ItemBorderCornerRadius" Value="2"/>
+    <Setter Property="ItemMargin" Value="3,3"/>
+    <Setter Property="ItemBorderThickness" Value="1"/>
+    <Setter Property="Padding" Value="4,2"/>
+    <Setter Property="ArrowSize" Value="12"/>
+    <Setter Property="ArrowMargin" Value="1,0,1,0"/>
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="controls:EExpander">
@@ -17,28 +22,34 @@
                             CornerRadius="{TemplateBinding EBorderCornerRadius}" 
                             BorderThickness="{TemplateBinding EBorderThickness}" 
                             Padding="{TemplateBinding Padding}" ext:StateListener.Listener="{Binding RelativeSource={RelativeSource AncestorType=controls:EExpander}}">
-            <controls:EHeaderControl HeaderPlacement="{TemplateBinding HeaderPlacement}">
+            <controls:EHeaderControl HeaderPlacement="{TemplateBinding HeaderPlacement}" 
+                                     HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
               <controls:EHeaderControl.Header>
                 <ToggleButton x:Name="PART_HeaderBtn" 
 IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" 
 Background="Transparent" Style="{StaticResource ToggleButton_EmptyStyle}">
-                  <Grid Margin="{TemplateBinding Padding}">
+                  <Grid Margin="0">
                     <controls:EHeaderControl HeaderPlacement="{TemplateBinding ArrowPlacement}"
                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
                    VerticalAlignment="Stretch" VerticalContentAlignment="Stretch"
-                   Content="{TemplateBinding Header}" HeaderTemplate="{TemplateBinding HeaderTemplate}">
+                   HeaderTemplate="{TemplateBinding HeaderTemplate}">
                       <controls:EHeaderControl.Header>
                         <controls:EArrowControl x:Name="PART_ArrowContainer" Grid.Row="0" Grid.Column="0" 
                           ArrowTargetAngle="{Binding HeaderPlacement, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource PlacementAngleConverter}, ConverterParameter=+180}"
                           ArrowBasicAngle="{Binding ArrowPlacement, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource PlacementAngleConverter}, ConverterParameter=+180}"
                           Foreground="{Binding BorderBrush, ElementName=PART_EExpanderRoot}"/>
                       </controls:EHeaderControl.Header>
+                      <ContentPresenter 
+                        Margin="{TemplateBinding ItemMargin}"
+                        Content="{TemplateBinding Header}"/>
                     </controls:EHeaderControl>
                   </Grid>
                 </ToggleButton>
               </controls:EHeaderControl.Header>
               <ContentPresenter x:Name="PART_ContentHost" Grid.Row="1" Grid.Column="0" 
-                                 Margin="{TemplateBinding Padding}" ContentSource="Content" RenderTransformOrigin="0,0" Visibility="Collapsed"/>
+                                VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                Margin="{TemplateBinding ItemMargin}"  
+                                ContentSource="Content" RenderTransformOrigin="0,0" Visibility="Collapsed"/>
             </controls:EHeaderControl>
             <ext:StateListener.Rules>
               <ext:RuleCollection>
